@@ -1,0 +1,370 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="dashboard-header">
+
+    <div>
+
+        <h1 class="page-title">
+            Dashboard
+        </h1>
+
+        <p class="text-muted">
+            Welcome back, Admin. Here's what's happening today.
+        </p>
+
+    </div>
+
+    <div>
+
+        <span class="date-badge">
+            @DateTime.Now.ToString("MMMM dd, yyyy")
+        </span>
+
+    </div>
+
+</div>
+
+<!-- STAT CARDS -->
+
+<div class="row g-4 mt-2">
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div>
+                <small>Total Students</small>
+                <h2>425</h2>
+            </div>
+
+            <i class="bi bi-mortarboard-fill card-icon"></i>
+
+        </div>
+
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div>
+                <small>Total Teachers</small>
+                <h2>18</h2>
+            </div>
+
+            <i class="bi bi-person-workspace card-icon"></i>
+
+        </div>
+
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+
+        <div class="dashboard-card">
+
+            <div>
+                <small>Total Sections</small>
+                <h2>12</h2>
+            </div>
+
+            <i class="bi bi-diagram-3-fill card-icon"></i>
+
+        </div>
+
+    </div>
+
+ <div class="col-xl-3 col-md-6">
+
+    <div class="dashboard-card">
+
+        <div>
+            <small>Total Users</small>
+            <h2>8</h2>
+        </div>
+
+        <i class="bi bi-people-fill card-icon"></i>
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- CHART + RECENT ACTIVITIES -->
+
+<div class="row mt-4">
+
+    <!-- ENROLLMENT TREND -->
+
+    <div class="col-lg-8 mb-4">
+
+        <div class="card custom-card h-100">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+                    Student Enrollment Trend
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <canvas id="enrollmentChart" height="110"></canvas>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- RECENT ACTIVITIES -->
+
+    <div class="col-lg-4 mb-4">
+
+        <div class="card custom-card h-100">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+                    Recent Activities
+                </h5>
+
+            </div>
+
+            <div class="card-body">
+
+                <ul class="list-group list-group-flush">
+
+                    <li class="list-group-item">
+                        New student registered.
+                    </li>
+
+                    <li class="list-group-item">
+                        Attendance updated.
+                    </li>
+
+                    <li class="list-group-item">
+                        Grade report generated.
+                    </li>
+
+                    <li class="list-group-item">
+                        New teacher account created.
+                    </li>
+
+                    <li class="list-group-item">
+                        Section schedule updated.
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<style>
+
+.dashboard-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+}
+
+.page-title{
+    color:#2C2C2C;
+    font-size:3rem;
+    font-weight:700;
+}
+
+.date-badge{
+    background:#2C2C2C;
+    color:white;
+    padding:10px 16px;
+    border-radius:8px;
+    font-weight:600;
+}
+
+.dashboard-card{
+    background:#FFFFFF;
+    border-radius:16px;
+    padding:25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-left:5px solid #2C2C2C;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    transition:.3s;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+}
+
+.dashboard-card h2{
+    margin-top:10px;
+    font-size:2rem;
+    font-weight:700;
+    color:#2C2C2C;
+}
+
+.dashboard-card small{
+    color:#777;
+}
+
+.card-icon{
+    font-size:3rem;
+    color:#D8D8D8;
+}
+
+.custom-card{
+    border:none;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.card-header{
+    border-bottom:1px solid #EEEEEE;
+}
+
+.card-header h5{
+    color:#2C2C2C;
+    font-weight:600;
+}
+
+.list-group-item{
+    border-color:#EEEEEE;
+    padding:12px 15px;
+}
+
+canvas{
+    max-height:350px;
+}
+
+@@media (max-width:768px){
+
+    .page-title{
+        font-size:2rem;
+    }
+
+    .dashboard-card{
+        padding:20px;
+    }
+
+    .card-icon{
+        font-size:2rem;
+    }
+
+    .dashboard-header{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+}
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const ctx = document.getElementById("enrollmentChart");
+
+new Chart(ctx, {
+
+    type: "line",
+
+    data: {
+
+        labels: [
+            "Jan",
+            "Feb",
+            "Mar",
+            "Apr",
+            "May",
+            "Jun",
+            "Jul",
+            "Aug"
+        ],
+
+        datasets: [{
+
+            label: "Students",
+
+            data: [
+                280,
+                300,
+                325,
+                350,
+                375,
+                390,
+                410,
+                425
+            ],
+
+            borderColor: "#C8102E",
+
+            backgroundColor: "rgba(200,16,46,0.08)",
+
+            fill: true,
+
+            tension: .4,
+
+            borderWidth: 3,
+
+            pointRadius: 4,
+
+            pointHoverRadius: 6
+
+        }]
+    },
+
+    options: {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+            legend: {
+                display: false
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: false,
+
+                grid: {
+                    color: "#EEEEEE"
+                }
+
+            },
+
+            x: {
+
+                grid: {
+                    display: false
+                }
+
+            }
+
+        }
+
+    }
+
+});
+
+</script>

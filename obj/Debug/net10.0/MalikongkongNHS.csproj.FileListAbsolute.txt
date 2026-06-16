@@ -1,0 +1,10 @@
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.csproj.AssemblyReference.cache
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.AssemblyInfoInputs.cache
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.AssemblyInfo.cs
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.csproj.CoreCompileInputs.cache
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.RazorAssemblyInfo.cache
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.RazorAssemblyInfo.cs
+C:\Users\admin\MalikongkongNHS\obj\Debug\net10.0\MalikongkongNHS.sourcelink.json

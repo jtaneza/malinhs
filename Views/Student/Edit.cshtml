@@ -1,0 +1,102 @@
+@model MalikongkongNHS.Models.Entities.Student
+
+@{
+    ViewData["Title"] = "Edit Student";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">Edit Student</h1>
+        <p class="page-subtitle">
+            Update student information
+        </p>
+    </div>
+</div>
+
+<div class="custom-card">
+    <div class="card-body p-4">
+
+        <form asp-action="Edit" method="post">
+
+            <input asp-for="StudentId" type="hidden" />
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">LRN</label>
+                    <input asp-for="LRN" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Gender</label>
+                    <select asp-for="Gender" class="form-select">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">First Name</label>
+                    <input asp-for="FirstName" class="form-control" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Last Name</label>
+                    <input asp-for="LastName" class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">Section</label>
+
+                    <select asp-for="SectionId" class="form-select">
+
+                        <option value="">Select Section</option>
+
+                        @if (ViewBag.Sections != null)
+                        {
+                            foreach (var item in ViewBag.Sections)
+{
+    <option value="@item.SectionId">
+        @item.SectionName
+    </option>
+}
+                        }
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <label class="form-label">Status</label>
+
+                    <select asp-for="IsActive" class="form-select">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Update Student
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+</div>

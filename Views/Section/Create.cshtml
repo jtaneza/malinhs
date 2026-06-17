@@ -1,0 +1,79 @@
+```aspnetcorerazor
+@model MalikongkongNHS.Models.Entities.Section
+
+@{
+    ViewData["Title"] = "Add Section";
+}
+
+<div class="custom-card">
+    <div class="card-body p-4">
+
+        <form asp-action="Create" method="post">
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Grade Level</label>
+                    <input asp-for="GradeLevel"
+                           class="form-control"
+                           placeholder="e.g. Grade 7" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Section Name</label>
+                    <input asp-for="SectionName"
+                           class="form-control"
+                           placeholder="e.g. Hope" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Adviser</label>
+                    <select asp-for="Adviser" class="form-select">
+                        <option value="">-- Select Adviser --</option>
+                        @if (ViewBag.Teachers != null)
+                        {
+                            @foreach (var teacher in (List<MalikongkongNHS.Models.Entities.Teacher>)ViewBag.Teachers)
+                            {
+                                <option value="@teacher.FullName">@teacher.FullName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Capacity</label>
+                    <input asp-for="Capacity"
+                           type="number"
+                           class="form-control"
+                           min="0" />
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Status</label>
+
+                    <select asp-for="IsActive" class="form-select">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                    </select>
+
+                </div>
+
+            </div>
+
+            <div class="d-flex gap-2">
+
+                <button type="submit" class="btn btn-success">
+                    Save Section
+                </button>
+
+                <a asp-action="Index" class="btn btn-secondary">
+                    Cancel
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+</div>
+```

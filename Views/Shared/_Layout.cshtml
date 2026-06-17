@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
+@using Microsoft.AspNetCore.Http
 
 @{
     var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
@@ -25,6 +25,13 @@
           rel="stylesheet" />
 
     <style>
+
+.header-actions button,
+.header-actions a{
+    position: relative;
+    z-index: 20;
+    pointer-events: auto;
+}
 
         :root{
     --primary:#2C2C2C;
@@ -178,7 +185,34 @@
         .logout-btn i{
             font-size:18px;
         }
+        /* ================= CONTENT LAYER FIX ================= */
 
+        /* ================= PAGE HEADER BUTTONS ================= */
+        .page-header,
+.header-actions{
+    position: relative;
+    z-index: 10;
+}
+
+        /* ================= MODAL FIX (CRITICAL) ================= */
+        .modal{
+            z-index: 2000 !important;
+        }
+
+        .modal-backdrop{
+            z-index: 1990 !important;
+        }
+
+        /* ================= BUTTON CLICK FIX ================= */
+        .header-actions button,
+        .header-actions a{
+            pointer-events: auto !important;
+        }
+
+        /* ================= SIDEBAR SAFETY ================= */
+        .sidebar{
+            z-index: 1100;
+        }
         /* ================= CONTENT ================= */
 
         .content{
@@ -191,19 +225,26 @@
 
         /* ================= OVERLAY ================= */
 
-        .overlay{
-            display:none;
-            position:fixed;
-            inset:0;
-            background:rgba(0,0,0,.45);
-            z-index:1090;
-        }
+.overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    z-index: 1000;
+}
 
-        .overlay.show{
-            display:block;
-        }
+.overlay.show{
+    display: block;
+}
 
-        /* ================= MOBILE ================= */
+.modal{
+    z-index: 2000 !important;
+}
+
+.modal-backdrop{
+    z-index: 1990 !important;
+}
+  /* ================= MOBILE ================= */
 
         @@media (max-width:992px){
 
@@ -246,7 +287,10 @@
                 padding:15px;
             }
         }
-
+#overlay {
+    display: none !important;
+    pointer-events: none;
+}
     </style>
 
 </head>
@@ -414,6 +458,8 @@
     @RenderBody()
 </main>
 
+@RenderSection("Modals", required: false)
+
 <script>
 
     const menuBtn = document.getElementById("menuBtn");
@@ -435,6 +481,8 @@
     });
 
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 @await RenderSectionAsync("Scripts", required: false)
 

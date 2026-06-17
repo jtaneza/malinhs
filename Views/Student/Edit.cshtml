@@ -20,6 +20,8 @@
 
             <input asp-for="StudentId" type="hidden" />
 
+            <h6 class="text-muted mb-3"><i class="bi bi-person me-1"></i> Personal Information</h6>
+
             <div class="row">
 
                 <div class="col-md-6 mb-3">
@@ -64,11 +66,11 @@
                         @if (ViewBag.Sections != null)
                         {
                             foreach (var item in ViewBag.Sections)
-{
-    <option value="@item.SectionId">
-        @item.SectionName
-    </option>
-}
+                            {
+                                <option value="@item.SectionId">
+                                    @item.SectionName
+                                </option>
+                            }
                         }
 
                     </select>
@@ -84,6 +86,26 @@
                         <option value="false">Inactive</option>
                     </select>
 
+                </div>
+
+            </div>
+
+            <hr class="my-3" />
+
+            <h6 class="text-muted mb-3"><i class="bi bi-shield-lock me-1"></i> Account Credentials</h6>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email</label>
+                    <input asp-for="Email" type="email" class="form-control" placeholder="e.g. student@malikongkong.edu.ph" />
+                    <small class="text-muted">Used for student login</small>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Leave blank to keep current" />
+                    <small class="text-muted">Leave blank to keep current password</small>
                 </div>
 
             </div>

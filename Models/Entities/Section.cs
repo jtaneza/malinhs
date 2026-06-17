@@ -6,6 +6,11 @@ public class Section
 
     public string SectionName { get; set; } = string.Empty;
 
-    public ICollection<Student> Students { get; set; }
-        = new List<Student>();
+    public string? GradeLevel { get; set; }
+    public string? Adviser { get; set; }
+    public int? Capacity { get; set; }
+
+    public bool IsActive { get; set; } = true;
+
+    public ICollection<Student> Students { get; set; } = new List<Student>();
 }

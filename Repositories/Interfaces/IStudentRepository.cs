@@ -5,7 +5,8 @@ namespace MalikongkongNHS.Repositories.Interfaces
     public interface IStudentRepository
     {
         List<Student> GetAllStudents();
-
+        List<Section> GetSections();
+        
         Student? GetById(int id);
 
         void Add(Student student);

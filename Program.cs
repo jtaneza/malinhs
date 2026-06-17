@@ -21,6 +21,17 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 
+builder.Services.AddScoped<ISectionRepository, SectionRepository>();
+builder.Services.AddScoped<ISectionService, SectionService>();
+
+builder.Services.AddScoped<IGradeLevelRepository, GradeLevelRepository>();
+builder.Services.AddScoped<IGradeLevelService, GradeLevelService>();
+
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

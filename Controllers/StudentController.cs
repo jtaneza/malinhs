@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using MalikongkongNHS.Data;
 using MalikongkongNHS.Models.Entities;
 using MalikongkongNHS.Services.Interfaces;
 
@@ -8,14 +7,10 @@ namespace MalikongkongNHS.Controllers
     public class StudentController : Controller
     {
         private readonly IStudentService _studentService;
-        private readonly ApplicationDbContext _context;
 
-        public StudentController(
-            IStudentService studentService,
-            ApplicationDbContext context)
+        public StudentController(IStudentService studentService)
         {
             _studentService = studentService;
-            _context = context;
         }
 
         // =========================
@@ -25,7 +20,6 @@ namespace MalikongkongNHS.Controllers
         public IActionResult Index()
         {
             var students = _studentService.GetAllStudents();
-
             return View(students);
         }
 
@@ -36,8 +30,7 @@ namespace MalikongkongNHS.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-            ViewBag.Sections = _context.Sections.ToList();
-
+            ViewBag.Sections = _studentService.GetSections();
             return View(new Student());
         }
 
@@ -47,13 +40,11 @@ namespace MalikongkongNHS.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Sections = _context.Sections.ToList();
-
+                ViewBag.Sections = _studentService.GetSections();
                 return View(student);
             }
 
             _studentService.Add(student);
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -67,11 +58,9 @@ namespace MalikongkongNHS.Controllers
             var student = _studentService.GetById(id);
 
             if (student == null)
-            {
                 return NotFound();
-            }
 
-            ViewBag.Sections = _context.Sections.ToList();
+            ViewBag.Sections = _studentService.GetSections();
 
             return View(student);
         }
@@ -82,13 +71,11 @@ namespace MalikongkongNHS.Controllers
         {
             if (!ModelState.IsValid)
             {
-                ViewBag.Sections = _context.Sections.ToList();
-
+                ViewBag.Sections = _studentService.GetSections();
                 return View(student);
             }
 
             _studentService.Update(student);
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -101,7 +88,6 @@ namespace MalikongkongNHS.Controllers
         public IActionResult Delete(int id)
         {
             _studentService.Delete(id);
-
             return RedirectToAction(nameof(Index));
         }
     }

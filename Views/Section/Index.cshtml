@@ -1,0 +1,487 @@
+@model List<MalikongkongNHS.Models.Entities.Section>
+
+@{
+    ViewData["Title"] = "Classes & Sections";
+}
+
+<!-- HEADER -->
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h1 class="page-title">Classes & Sections</h1>
+        <p class="page-subtitle">Manage class sections, grade levels, and subjects</p>
+    </div>
+
+    <div class="header-actions d-flex gap-2">
+
+        <!-- SUBJECT BUTTON -->
+        <button type="button"
+                class="btn btn-subject"
+                data-bs-toggle="modal"
+                data-bs-target="#subjectModal">
+            <i class="bi bi-book"></i>
+            Add Subject
+        </button>
+
+        <!-- GRADE LEVEL BUTTON -->
+        <button type="button"
+                class="btn btn-dark"
+                data-bs-toggle="modal"
+                data-bs-target="#gradeLevelModal">
+            <i class="bi bi-mortarboard"></i>
+            Add Grade Level
+        </button>
+
+        <!-- SECTION BUTTON -->
+        <button type="button"
+                class="btn btn-add"
+                data-bs-toggle="modal"
+                data-bs-target="#sectionModal">
+            <i class="bi bi-plus-circle"></i>
+            Add Section
+        </button>
+
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="custom-card">
+    <div class="card-body">
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle fixed-table">
+
+                <thead>
+                    <tr>
+                        <th>Grade Level</th>
+                        <th>Section</th>
+                        <th>Adviser</th>
+                        <th>Capacity</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@(item.GradeLevel ?? "Not Assigned")</td>
+                        <td>@item.SectionName</td>
+                        <td>@(item.Adviser ?? "Not Assigned")</td>
+                        <td>@(item.Capacity ?? 0)</td>
+
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </td>
+
+                        <td>
+                            <a asp-action="Edit"
+                               asp-route-id="@item.SectionId"
+                               class="btn btn-sm btn-primary">
+                                Edit
+                            </a>
+
+                            <form asp-action="Delete"
+                                  asp-route-id="@item.SectionId"
+                                  method="post"
+                                  class="d-inline">
+
+                                <button type="submit"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Delete this section?')">
+                                    Delete
+                                </button>
+
+                            </form>
+                        </td>
+                    </tr>
+                }
+
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= MODALS (rendered outside .content via Layout section) ================= -->
+@section Modals {
+
+<!-- ================= MODAL: GRADE LEVEL ================= -->
+<div class="modal fade" id="gradeLevelModal" tabindex="-1" aria-labelledby="gradeLevelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-custom">
+
+            <form asp-controller="GradeLevel" asp-action="Create" method="post">
+
+                <div class="modal-header modal-header-dark">
+                    <div>
+                        <h5 class="modal-title" id="gradeLevelModalLabel">
+                            <i class="bi bi-mortarboard me-2"></i>Add Grade Level
+                        </h5>
+                        <small class="text-white-50">Create a new grade level</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-mortarboard me-1"></i>Grade Level
+                    </label>
+                    <input name="Name" class="form-control form-control-lg" placeholder="e.g. Grade 7" required />
+                </div>
+
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancel
+                    </button>
+                    <button class="btn btn-save" type="submit">
+                        <i class="bi bi-check-lg me-1"></i>Save
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL: SUBJECT ================= -->
+<div class="modal fade" id="subjectModal" tabindex="-1" aria-labelledby="subjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-custom">
+
+            <form asp-controller="Subject" asp-action="Create" method="post">
+
+                <div class="modal-header modal-header-subject">
+                    <div>
+                        <h5 class="modal-title" id="subjectModalLabel">
+                            <i class="bi bi-book me-2"></i>Add Subject
+                        </h5>
+                        <small class="text-white-50">Create a new subject for teacher assignment</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <label class="form-label fw-semibold">
+                        <i class="bi bi-book me-1"></i>Subject Name
+                    </label>
+                    <input name="Name" class="form-control form-control-lg" placeholder="e.g. Mathematics, English, Science" required />
+                    <small class="text-muted mt-1 d-block">This subject will be available for selection when assigning teachers.</small>
+                </div>
+
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancel
+                    </button>
+                    <button class="btn btn-save" type="submit">
+                        <i class="bi bi-check-lg me-1"></i>Save Subject
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- ================= MODAL: SECTION ================= -->
+<div class="modal fade" id="sectionModal" tabindex="-1" aria-labelledby="sectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content modal-custom">
+
+            <form asp-action="Create" method="post">
+
+                <div class="modal-header modal-header-red">
+                    <div>
+                        <h5 class="modal-title" id="sectionModalLabel">
+                            <i class="bi bi-plus-circle me-2"></i>Add Section
+                        </h5>
+                        <small class="text-white-50">Create a new class section</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-mortarboard me-1"></i>Grade Level
+                            </label>
+                            <select name="GradeLevel" class="form-select form-select-lg">
+                                <option value="">-- Select Grade Level --</option>
+                                @if (ViewBag.GradeLevels != null)
+                                {
+                                    @foreach (var gl in (List<MalikongkongNHS.Models.Entities.GradeLevel>)ViewBag.GradeLevels)
+                                    {
+                                        <option value="@gl.Name">@gl.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-building me-1"></i>Section Name
+                            </label>
+                            <input name="SectionName" class="form-control form-control-lg" required />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-person me-1"></i>Adviser
+                            </label>
+                            <select name="Adviser" class="form-select form-select-lg">
+                                <option value="">-- Select Adviser --</option>
+                                @if (ViewBag.Teachers != null)
+                                {
+                                    @foreach (var teacher in (List<MalikongkongNHS.Models.Entities.Teacher>)ViewBag.Teachers)
+                                    {
+                                        <option value="@teacher.FullName">@teacher.FullName</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-people me-1"></i>Capacity
+                            </label>
+                            <input name="Capacity" type="number" class="form-control form-control-lg" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-toggle-on me-1"></i>Status
+                            </label>
+                            <select name="IsActive" class="form-select form-select-lg">
+                                <option value="true">Active</option>
+                                <option value="false">Inactive</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancel
+                    </button>
+                    <button class="btn btn-save" type="submit">
+                        <i class="bi bi-check-lg me-1"></i>Save Section
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+} <!-- end Modals section -->
+
+<!-- ================= CSS ================= -->
+<style>
+
+.page-title{
+    font-size:2.2rem;
+    font-weight:700;
+    margin-bottom:0;
+}
+
+.page-subtitle{
+    color:#6c757d;
+    margin-top:5px;
+}
+
+/* HEADER FIX */
+.header-actions{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+/* RED BUTTON */
+.btn-add{
+    background:#C8102E;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:600;
+    border:none;
+    white-space:nowrap;
+    transition: all .2s ease;
+}
+
+.btn-add:hover{
+    background:#A50D25;
+    color:#fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(200,16,46,.3);
+}
+
+/* SUBJECT BUTTON */
+.btn-subject{
+    background:#1B6B3A;
+    color:#fff;
+    padding:10px 18px;
+    border-radius:10px;
+    font-weight:600;
+    border:none;
+    white-space:nowrap;
+    transition: all .2s ease;
+}
+
+.btn-subject:hover{
+    background:#145A2F;
+    color:#fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(27,107,58,.3);
+}
+
+/* CARD */
+.custom-card{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+/* TABLE FIX */
+.fixed-table{
+    table-layout: fixed;
+    width: 100%;
+}
+
+.fixed-table th,
+.fixed-table td{
+    padding:14px 12px;
+    text-align:center;
+    vertical-align:middle;
+    word-wrap:break-word;
+}
+
+.fixed-table th{
+    font-weight:600;
+}
+
+/* ACTION BUTTONS */
+.action-cell{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+}
+
+/* BADGE FIX */
+.badge{
+    min-width:70px;
+}
+
+/* BUTTON COLORS */
+.btn-primary{
+    background:#2C2C2C;
+    border-color:#2C2C2C;
+}
+
+.btn-danger{
+    background:#C8102E;
+    border-color:#C8102E;
+}
+
+.btn-danger:hover{
+    background:#A50D25;
+    border-color:#A50D25;
+}
+
+/* MODAL CUSTOM */
+.modal-custom{
+    border:none;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.15);
+}
+
+.modal-header-dark{
+    background:linear-gradient(135deg, #2C2C2C, #444);
+    color:#fff;
+    border:none;
+    padding:20px 24px;
+}
+
+.modal-header-subject{
+    background:linear-gradient(135deg, #1B6B3A, #28A745);
+    color:#fff;
+    border:none;
+    padding:20px 24px;
+}
+
+.modal-header-red{
+    background:linear-gradient(135deg, #C8102E, #E8304A);
+    color:#fff;
+    border:none;
+    padding:20px 24px;
+}
+
+.modal-footer-custom{
+    border-top:1px solid #f0f0f0;
+    padding:16px 24px;
+    background:#FAFAFA;
+}
+
+.btn-save{
+    background:#C8102E;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:10px 24px;
+    font-weight:600;
+    transition: all .2s ease;
+}
+
+.btn-save:hover{
+    background:#A50D25;
+    color:#fff;
+    transform: translateY(-1px);
+    box-shadow:0 4px 12px rgba(200,16,46,.3);
+}
+
+.form-control-lg,
+.form-select-lg{
+    border-radius:10px;
+}
+
+.form-control-lg:focus,
+.form-select-lg:focus{
+    border-color:#2C2C2C;
+    box-shadow:0 0 0 3px rgba(44,44,44,.10);
+}
+
+/* MOBILE FIX */
+@@media(max-width:768px){
+    .page-title{
+        font-size:1.5rem;
+    }
+
+    .page-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+}
+
+</style>

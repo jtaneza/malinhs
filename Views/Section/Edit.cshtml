@@ -1,0 +1,93 @@
+```aspnetcorerazor
+@model MalikongkongNHS.Models.Entities.Section
+
+@{
+    ViewData["Title"] = "Edit Section";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h1 class="page-title">Edit Section</h1>
+        <p class="page-subtitle">Update section details</p>
+    </div>
+
+</div>
+
+<div class="custom-card">
+
+    <div class="card-body p-4">
+
+        <form asp-action="Edit" method="post">
+
+            <input asp-for="SectionId" type="hidden" />
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Grade Level</label>
+                    <select asp-for="GradeLevel" class="form-select">
+                        <option value="">-- Select Grade Level --</option>
+                        @if (ViewBag.GradeLevels != null)
+                        {
+                            @foreach (var gl in (List<MalikongkongNHS.Models.Entities.GradeLevel>)ViewBag.GradeLevels)
+                            {
+                                <option value="@gl.Name" selected="@(Model.GradeLevel == gl.Name)">@gl.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Section Name</label>
+                    <input asp-for="SectionName" class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Adviser</label>
+                    <select asp-for="Adviser" class="form-select">
+                        <option value="">-- Select Adviser --</option>
+                        @if (ViewBag.Teachers != null)
+                        {
+                            @foreach (var teacher in (List<MalikongkongNHS.Models.Entities.Teacher>)ViewBag.Teachers)
+                            {
+                                <option value="@teacher.FullName" selected="@(Model.Adviser == teacher.FullName)">@teacher.FullName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Capacity</label>
+                    <input asp-for="Capacity" class="form-control" />
+                </div>
+
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+
+                <select asp-for="IsActive" class="form-select">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Update Section
+            </button>
+
+            <a asp-action="Index" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+```

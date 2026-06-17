@@ -5,6 +5,7 @@ namespace MalikongkongNHS.Services.Interfaces
     public interface IStudentService
     {
         List<Student> GetAllStudents();
+        List<Section> GetSections();
 
         Student? GetById(int id);
 

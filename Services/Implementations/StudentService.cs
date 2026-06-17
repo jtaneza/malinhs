@@ -17,7 +17,11 @@ namespace MalikongkongNHS.Services.Implementations
         {
             return _studentRepository.GetAllStudents();
         }
-
+        public List<Section> GetSections()
+        {
+            return _studentRepository.GetSections();
+        }
+        
         public Student? GetById(int id)
         {
             return _studentRepository.GetById(id);

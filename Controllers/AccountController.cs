@@ -56,6 +56,10 @@ public IActionResult Login(LoginViewModel model)
             "Role",
             user.Role);
 
+        HttpContext.Session.SetInt32(
+            "UserId",
+            user.UserId);
+
         return user.Role switch
         {
             "Admin" =>
@@ -66,7 +70,7 @@ public IActionResult Login(LoginViewModel model)
             "Teacher" =>
                 RedirectToAction(
                     "Index",
-                    "Teacher"),
+                    "Dashboard"),
 
             "Cashier" =>
                 RedirectToAction(
@@ -76,7 +80,7 @@ public IActionResult Login(LoginViewModel model)
             "Student" =>
                 RedirectToAction(
                     "Index",
-                    "Student"),
+                    "Dashboard"),
 
             _ =>
                 RedirectToAction(

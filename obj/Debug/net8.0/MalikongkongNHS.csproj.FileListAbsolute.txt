@@ -138,3 +138,8 @@ C:\Users\admin\MalikongkongNHS\obj\Debug\net8.0\Malikong.C493CFE3.Up2Date
 C:\Users\admin\MalikongkongNHS\obj\Debug\net8.0\MalikongkongNHS.dll
 C:\Users\admin\MalikongkongNHS\obj\Debug\net8.0\refint\MalikongkongNHS.dll
 C:\Users\admin\MalikongkongNHS\obj\Debug\net8.0\MalikongkongNHS.pdb
+C:\Users\admin\MalikongkongNHS\bin\Debug\net8.0\MalikongkongNHS.deps.json
+C:\Users\admin\MalikongkongNHS\bin\Debug\net8.0\MalikongkongNHS.runtimeconfig.json
+C:\Users\admin\MalikongkongNHS\bin\Debug\net8.0\MalikongkongNHS.pdb
+C:\Users\admin\MalikongkongNHS\obj\Debug\net8.0\MalikongkongNHS.genruntimeconfig.cache
+C:\Users\admin\MalikongkongNHS\obj\Debug\net8.0\ref\MalikongkongNHS.dll

@@ -1,0 +1,216 @@
+@model List<MalikongkongNHS.Models.ViewModels.UserM>
+
+@{
+    ViewData["Title"] = "Users";
+}
+
+<style>
+    /* SAME FONT STYLE AS YOU REQUESTED */
+    body,
+    table,
+    input,
+    button,
+    select,
+    textarea {
+        font-family: "Segoe UI", Arial, sans-serif !important;
+        font-weight: 600 !important;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 700 !important;
+    }
+
+    /* MATCH STUDENT UI */
+    .page-title {
+        color: #2C2C2C;
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 0;
+    }
+
+    .page-subtitle {
+        color: #6C757D;
+        font-size: 1rem;
+        margin-top: 5px;
+    }
+
+    .btn-add {
+        background: #C8102E;
+        color: #fff;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-add:hover {
+        background: #A50D25;
+        color: #fff;
+    }
+
+    .custom-card {
+        background: #fff;
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    }
+
+    .search-box {
+        border-radius: 10px;
+        border: 1px solid #DEE2E6;
+        padding: 8px 12px;
+    }
+
+    .search-box:focus {
+        border-color: #2C2C2C;
+        box-shadow: 0 0 0 3px rgba(44,44,44,.10);
+    }
+
+    .actions-cell {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        white-space: nowrap;
+    }
+
+    table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    th:last-child,
+    td:last-child {
+        width: 180px;
+    }
+</style>
+
+<!-- HEADER (FIXED LIKE STUDENTS) -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+        <h1 class="page-title">Users</h1>
+        <p class="page-subtitle">Manage user accounts</p>
+    </div>
+
+    <button class="btn btn-add"
+            data-bs-toggle="modal"
+            data-bs-target="#addUser">
+        <i class="bi bi-plus-circle"></i>
+        Add User
+    </button>
+
+</div>
+
+<!-- CARD -->
+<div class="custom-card p-3">
+
+    <!-- SEARCH -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text"
+                   id="searchInput"
+                   class="search-box w-100"
+                   placeholder="Search User..." />
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>User ID</th>
+                    <th>Full Name</th>
+                    <th>Username/Email</th>
+                    <th>Password</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.UserId</td>
+                        <td>@(string.IsNullOrWhiteSpace(user.FullName) ? "N/A" : user.FullName)</td>
+                        <td>@user.Username</td>
+                        <td>****</td>
+                        <td>@user.Role</td>
+
+                        <td class="actions-cell">
+
+                            <a class="btn btn-sm btn-primary"
+                               href="/User/View/@user.UserId">View</a>
+
+                            <a class="btn btn-sm btn-warning"
+                               href="/User/Edit/@user.UserId">Edit</a>
+
+                            <a class="btn btn-sm btn-danger"
+                               href="/User/Delete/@user.UserId"
+                               onclick="return confirm('Delete this user?')">
+                                Delete
+                            </a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal fade" id="addUser">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="post" action="/User/Create">
+
+                <div class="modal-header">
+                    <h5>Add User</h5>
+                </div>
+
+                <div class="modal-body">
+
+                    <input name="FullName" class="form-control mb-2" placeholder="Full Name" />
+                    <input name="Username" class="form-control mb-2" placeholder="Username / Email" />
+                    <input name="Password" type="password" class="form-control mb-2" placeholder="Password" />
+
+                    <select name="Role" class="form-select">
+                        <option value="Admin">Admin</option>
+                        <option value="Cashier">Cashier</option>
+                    </select>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Save
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- SEARCH SCRIPT -->
+<script>
+document.getElementById("searchInput").addEventListener("keyup", function () {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(value)
+            ? ""
+            : "none";
+    });
+});
+</script>

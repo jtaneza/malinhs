@@ -57,4 +57,66 @@ public class UserService : IUserService
 
         return null;
     }
+    // ======================
+    // USER MANAGEMENT (NEW)
+    // ======================
+
+    public List<UserM> GetAllUsers()
+{
+    return _userRepository.GetAll()
+        .Select(u => new UserM
+        {
+            UserId = u.UserId,
+            FullName = u.FullName,
+            Username = u.Username,
+            Password = u.Password,
+            Role = u.Role
+        }).ToList();
+}
+
+public UserM? GetUserById(int id)
+{
+    var user = _userRepository.GetById(id);
+    if (user == null) return null;
+
+    return new UserM
+    {
+        UserId = user.UserId,
+        FullName = user.FullName,
+        Username = user.Username,
+        Password = user.Password,
+        Role = user.Role
+    };
+}
+
+public void CreateUser(UserM model)
+{
+    var user = new User
+    {
+        FullName = model.FullName,   // ✅ ADD THIS
+        Username = model.Username,
+        Password = model.Password,
+        Role = model.Role
+    };
+
+    _userRepository.Create(user);
+}
+
+    public void UpdateUser(UserM model)
+    {
+        var user = _userRepository.GetById(model.UserId);
+        if (user == null) return;
+
+        user.FullName = model.FullName;   // ✅ ADD THIS
+        user.Username = model.Username;
+        user.Password = model.Password;
+        user.Role = model.Role;
+
+        _userRepository.Update(user);
+    }
+
+    public void DeleteUser(int id)
+    {
+        _userRepository.Delete(id);
+    }
 }

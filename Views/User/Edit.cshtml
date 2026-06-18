@@ -1,0 +1,22 @@
+@model MalikongkongNHS.Models.ViewModels.UserM
+
+<h2>Edit User</h2>
+
+<form method="post" action="/User/Edit">
+
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+
+    <input name="FullName" class="form-control mb-2" value="@Model.FullName" placeholder="Full Name" />
+
+    <input name="Username" class="form-control mb-2" value="@Model.Username" placeholder="Username" />
+
+    <input name="Password" class="form-control mb-2" value="@Model.Password" placeholder="Password" />
+
+    <select name="Role" class="form-select mb-2">
+        <option value="Admin" selected="@("Admin" == Model.Role)">Admin</option>
+        <option value="Cashier" selected="@("Cashier" == Model.Role)">Cashier</option>
+    </select>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+
+</form>

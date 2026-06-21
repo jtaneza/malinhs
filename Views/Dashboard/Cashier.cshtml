@@ -1,0 +1,117 @@
+@model MalikongkongNHS.Models.ViewModels.CashierDashboardVM
+
+@{
+    ViewData["Title"] = "Cashier Dashboard";
+}
+
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .date-badge {
+        background-color: #f0f4ff;
+        color: var(--secondary);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card small {
+        color: #868e96;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .dashboard-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        color: var(--secondary);
+        opacity: 0.3;
+    }
+</style>
+
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="text-muted">Welcome back, Cashier. Here's payment overview.</p>
+    </div>
+    <div>
+        <span class="date-badge">
+            @DateTime.Now.ToString("MMMM dd, yyyy")
+        </span>
+    </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-4 mt-2">
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Total Payments</small>
+                <h2>@Model.TotalPayments</h2>
+            </div>
+            <i class="bi bi-cash-stack card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Paid Students</small>
+                <h2>@Model.PaidStudents</h2>
+            </div>
+            <i class="bi bi-person-check-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Pending Payments</small>
+                <h2>@Model.PendingPayments</h2>
+            </div>
+            <i class="bi bi-exclamation-circle-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Revenue Today</small>
+                <h2>@Model.RevenueToday</h2>
+            </div>
+            <i class="bi bi-graph-up-arrow card-icon"></i>
+        </div>
+    </div>
+
+</div>

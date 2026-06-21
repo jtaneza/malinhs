@@ -6,28 +6,27 @@ namespace MalikongkongNHS.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(
-            DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        // Users
+        // USERS (ADMIN MODULE)
         public DbSet<User> Users { get; set; }
 
-        // Students
+        // SYSTEM MODULES
         public DbSet<Student> Students { get; set; }
-
-        // Teachers
         public DbSet<Teacher> Teachers { get; set; }
-
-        // Sections
         public DbSet<Section> Sections { get; set; }
-
-        // Grade Level
         public DbSet<GradeLevel> GradeLevels { get; set; }
-
-        // Subjects
         public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Activity> Activities { get; set; }
+
+        // DASHBOARD MODULES
+        public DbSet<ClassEntity> Classes { get; set; }
+        public DbSet<ClassStudent> ClassStudents { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Grade> Grades { get; set; }
+        public DbSet<Payment> Payments { get; set; }
     }
 }

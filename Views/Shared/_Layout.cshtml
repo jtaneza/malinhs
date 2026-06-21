@@ -379,10 +379,17 @@
 
     @if (role == "Teacher")
     {
-        <a asp-controller="Dashboard" asp-action="Index"
+        <a asp-controller="Dashboard" asp-action="Teacher"
            class="@(currentController == "Dashboard" ? "active" : "")">
             <i class="bi bi-speedometer2"></i>
             <span>Dashboard</span>
+        </a>
+
+        
+        <a asp-controller="Class" asp-action="Index"
+           class="@(currentController == "Class" ? "active" : "")">
+            <i class="bi bi-easel2-fill"></i>
+            <span>My Classes</span>
         </a>
 
         <a asp-controller="Attendance" asp-action="Index"
@@ -406,12 +413,6 @@
 
     @if (role == "Cashier")
     {
-        <a asp-controller="Dashboard" asp-action="Index"
-           class="@(currentController == "Dashboard" ? "active" : "")">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
-
         <a asp-controller="Payment" asp-action="Index"
            class="@(currentController == "Payment" ? "active" : "")">
             <i class="bi bi-cash-stack"></i>
@@ -421,7 +422,7 @@
 
     @if (role == "Student")
     {
-        <a asp-controller="Dashboard" asp-action="Index"
+        <a asp-controller="Dashboard" asp-action="Student"
            class="@(currentController == "Dashboard" ? "active" : "")">
             <i class="bi bi-speedometer2"></i>
             <span>Dashboard</span>
@@ -431,6 +432,20 @@
            class="@(currentController == "Student" ? "active" : "")">
             <i class="bi bi-person"></i>
             <span>My Profile</span>
+        </a>
+
+        
+        <a asp-controller="Attendance" asp-action="StudentView"
+           class="@(currentController == "Attendance" ? "active" : "")">
+            <i class="bi bi-calendar-check"></i>
+            <span>My Attendance</span>
+        </a>
+
+        
+        <a asp-controller="Grade" asp-action="StudentView"
+           class="@(currentController == "Grade" ? "active" : "")">
+            <i class="bi bi-journal-text"></i>
+            <span>My Grades</span>
         </a>
     }
 

@@ -1,0 +1,226 @@
+@model List<MalikongkongNHS.Models.ViewModels.TeacherClassVM>
+
+@{
+    ViewData["Title"] = "My Classes";
+}
+
+<style>
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .section-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        border-left: 5px solid var(--secondary);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+    }
+
+    .section-meta {
+        display: flex;
+        gap: 1rem;
+        margin-top: 4px;
+    }
+
+    .meta-badge {
+        background: #f0f4ff;
+        color: #3b5bdb;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .meta-badge.red {
+        background: #fee2e2;
+        color: var(--secondary);
+    }
+
+    .student-count {
+        background: var(--secondary);
+        color: #fff;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #868e96;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+    }
+
+    .search-box {
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #868e96;
+    }
+
+    .search-box input {
+        padding-left: 36px;
+    }
+
+    .btn-view {
+        background: var(--secondary);
+        color: #fff;
+        border: none;
+        padding: 5px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        text-decoration: none;
+        transition: .3s;
+    }
+
+    .btn-view:hover {
+        background: #a00d24;
+        color: #fff;
+    }
+</style>
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">My Classes</h1>
+        <p class="text-muted">View your assigned sections and student lists.</p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-easel2"></i>
+        <h5>No Classes Assigned Yet</h5>
+        <p>You have no sections assigned to you. Please contact the admin.</p>
+    </div>
+}
+else
+{
+    <!-- SUMMARY ROW -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="d-flex align-items-center gap-3 bg-white rounded-3 p-3 shadow-sm">
+                <i class="bi bi-easel2-fill fs-2 text-danger opacity-50"></i>
+                <div>
+                    <small class="text-muted text-uppercase" style="font-size:.75rem;">Total Sections</small>
+                    <h4 class="mb-0 fw-bold">@Model.Count</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex align-items-center gap-3 bg-white rounded-3 p-3 shadow-sm">
+                <i class="bi bi-mortarboard-fill fs-2 text-danger opacity-50"></i>
+                <div>
+                    <small class="text-muted text-uppercase" style="font-size:.75rem;">Total Students</small>
+                    <h4 class="mb-0 fw-bold">@Model.Sum(s => s.Students.Count)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION CARDS -->
+    @foreach (var cls in Model)
+    {
+        <div class="section-card">
+            <div class="section-header">
+                <div>
+                    <h5 class="section-title">
+                        <i class="bi bi-building me-2 text-danger"></i>@cls.SectionName
+                    </h5>
+                    <div class="section-meta">
+                        <span class="meta-badge">Grade @cls.GradeLevel</span>
+                        <span class="meta-badge red">Capacity: @cls.Capacity</span>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="student-count">
+                        <i class="bi bi-people-fill me-1"></i>@cls.Students.Count Students
+                    </span>
+                    <a asp-controller="Class" asp-action="Students"
+                       asp-route-sectionId="@cls.SectionId"
+                       class="btn-view">
+                        <i class="bi bi-eye me-1"></i> View All
+                    </a>
+                </div>
+            </div>
+
+            <!-- STUDENT PREVIEW TABLE (first 5) -->
+            @if (cls.Students.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student No.</th>
+                                <th>Full Name</th>
+                                <th>Gender</th>
+                                <th>Guardian</th>
+                                <th>Contact</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var student in cls.Students.Take(5))
+                            {
+                                <tr>
+                                    <td><span class="fw-semibold">@student.StudentNo</span></td>
+                                    <td>@student.FullName</td>
+                                    <td>@student.Gender</td>
+                                    <td>@student.GuardianName</td>
+                                    <td>@student.ContactNumber</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (cls.Students.Count > 5)
+                {
+                    <div class="text-center mt-2">
+                        <a asp-controller="Class" asp-action="Students"
+                           asp-route-sectionId="@cls.SectionId"
+                           class="text-danger text-decoration-none" style="font-size:.85rem;">
+                            + @(cls.Students.Count - 5) more students — View All
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-muted mb-0" style="font-size:.9rem;">
+                    <i class="bi bi-info-circle me-1"></i> No students enrolled in this section yet.
+                </p>
+            }
+        </div>
+    }
+}

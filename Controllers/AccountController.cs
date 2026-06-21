@@ -25,7 +25,14 @@ namespace MalikongkongNHS.Controllers
 
             if (!string.IsNullOrEmpty(username))
             {
-                return RedirectToAction("Index", "Dashboard");
+                var role = HttpContext.Session.GetString("Role");
+                return role switch
+                {
+                    "Teacher" => RedirectToAction("Teacher", "Dashboard"),
+                    "Cashier" => RedirectToAction("Index", "Payment"),
+                    "Student" => RedirectToAction("Student", "Dashboard"),
+                    _ => RedirectToAction("Index", "Dashboard")
+                };
             }
 
             return View();
@@ -69,7 +76,7 @@ public IActionResult Login(LoginViewModel model)
 
             "Teacher" =>
                 RedirectToAction(
-                    "Index",
+                    "Teacher",
                     "Dashboard"),
 
             "Cashier" =>

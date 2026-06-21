@@ -4006,26 +4006,24 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\admin\\.nuget\\packages\\": {}
+    "C:\\Users\\jera\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\admin\\MalikongkongNHS\\MalikongkongNHS.csproj",
+      "projectUniqueName": "C:\\xampp\\htdocs\\MALI\\MalikongkongNHS\\MalikongkongNHS.csproj",
       "projectName": "MalikongkongNHS",
-      "projectPath": "C:\\Users\\admin\\MalikongkongNHS\\MalikongkongNHS.csproj",
-      "packagesPath": "C:\\Users\\admin\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\admin\\MalikongkongNHS\\obj\\",
+      "projectPath": "C:\\xampp\\htdocs\\MALI\\MalikongkongNHS\\MalikongkongNHS.csproj",
+      "packagesPath": "C:\\Users\\jera\\.nuget\\packages\\",
+      "outputPath": "C:\\xampp\\htdocs\\MALI\\MalikongkongNHS\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Users\\jera\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

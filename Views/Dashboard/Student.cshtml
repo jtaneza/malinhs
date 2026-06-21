@@ -1,0 +1,117 @@
+@model MalikongkongNHS.Models.ViewModels.StudentDashboardVM
+
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .date-badge {
+        background-color: #f0f4ff;
+        color: var(--secondary);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card small {
+        color: #868e96;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .dashboard-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        color: var(--secondary);
+        opacity: 0.3;
+    }
+</style>
+
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="text-muted">Welcome back. Here are your records.</p>
+    </div>
+    <div>
+        <span class="date-badge">
+            @DateTime.Now.ToString("MMMM dd, yyyy")
+        </span>
+    </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-4 mt-2">
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>My Subjects</small>
+                <h2>@Model.Subjects</h2>
+            </div>
+            <i class="bi bi-book-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Attendance</small>
+                <h2>@Model.AttendanceRate%</h2>
+            </div>
+            <i class="bi bi-check-circle-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Grades</small>
+                <h2>@Model.AverageGrade</h2>
+            </div>
+            <i class="bi bi-bar-chart-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Remarks</small>
+                <h2>@Model.Remarks</h2>
+            </div>
+            <i class="bi bi-award-fill card-icon"></i>
+        </div>
+    </div>
+
+</div>

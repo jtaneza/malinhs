@@ -49,6 +49,8 @@
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Section</th>
+                        <th>Guardian</th>
+                        <th>Contact</th>
                         <th>Status</th>
                         <th width="180">Actions</th>
                     </tr>
@@ -72,6 +74,14 @@
 
                                 <td>
                                     @(student.Section?.SectionName ?? "No Section")
+                                </td>
+
+                                <td>
+                                    @(student.GuardianName ?? "—")
+                                </td>
+
+                                <td>
+                                    @(student.ContactNumber ?? "—")
                                 </td>
 
                                 <td>
@@ -120,7 +130,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="6"
+                            <td colspan="8"
                                 class="text-center text-muted py-5">
                                 No student records found.
                             </td>

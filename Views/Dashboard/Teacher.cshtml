@@ -1,0 +1,117 @@
+@model MalikongkongNHS.Models.ViewModels.TeacherDashboardVM
+
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+}
+
+<style>
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .date-badge {
+        background-color: #f0f4ff;
+        color: var(--secondary);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .dashboard-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card small {
+        color: #868e96;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .dashboard-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .card-icon {
+        font-size: 2.5rem;
+        color: var(--secondary);
+        opacity: 0.3;
+    }
+</style>
+
+<div class="dashboard-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="text-muted">Welcome back, Teacher. Here's your class overview.</p>
+    </div>
+    <div>
+        <span class="date-badge">
+            @DateTime.Now.ToString("MMMM dd, yyyy")
+        </span>
+    </div>
+</div>
+
+<!-- STAT CARDS -->
+<div class="row g-4 mt-2">
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>My Students</small>
+                <h2>@Model.TotalStudentsHandled</h2>
+            </div>
+            <i class="bi bi-mortarboard-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>My Classes</small>
+                <h2>@Model.TotalClasses</h2>
+            </div>
+            <i class="bi bi-easel-fill card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Attendance Today</small>
+                <h2>@Model.TodayAttendanceTaken</h2>
+            </div>
+            <i class="bi bi-calendar-check card-icon"></i>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="dashboard-card">
+            <div>
+                <small>Pending Grades</small>
+                <h2>@Model.PendingGrades</h2>
+            </div>
+            <i class="bi bi-journal-text card-icon"></i>
+        </div>
+    </div>
+
+</div>

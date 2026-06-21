@@ -1,0 +1,221 @@
+@model MalikongkongNHS.Models.ViewModels.TeacherClassVM
+
+@{
+    ViewData["Title"] = $"{Model.SectionName} - Students";
+}
+
+<style>
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--primary);
+    }
+
+    .back-link {
+        color: var(--secondary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+        color: #a00d24;
+    }
+
+    .section-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        border-left: 5px solid var(--secondary);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+    }
+
+    .section-meta {
+        display: flex;
+        gap: 1rem;
+        margin-top: 4px;
+        flex-wrap: wrap;
+    }
+
+    .meta-badge {
+        background: #f0f4ff;
+        color: #3b5bdb;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .meta-badge.red {
+        background: #fee2e2;
+        color: var(--secondary);
+    }
+
+    .student-count {
+        background: var(--secondary);
+        color: #fff;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #868e96;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+        opacity: 0.4;
+    }
+
+    .search-box {
+        position: relative;
+        max-width: 320px;
+        margin-bottom: 1rem;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #868e96;
+    }
+
+    .search-box input {
+        padding-left: 36px;
+    }
+
+    #noResultsRow td {
+        text-align: center;
+        color: #868e96;
+        padding: 2rem;
+    }
+</style>
+
+<!-- BACK LINK -->
+<a asp-controller="Class" asp-action="Index" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to My Classes
+</a>
+
+<!-- PAGE HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="page-title">@Model.SectionName</h1>
+        <p class="text-muted mb-0">Full student list for this section.</p>
+    </div>
+</div>
+
+<div class="section-card">
+    <div class="section-header">
+        <div>
+            <h5 class="section-title">
+                <i class="bi bi-building me-2 text-danger"></i>@Model.SectionName
+            </h5>
+            <div class="section-meta">
+                <span class="meta-badge">Grade @Model.GradeLevel</span>
+                <span class="meta-badge red">Capacity: @Model.Capacity</span>
+            </div>
+        </div>
+        <span class="student-count">
+            <i class="bi bi-people-fill me-1"></i>@Model.Students.Count Students
+        </span>
+    </div>
+
+    @if (!Model.Students.Any())
+    {
+        <div class="empty-state">
+            <i class="bi bi-person-x"></i>
+            <h5>No Students Enrolled</h5>
+            <p>This section currently has no active students.</p>
+        </div>
+    }
+    else
+    {
+        <!-- SEARCH -->
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="studentSearch" class="form-control"
+                   placeholder="Search by name or student no..." />
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="studentTable">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student No.</th>
+                        <th>Full Name</th>
+                        <th>Gender</th>
+                        <th>Guardian</th>
+                        <th>Contact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model.Students)
+                    {
+                        <tr class="student-row">
+                            <td><span class="fw-semibold">@student.StudentNo</span></td>
+                            <td class="student-name">@student.FullName</td>
+                            <td>@student.Gender</td>
+                            <td>@student.GuardianName</td>
+                            <td>@student.ContactNumber</td>
+                        </tr>
+                    }
+                    <tr id="noResultsRow" style="display:none;">
+                        <td colspan="5">No matching students found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@if (Model.Students.Any())
+{
+    <script>
+        document.getElementById('studentSearch').addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            const rows = document.querySelectorAll('#studentTable .student-row');
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const name = row.querySelector('.student-name').textContent.toLowerCase();
+                const studentNo = row.children[0].textContent.toLowerCase();
+                const match = name.includes(query) || studentNo.includes(query);
+                row.style.display = match ? '' : 'none';
+                if (match) visibleCount++;
+            });
+
+            document.getElementById('noResultsRow').style.display =
+                visibleCount === 0 ? '' : 'none';
+        });
+    </script>
+}

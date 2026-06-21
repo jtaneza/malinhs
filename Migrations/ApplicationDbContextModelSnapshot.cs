@@ -36,7 +36,7 @@ namespace MalikongkongNHS.Migrations
 
                     b.HasKey("GradeLevelId");
 
-                    b.ToTable("GradeLevels");
+                    b.ToTable("GradeLevels", (string)null);
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Section", b =>
@@ -65,7 +65,7 @@ namespace MalikongkongNHS.Migrations
 
                     b.HasKey("SectionId");
 
-                    b.ToTable("Sections");
+                    b.ToTable("Sections", (string)null);
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Student", b =>
@@ -122,7 +122,7 @@ namespace MalikongkongNHS.Migrations
 
                     b.HasIndex("SectionId");
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", (string)null);
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Subject", b =>
@@ -139,7 +139,7 @@ namespace MalikongkongNHS.Migrations
 
                     b.HasKey("SubjectId");
 
-                    b.ToTable("Subjects");
+                    b.ToTable("Subjects", (string)null);
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Teacher", b =>
@@ -165,7 +165,7 @@ namespace MalikongkongNHS.Migrations
 
                     b.HasKey("TeacherId");
 
-                    b.ToTable("Teachers");
+                    b.ToTable("Teachers", (string)null);
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.User", b =>
@@ -194,7 +194,7 @@ namespace MalikongkongNHS.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Student", b =>

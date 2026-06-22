@@ -41,6 +41,23 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// ── Auto-seed database on startup ──────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<MalikongkongNHS.Data.ApplicationDbContext>();
+        db.Database.EnsureCreated();
+        MalikongkongNHS.Data.DbSeeder.Seed(db);
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("DB seed skipped due to connection error: {Message}", ex.Message);
+    }
+}
+// ───────────────────────────────────────────────────────────────────
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

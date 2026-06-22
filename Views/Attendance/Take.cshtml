@@ -1,0 +1,152 @@
+@model MalikongkongNHS.Models.ViewModels.AttendanceTakeVM
+
+@{
+    ViewData["Title"] = "Take Attendance";
+}
+
+<style>
+    .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: var(--primary); }
+
+    .back-link {
+        color: var(--secondary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 1rem;
+    }
+
+    .back-link:hover { color: #a00d24; }
+
+    .attendance-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    .student-row { border-bottom: 1px solid #f1f3f5; padding: .75rem 0; }
+    .student-row:last-child { border-bottom: none; }
+
+    .status-btn {
+        border: 2px solid #dee2e6;
+        background: #fff;
+        border-radius: 8px;
+        padding: 5px 14px;
+        font-size: .82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .status-btn.active-present  { border-color: #10b981; background: #d1fae5; color: #065f46; }
+    .status-btn.active-absent   { border-color: #ef4444; background: #fee2e2; color: #991b1b; }
+    .status-btn.active-late     { border-color: #f59e0b; background: #fef9c3; color: #854d0e; }
+    .status-btn.active-excused  { border-color: #6366f1; background: #e0e7ff; color: #3730a3; }
+
+    .btn-submit {
+        background: var(--secondary);
+        color: #fff;
+        border: none;
+        padding: 10px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: .3s;
+    }
+
+    .btn-submit:hover { background: #a00d24; }
+</style>
+
+<a asp-action="Index" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to Attendance
+</a>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="page-title">Take Attendance</h1>
+        <p class="text-muted mb-0">
+            <strong>@Model.SectionName</strong> &nbsp;|&nbsp;
+            @Model.Date.ToString("MMMM dd, yyyy")
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="status-btn active-present" onclick="markAll('Present')">
+            <i class="bi bi-check-all me-1"></i> All Present
+        </button>
+        <button type="button" class="status-btn active-absent" onclick="markAll('Absent')">
+            <i class="bi bi-x-circle me-1"></i> All Absent
+        </button>
+    </div>
+</div>
+
+<div class="attendance-card">
+    <form asp-action="Take" method="post" id="attendanceForm">
+        <input type="hidden" name="SectionId"   value="@Model.SectionId" />
+        <input type="hidden" name="SectionName" value="@Model.SectionName" />
+
+        @for (int i = 0; i < Model.Students.Count; i++)
+        {
+            var s = Model.Students[i];
+            <input type="hidden" name="Students[@i].StudentId" value="@s.StudentId" />
+            <input type="hidden" name="Students[@i].FullName"  value="@s.FullName" />
+            <input type="hidden" name="Students[@i].LRN"       value="@s.LRN" />
+
+            <div class="student-row d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-semibold">@s.FullName</span>
+                    <small class="text-muted ms-2">@s.LRN</small>
+                </div>
+                <div class="d-flex gap-2" id="btns-@i">
+                    <input type="hidden" name="Students[@i].Status" id="status-@i" value="Present" />
+
+                    <button type="button" class="status-btn active-present"
+                            onclick="setStatus(@i, 'Present')">Present</button>
+
+                    <button type="button" class="status-btn"
+                            onclick="setStatus(@i, 'Absent')">Absent</button>
+
+                    <button type="button" class="status-btn"
+                            onclick="setStatus(@i, 'Late')">Late</button>
+
+                    <button type="button" class="status-btn"
+                            onclick="setStatus(@i, 'Excused')">Excused</button>
+                </div>
+            </div>
+        }
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-send me-2"></i>Submit Attendance
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const classMap = {
+        'Present': 'active-present',
+        'Absent':  'active-absent',
+        'Late':    'active-late',
+        'Excused': 'active-excused'
+    };
+
+    function setStatus(index, status) {
+        document.getElementById('status-' + index).value = status;
+        const btns = document.querySelectorAll('#btns-' + index + ' .status-btn');
+        btns.forEach(btn => {
+            btn.classList.remove('active-present','active-absent','active-late','active-excused');
+            if (btn.textContent.trim() === status) {
+                btn.classList.add(classMap[status]);
+            }
+        });
+    }
+
+    function markAll(status) {
+        const count = @Model.Students.Count;
+        for (let i = 0; i < count; i++) setStatus(i, status);
+    }
+</script>

@@ -1,13 +1,16 @@
-namespace MalikongkongNHS.Models.Entities
+namespace MalikongkongNHS.Models.Entities;
+
+public class Attendance
 {
-    public class Attendance
-    {
-        public int Id { get; set; }
+    public int AttendanceId { get; set; }
+    public int StudentId   { get; set; }
+    public int SectionId   { get; set; }
+    public int TeacherId   { get; set; }
+    public DateTime Date   { get; set; }
 
-        public int StudentId { get; set; }
-        public int ClassId { get; set; }
+    // "Present", "Absent", "Late", "Excused"
+    public string Status { get; set; } = "Present";
 
-        public DateTime Date { get; set; }
-        public string Status { get; set; } = "Present";
-    }
+    public virtual Student? Student { get; set; }
+    public virtual Section? Section { get; set; }
 }

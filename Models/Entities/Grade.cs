@@ -1,3 +1,4 @@
+
 namespace MalikongkongNHS.Models.Entities
 {
     public class Grade
@@ -5,9 +6,16 @@ namespace MalikongkongNHS.Models.Entities
         public int Id { get; set; }
 
         public int StudentId { get; set; }
-        public int ClassId { get; set; }
+        public Student Student { get; set; }
+
+        public int ClassId { get; set; }          // ClassId = SectionId
+        public Section Section { get; set; }
+
+        public int Quarter { get; set; }          // 1, 2, 3, 4
 
         public double Score { get; set; }
         public bool IsFinalized { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

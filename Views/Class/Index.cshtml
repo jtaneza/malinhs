@@ -108,6 +108,26 @@
         background: #a00d24;
         color: #fff;
     }
+
+    /* STUDENT PREVIEW TABLE ALIGNMENT */
+    .student-preview-table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    .student-preview-table th,
+    .student-preview-table td {
+        padding: 10px 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .student-preview-table .col-studentno { width: 14%; }
+    .student-preview-table .col-name      { width: 28%; }
+    .student-preview-table .col-gender    { width: 12%; }
+    .student-preview-table .col-guardian  { width: 26%; }
+    .student-preview-table .col-contact   { width: 20%; }
 </style>
 
 <!-- PAGE HEADER -->
@@ -180,25 +200,32 @@ else
             @if (cls.Students.Any())
             {
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 student-preview-table">
+                        <colgroup>
+                            <col class="col-studentno" />
+                            <col class="col-name" />
+                            <col class="col-gender" />
+                            <col class="col-guardian" />
+                            <col class="col-contact" />
+                        </colgroup>
                         <thead class="table-light">
                             <tr>
-                                <th>Student No.</th>
-                                <th>Full Name</th>
-                                <th>Gender</th>
-                                <th>Guardian</th>
-                                <th>Contact</th>
+                                <th class="col-studentno">Student No.</th>
+                                <th class="col-name">Full Name</th>
+                                <th class="col-gender">Gender</th>
+                                <th class="col-guardian">Guardian</th>
+                                <th class="col-contact">Contact</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var student in cls.Students.Take(5))
                             {
                                 <tr>
-                                    <td><span class="fw-semibold">@student.StudentNo</span></td>
-                                    <td>@student.FullName</td>
-                                    <td>@student.Gender</td>
-                                    <td>@student.GuardianName</td>
-                                    <td>@student.ContactNumber</td>
+                                    <td class="col-studentno"><span class="fw-semibold">@student.StudentNo</span></td>
+                                    <td class="col-name">@student.FullName</td>
+                                    <td class="col-gender">@student.Gender</td>
+                                    <td class="col-guardian">@student.GuardianName</td>
+                                    <td class="col-contact">@student.ContactNumber</td>
                                 </tr>
                             }
                         </tbody>

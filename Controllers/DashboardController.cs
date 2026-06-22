@@ -63,16 +63,24 @@ namespace MalikongkongNHS.Controllers
             .Include(s => s.Students)
             .ToList();
 
+    var sectionIds = sections.Select(s => s.SectionId).ToList();
+    var today = DateTime.Today;
+
+    var todayAttendanceCount = sectionIds.Any()
+        ? _context.Attendances.Count(a => sectionIds.Contains(a.SectionId) && a.Date.Date == today)
+        : 0;
+
     var vm = new TeacherDashboardVM
     {
         TotalClasses          = sections.Count,
         TotalStudentsHandled  = sections.Sum(s => s.Students.Count(st => st.IsActive)),
-        TodayAttendanceTaken  = 0,
+        TodayAttendanceTaken  = todayAttendanceCount,
         PendingGrades         = 0
     };
 
     return View(vm);
 }
+
 
         // ================= STUDENT =================
         public IActionResult Student()

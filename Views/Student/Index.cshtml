@@ -4,6 +4,7 @@
     ViewData["Title"] = "Students";
 }
 
+<!-- PAGE HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
@@ -11,48 +12,73 @@
         <p class="page-subtitle">Manage student records</p>
     </div>
 
-    <a asp-controller="Student"
-       asp-action="Create"
-       class="btn btn-add">
-
-        <i class="bi bi-plus-circle"></i>
-        Add Student
-
+    <a asp-controller="Student" asp-action="Create" class="btn btn-add">
+        <i class="bi bi-plus-circle"></i> Add Student
     </a>
 
 </div>
 
+<!-- SUCCESS / ERROR ALERTS -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- ===== TOOLBAR: OUTSIDE THE CARD ===== -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+    <!-- Search (left) -->
+    <div class="search-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text"
+               id="studentSearch"
+               class="form-control search-box"
+               placeholder="Search student..." />
+    </div>
+
+    <!-- Entries selector (right) -->
+    <div class="d-flex align-items-center gap-2 text-muted small fw-medium">
+        <span>Show</span>
+        <select id="entriesPerPage" class="form-select form-select-sm entries-select">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+        </select>
+        <span>entries</span>
+    </div>
+
+</div>
+
+<!-- MAIN CARD (TABLE ONLY) -->
 <div class="custom-card">
+    <div class="card-body p-0">
 
-    <div class="card-body">
-
-        <!-- SEARCH -->
-        <div class="row mb-3">
-
-            <div class="col-md-4">
-                <input type="text"
-                       id="studentSearch"
-                       class="form-control search-box"
-                       placeholder="Search Student..." />
-            </div>
-
-        </div>
-
-        <!-- TABLE -->
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle">
+            <table class="table table-hover align-middle student-table mb-0">
 
                 <thead class="table-light">
                     <tr>
-                        <th>LRN</th>
-                        <th>Name</th>
-                        <th>Gender</th>
-                        <th>Section</th>
-                        <th>Guardian</th>
-                        <th>Contact</th>
-                        <th>Status</th>
-                        <th width="180">Actions</th>
+                        <th style="width:4%">#</th>
+                        <th style="width:12%">LRN</th>
+                        <th style="width:16%">Name</th>
+                        <th style="width:7%">Gender</th>
+                        <th style="width:10%">Section</th>
+                        <th style="width:13%">Guardian</th>
+                        <th style="width:11%">Contact</th>
+                        <th style="width:7%">Status</th>
+                        <th style="width:20%" class="text-center">Actions</th>
                     </tr>
                 </thead>
 
@@ -60,79 +86,113 @@
 
                     @if (Model != null && Model.Any())
                     {
+                        int counter = 1;
                         foreach (var student in Model)
                         {
                             <tr>
+                                <td>@counter</td>
 
-                                <td>@student.LRN</td>
-
-                                <td>
-                                    @student.LastName, @student.FirstName
-                                </td>
-
-                                <td>@student.Gender</td>
+                                <td class="text-muted small">@student.LRN</td>
 
                                 <td>
-                                    @(student.Section?.SectionName ?? "No Section")
-                                </td>
-
-                                <td>
-                                    @(student.GuardianName ?? "—")
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="student-avatar">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                        <span class="fw-semibold">@student.LastName, @student.FirstName</span>
+                                    </div>
                                 </td>
 
                                 <td>
-                                    @(student.ContactNumber ?? "—")
+                                    <span class="gender-badge gender-@(student.Gender?.ToLower() ?? "other")">
+                                        @student.Gender
+                                    </span>
                                 </td>
+
+                                <td>@(student.Section?.SectionName ?? "No Section")</td>
+
+                                <td class="text-muted">@(student.GuardianName ?? "—")</td>
+
+                                <td class="text-muted">@(student.ContactNumber ?? "—")</td>
 
                                 <td>
                                     @if (student.IsActive)
                                     {
-                                        <span class="badge bg-success">Active</span>
+                                        <span class="status-badge status-active">Active</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-danger">Inactive</span>
+                                        <span class="status-badge status-inactive">Inactive</span>
                                     }
                                 </td>
 
-                                <td class="actions-cell">
+                                <td class="text-center">
+                                    <div class="d-flex gap-1 justify-content-center align-items-center flex-nowrap">
 
-                                    <a asp-controller="Student"
-                                       asp-action="Edit"
-                                       asp-route-id="@student.StudentId"
-                                       class="btn btn-sm btn-primary">
+                                        <!-- EDIT -->
+                                        <a asp-controller="Student"
+                                           asp-action="Edit"
+                                           asp-route-id="@student.StudentId"
+                                           class="btn btn-sm btn-edit"
+                                           title="Edit Student">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
 
-                                        <i class="bi bi-pencil-square"></i>
-                                        Edit
-                                    </a>
+                                        <!-- ACTIVATE / DEACTIVATE -->
+                                        <form asp-controller="Student"
+                                              asp-action="ToggleStatus"
+                                              asp-route-id="@student.StudentId"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            @if (student.IsActive)
+                                            {
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-deactivate"
+                                                        title="Deactivate Student"
+                                                        onclick="return confirm('Deactivate @student.FirstName @student.LastName? They will no longer be able to log in.')">
+                                                    <i class="bi bi-slash-circle"></i> Deactivate
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-activate"
+                                                        title="Activate Student"
+                                                        onclick="return confirm('Activate @student.FirstName @student.LastName?')">
+                                                    <i class="bi bi-check-circle"></i> Activate
+                                                </button>
+                                            }
+                                        </form>
 
-                                    <form asp-controller="Student"
-                                          asp-action="Delete"
-                                          asp-route-id="@student.StudentId"
-                                          method="post"
-                                          class="d-inline">
+                                        <!-- DELETE -->
+                                        <form asp-controller="Student"
+                                              asp-action="Delete"
+                                              asp-route-id="@student.StudentId"
+                                              method="post"
+                                              class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-delete"
+                                                    title="Delete Student"
+                                                    onclick="return confirm('Permanently delete @student.FirstName @student.LastName? This cannot be undone.')">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
 
-                                        <button type="submit"
-                                                class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Delete this student?')">
-
-                                            <i class="bi bi-trash"></i>
-                                            Delete
-                                        </button>
-
-                                    </form>
-
+                                    </div>
                                 </td>
 
                             </tr>
+                            counter++;
                         }
                     }
                     else
                     {
                         <tr>
-                            <td colspan="8"
-                                class="text-center text-muted py-5">
-                                No student records found.
+                            <td colspan="9" class="text-center text-muted py-5">
+                                <i class="bi bi-people" style="font-size:3rem;opacity:.3"></i>
+                                <br />No student records found.
                             </td>
                         </tr>
                     }
@@ -142,36 +202,38 @@
             </table>
 
         </div>
-
     </div>
-
 </div>
 
-<!-- STYLE -->
+<!-- ===== PAGINATION: OUTSIDE THE CARD (BELOW) ===== -->
+<div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+    <div class="text-muted small" id="paginationInfo"></div>
+    <nav aria-label="Student pagination">
+        <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+    </nav>
+</div>
+
+<!-- =========================================== -->
+<!-- STYLES                                      -->
+<!-- =========================================== -->
+
 <style>
 
+/* PAGE HEADER */
 .page-title{
     color:#2C2C2C;
     font-size:3rem;
     font-weight:700;
     margin-bottom:0;
 }
-
 .page-subtitle{
     color:#6C757D;
     font-size:1rem;
     margin-top:5px;
+    font-weight:400;
 }
 
-.custom-card{
-    background:#FFFFFF;
-    border:none;
-    border-radius:16px;
-    overflow:visible;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-
-/* BUTTON */
+/* ADD BUTTON */
 .btn-add{
     background:#C8102E;
     color:#FFFFFF;
@@ -179,85 +241,352 @@
     padding:10px 18px;
     border-radius:10px;
     font-weight:600;
+    transition:all .2s ease;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
 }
-
 .btn-add:hover{
     background:#A50D25;
     color:#FFFFFF;
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(200,16,46,.3);
 }
 
-/* TABLE */
-.table{
-    margin-bottom:0;
+/* SEARCH WRAPPER (outside card) */
+.search-wrapper{
+    position:relative;
+    width:260px;
 }
-
-.table thead th{
-    border-bottom:2px solid #E9ECEF;
-    color:#2C2C2C;
-    font-weight:600;
+.search-icon{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9CA3AF;
+    font-size:.9rem;
+    pointer-events:none;
+    z-index:2;
 }
-
-.table tbody td{
-    vertical-align:middle;
-}
-
-/* INPUT */
 .search-box{
     border-radius:10px;
     border:1px solid #DEE2E6;
+    padding-left:2.4rem;
+    background:#fff;
 }
-
 .search-box:focus{
     border-color:#2C2C2C;
     box-shadow:0 0 0 3px rgba(44,44,44,.10);
 }
 
+/* ENTRIES SELECT */
+.entries-select{
+    width:72px;
+    border-radius:8px;
+    border:1px solid #DEE2E6;
+    font-size:.82rem;
+    color:#2C2C2C;
+}
+.entries-select:focus{
+    border-color:#2C2C2C;
+    box-shadow:0 0 0 3px rgba(44,44,44,.10);
+}
+
+/* CARD */
+.custom-card{
+    background:#FFFFFF;
+    border:none;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+/* TABLE */
+.student-table{
+    table-layout:auto;
+    width:100%;
+}
+.student-table thead th{
+    border-bottom:2px solid #E9ECEF;
+    color:#2C2C2C;
+    font-weight:600;
+    font-size:.82rem;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    padding:13px 12px;
+    background:#F8F9FA;
+}
+.student-table tbody td{
+    vertical-align:middle;
+    padding:13px 12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.student-table tbody tr{
+    transition:background .15s ease;
+}
+.student-table tbody tr:hover{
+    background:rgba(200,16,46,.03);
+}
+
+/* STUDENT AVATAR */
+.student-avatar{
+    width:32px;
+    height:32px;
+    background:linear-gradient(135deg,#2C2C2C,#555);
+    border-radius:8px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:.9rem;
+    flex-shrink:0;
+}
+
+/* GENDER BADGE */
+.gender-badge{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:20px;
+    font-size:.75rem;
+    font-weight:600;
+}
+.gender-male{
+    background:rgba(21,101,192,.12);
+    color:#1565C0;
+}
+.gender-female{
+    background:rgba(173,20,87,.12);
+    color:#AD1457;
+}
+.gender-other{
+    background:rgba(100,100,100,.12);
+    color:#555;
+}
+
+/* STATUS BADGE */
+.status-badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:.73rem;
+    font-weight:700;
+    letter-spacing:.4px;
+}
+.status-active{
+    background:rgba(25,135,84,.12);
+    color:#198754;
+}
+.status-inactive{
+    background:rgba(200,16,46,.12);
+    color:#C8102E;
+}
+
 /* ACTION BUTTONS */
-.btn-primary{
+.btn-edit{
     background:#2C2C2C;
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    padding:4px 10px;
+    font-size:.75rem;
+    font-weight:500;
+    transition:all .2s ease;
+    white-space:nowrap;
+}
+.btn-edit:hover{
+    background:#1F1F1F;
+    color:#fff;
+    transform:translateY(-1px);
+}
+
+.btn-deactivate{
+    background:#C8102E;
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    padding:4px 10px;
+    font-size:.75rem;
+    font-weight:500;
+    transition:all .2s ease;
+    white-space:nowrap;
+}
+.btn-deactivate:hover{
+    background:#A50D25;
+    color:#fff;
+    transform:translateY(-1px);
+    box-shadow:0 3px 8px rgba(200,16,46,.3);
+}
+
+.btn-activate{
+    background:#198754;
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    padding:4px 10px;
+    font-size:.75rem;
+    font-weight:500;
+    transition:all .2s ease;
+    white-space:nowrap;
+}
+.btn-activate:hover{
+    background:#146c43;
+    color:#fff;
+    transform:translateY(-1px);
+    box-shadow:0 3px 8px rgba(25,135,84,.3);
+}
+
+.btn-delete{
+    background:#6C757D;
+    color:#fff;
+    border:none;
+    border-radius:7px;
+    padding:4px 10px;
+    font-size:.75rem;
+    font-weight:500;
+    transition:all .2s ease;
+    white-space:nowrap;
+}
+.btn-delete:hover{
+    background:#565e64;
+    color:#fff;
+    transform:translateY(-1px);
+}
+
+/* PAGINATION */
+.pagination .page-link{
+    color:#2C2C2C;
+    border-radius:8px !important;
+    margin:0 2px;
+    border:1px solid #E9ECEF;
+    padding:5px 12px;
+    font-size:.82rem;
+    font-weight:500;
+    transition:all .15s ease;
+}
+.pagination .page-link:hover{
+    background:#2C2C2C;
+    color:#fff;
     border-color:#2C2C2C;
 }
-
-.btn-primary:hover{
-    background:#1F1F1F;
-}
-
-.btn-danger{
+.pagination .page-item.active .page-link{
     background:#C8102E;
     border-color:#C8102E;
+    color:#fff;
+    box-shadow:0 3px 8px rgba(200,16,46,.3);
+}
+.pagination .page-item.disabled .page-link{
+    color:#ADB5BD;
+    background:#F8F9FA;
+    border-color:#E9ECEF;
 }
 
-.btn-danger:hover{
-    background:#A50D25;
+/* ALERTS */
+.alert{
+    border-radius:12px;
+    border:none;
+    font-weight:500;
 }
+.alert-success{ background:rgba(25,135,84,.08); color:#198754; }
+.alert-danger{  background:rgba(200,16,46,.08);  color:#C8102E; }
 
 /* RESPONSIVE */
 @@media(max-width:768px){
-
-    .page-title{
-        font-size:2rem;
-    }
-
-    .btn-add{
-        margin-top:10px;
-    }
+    .page-title{ font-size:1.8rem; }
+    .btn-add{ margin-top:10px; }
+    .student-table{ table-layout:auto; }
+    .search-wrapper{ width:100%; }
 }
 
 </style>
 
-<!-- SEARCH SCRIPT -->
+<!-- =========================================== -->
+<!-- SCRIPTS                                     -->
+<!-- =========================================== -->
+
 <script>
-document.getElementById("studentSearch").addEventListener("keyup", function () {
 
-    let value = this.value.toLowerCase();
-    let rows = document.querySelectorAll("#studentTable tr");
+// ===== PAGINATION + SEARCH ENGINE =====
+const allRows    = Array.from(document.querySelectorAll('#studentTable tr'));
+let currentPage  = 1;
+let rowsPerPage  = parseInt(document.getElementById('entriesPerPage').value);
+let filteredRows = [...allRows];
 
-    rows.forEach(row => {
+function renderTable() {
+    allRows.forEach(r => r.style.display = 'none');
 
-        let text = row.innerText.toLowerCase();
-        row.style.display = text.includes(value) ? "" : "none";
+    const start    = (currentPage - 1) * rowsPerPage;
+    const end      = start + rowsPerPage;
+    filteredRows.slice(start, end).forEach(r => r.style.display = '');
 
-    });
+    const total  = filteredRows.length;
+    const infoEl = document.getElementById('paginationInfo');
+    if (total === 0) {
+        infoEl.textContent = 'No entries found';
+    } else {
+        infoEl.textContent = `Showing ${start + 1} to ${Math.min(end, total)} of ${total} entries`;
+    }
 
+    renderPagination(total);
+}
+
+function renderPagination(total) {
+    const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+    const ul = document.getElementById('paginationControls');
+    ul.innerHTML = '';
+
+    // Prev
+    const prev = document.createElement('li');
+    prev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prev.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+    prev.addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) { currentPage--; renderTable(); }});
+    ul.appendChild(prev);
+
+    // Page numbers (window of 5)
+    let startP = Math.max(1, currentPage - 2);
+    let endP   = Math.min(totalPages, startP + 4);
+    if (endP - startP < 4) startP = Math.max(1, endP - 4);
+
+    for (let i = startP; i <= endP; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        const page = i;
+        li.addEventListener('click', e => { e.preventDefault(); currentPage = page; renderTable(); });
+        ul.appendChild(li);
+    }
+
+    // Next
+    const next = document.createElement('li');
+    next.className = `page-item ${currentPage >= totalPages ? 'disabled' : ''}`;
+    next.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+    next.addEventListener('click', e => { e.preventDefault(); if (currentPage < totalPages) { currentPage++; renderTable(); }});
+    ul.appendChild(next);
+}
+
+// Search
+document.getElementById('studentSearch').addEventListener('input', function () {
+    const val    = this.value.toLowerCase().trim();
+    filteredRows = allRows.filter(r => r.innerText.toLowerCase().includes(val));
+    currentPage  = 1;
+    renderTable();
 });
+
+// Entries per page
+document.getElementById('entriesPerPage').addEventListener('change', function () {
+    rowsPerPage = parseInt(this.value);
+    currentPage = 1;
+    renderTable();
+});
+
+// Initial render
+renderTable();
+
+// Auto-dismiss alerts
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close());
+}, 4000);
+
 </script>

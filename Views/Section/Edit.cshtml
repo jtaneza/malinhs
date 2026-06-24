@@ -1,31 +1,81 @@
-```aspnetcorerazor
 @model MalikongkongNHS.Models.Entities.Section
 
 @{
     ViewData["Title"] = "Edit Section";
+    var subjects = (List<MalikongkongNHS.Models.Entities.Subject>)ViewBag.Subjects;
+    var teachers = (List<MalikongkongNHS.Models.Entities.Teacher>)ViewBag.Teachers;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+.subject-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; border-radius:10px; background:#F8F9FA;
+    margin-bottom:8px; gap:12px;
+}
+.subject-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    font-weight:600; font-size:.85rem; color:#2C2C2C;
+}
+.subject-badge .icon{
+    width:34px; height:34px; border-radius:8px;
+    background:rgba(200,16,46,.1); color:#C8102E;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1rem; flex-shrink:0;
+}
+.teacher-tag{
+    font-size:.75rem; color:#6C757D; font-weight:500;
+    background:#fff; border:1px solid #dee2e6;
+    border-radius:20px; padding:3px 10px;
+}
+.remove-btn{
+    border:none; background:rgba(200,16,46,.1); color:#C8102E;
+    border-radius:8px; width:32px; height:32px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:all .2s; flex-shrink:0;
+}
+.remove-btn:hover{ background:#C8102E; color:#fff; }
+.add-subject-form{
+    background:#fff; border:1.5px dashed #dee2e6; border-radius:12px;
+    padding:16px; margin-top:12px;
+}
+</style>
 
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="page-title">Edit Section</h1>
-        <p class="page-subtitle">Update section details</p>
+        <p class="page-subtitle">Update section details and manage subjects</p>
     </div>
-
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
 </div>
 
-<div class="custom-card">
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success border-0 rounded-3 mb-3">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+    </div>
+}
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning border-0 rounded-3 mb-3">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Warning"]
+    </div>
+}
 
+<!-- ── SECTION DETAILS ── -->
+<div class="custom-card mb-4">
     <div class="card-body p-4">
+        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.6px">
+            <i class="bi bi-building me-1"></i>Section Details
+        </h6>
 
         <form asp-action="Edit" method="post">
-
             <input asp-for="SectionId" type="hidden" />
 
             <div class="row">
-
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Grade Level</label>
+                    <label class="form-label fw-semibold">Grade Level</label>
                     <select asp-for="GradeLevel" class="form-select">
                         <option value="">-- Select Grade Level --</option>
                         @if (ViewBag.GradeLevels != null)
@@ -37,57 +87,125 @@
                         }
                     </select>
                 </div>
-
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Section Name</label>
+                    <label class="form-label fw-semibold">Section Name</label>
                     <input asp-for="SectionName" class="form-control" />
                 </div>
-
             </div>
 
             <div class="row">
-
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Adviser</label>
+                    <label class="form-label fw-semibold">Adviser (Homeroom Teacher)</label>
                     <select asp-for="Adviser" class="form-select">
                         <option value="">-- Select Adviser --</option>
-                        @if (ViewBag.Teachers != null)
+                        @foreach (var t in teachers)
                         {
-                            @foreach (var teacher in (List<MalikongkongNHS.Models.Entities.Teacher>)ViewBag.Teachers)
-                            {
-                                <option value="@teacher.FullName" selected="@(Model.Adviser == teacher.FullName)">@teacher.FullName</option>
-                            }
+                            <option value="@t.FullName" selected="@(Model.Adviser == t.FullName)">@t.FullName</option>
                         }
                     </select>
                 </div>
-
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Capacity</label>
+                    <label class="form-label fw-semibold">Capacity</label>
                     <input asp-for="Capacity" class="form-control" />
                 </div>
-
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Status</label>
-
+                <label class="form-label fw-semibold">Status</label>
                 <select asp-for="IsActive" class="form-select">
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                Update Section
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-floppy-fill me-1"></i>Update Section
             </button>
-
-            <a asp-action="Index" class="btn btn-secondary">
-                Cancel
-            </a>
-
         </form>
-
     </div>
-
 </div>
-```
+
+<!-- ── SUBJECTS ASSIGNED ── -->
+<div class="custom-card">
+    <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h6 class="fw-bold text-muted text-uppercase mb-0" style="font-size:.75rem;letter-spacing:.6px">
+                <i class="bi bi-book-fill me-1" style="color:#C8102E"></i>
+                Subjects Assigned
+                <span class="ms-2 badge" style="background:rgba(200,16,46,.1);color:#C8102E;font-size:.7rem">
+                    @Model.SectionSubjects.Count
+                </span>
+            </h6>
+            <small class="text-muted">Students in this section take all subjects below</small>
+        </div>
+
+        @if (!Model.SectionSubjects.Any())
+        {
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-book" style="font-size:2.5rem;opacity:.3"></i>
+                <p class="mt-2 mb-0">No subjects assigned yet. Add subjects below.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var ss in Model.SectionSubjects)
+            {
+                <div class="subject-row">
+                    <div class="subject-badge">
+                        <span class="icon"><i class="bi bi-book-fill"></i></span>
+                        @ss.Subject?.Name
+                    </div>
+                    <span class="teacher-tag">
+                        <i class="bi bi-person-fill me-1"></i>@(ss.Teacher?.FullName ?? "No teacher")
+                    </span>
+                    <form asp-action="RemoveSubject" method="post" style="margin:0"
+                          onsubmit="return confirm('Remove @ss.Subject?.Name from this section?')">
+                        <input type="hidden" name="sectionSubjectId" value="@ss.Id" />
+                        <input type="hidden" name="sectionId" value="@Model.SectionId" />
+                        <button type="submit" class="remove-btn" title="Remove">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </form>
+                </div>
+            }
+        }
+
+        <!-- ADD SUBJECT FORM -->
+        <div class="add-subject-form">
+            <p class="fw-semibold mb-2" style="font-size:.82rem;color:#6C757D">
+                <i class="bi bi-plus-circle me-1"></i>Add a Subject
+            </p>
+            <form asp-action="AssignSubject" method="post">
+                <input type="hidden" name="sectionId" value="@Model.SectionId" />
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label mb-1" style="font-size:.78rem;font-weight:600">Subject</label>
+                        <select name="subjectId" class="form-select form-select-sm" required>
+                            <option value="">-- Select Subject --</option>
+                            @foreach (var sub in subjects)
+                            {
+                                <option value="@sub.SubjectId">@sub.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label mb-1" style="font-size:.78rem;font-weight:600">Teacher</label>
+                        <select name="teacherId" class="form-select form-select-sm" required>
+                            <option value="">-- Select Teacher --</option>
+                            @foreach (var t in teachers)
+                            {
+                                <option value="@t.TeacherId">@t.FullName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-sm w-100"
+                                style="background:#C8102E;color:#fff;border-radius:8px;font-weight:600">
+                            <i class="bi bi-plus-lg me-1"></i>Add
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

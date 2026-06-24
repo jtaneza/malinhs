@@ -91,17 +91,30 @@ namespace MalikongkongNHS.Controllers
             var studentId = HttpContext.Session.GetInt32("UserId");
 
             var student = _context.Students
+                .Include(s => s.Section)
+                    .ThenInclude(sec => sec!.SectionSubjects)
                 .FirstOrDefault(s => s.StudentId == studentId);
+
+            // Count subjects from the section's SectionSubjects
+            int subjectCount = student?.Section?.SectionSubjects?.Count ?? 0;
+
+            // Real attendance rate
+            var attendanceRecords = _context.Attendances
+                .Where(a => a.StudentId == studentId)
+                .ToList();
+            int total   = attendanceRecords.Count;
+            int present = attendanceRecords.Count(r => r.Status == "Present" || r.Status == "Late" || r.Status == "Excused");
+            double rate = total > 0 ? Math.Round(present * 100.0 / total, 1) : 0;
 
             var vm = new StudentDashboardVM
             {
                 FullName = student != null
                     ? student.FirstName + " " + student.LastName
                     : "Student",
-
-                AttendanceRate = 0,
+                Subjects       = subjectCount,
+                AttendanceRate = rate,
                 AverageGrade   = 0,
-                Remarks        = "No Data Yet"
+                Remarks        = string.Empty
             };
 
             return View(vm);

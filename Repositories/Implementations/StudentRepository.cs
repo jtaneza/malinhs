@@ -58,5 +58,16 @@ public List<Section> GetSections()
                 _context.SaveChanges();
             }
         }
+
+        public void ToggleStatus(int id)
+        {
+            var student = _context.Students.Find(id);
+
+            if (student != null)
+            {
+                student.IsActive = !student.IsActive;
+                _context.SaveChanges();
+            }
+        }
     }
 }

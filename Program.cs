@@ -41,22 +41,30 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
-// ── Auto-seed database on startup ──────────────────────────────────
+
+// ── Auto-seed database on startup (SAFE FIXED VERSION) ─────────────
 using (var scope = app.Services.CreateScope())
 {
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
     try
     {
-        var db = scope.ServiceProvider.GetRequiredService<MalikongkongNHS.Data.ApplicationDbContext>();
-        db.Database.EnsureCreated();
-        MalikongkongNHS.Data.DbSeeder.Seed(db);
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        // Only run seeding in development (prevents hosting crash)
+        if (app.Environment.IsDevelopment())
+        {
+            db.Database.EnsureCreated();
+            DbSeeder.Seed(db);
+        }
     }
     catch (Exception ex)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogWarning("DB seed skipped due to connection error: {Message}", ex.Message);
+        logger.LogWarning("DB seed skipped due to error: {Message}", ex.Message);
     }
 }
-// ───────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────
+
 
 if (!app.Environment.IsDevelopment())
 {

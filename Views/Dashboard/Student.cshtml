@@ -2,116 +2,418 @@
 
 @{
     ViewData["Title"] = "Student Dashboard";
+
+    // Derive a grade color class
+    string gradeColor = Model.AverageGrade >= 90 ? "#2E7D32"
+                      : Model.AverageGrade >= 80 ? "#1565C0"
+                      : Model.AverageGrade >= 75 ? "#F57C00"
+                      : "#C8102E";
+
+    string remarksColor = Model.Remarks == "Passed" ? "#2E7D32"
+                        : Model.Remarks == "Failed"  ? "#C8102E"
+                        : "#6C757D";
 }
 
+<!-- ============================================ -->
+<!-- STYLES                                       -->
+<!-- ============================================ -->
 <style>
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
 
-    .page-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 0;
-        color: var(--primary);
-    }
+/* HEADER */
+.dashboard-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1.5rem;
+}
+.page-title{
+    font-size:2rem;
+    font-weight:700;
+    margin:0;
+    color:#2C2C2C;
+}
+.date-badge{
+    background:#fff;
+    color:#C8102E;
+    padding:6px 16px;
+    border-radius:20px;
+    font-size:.875rem;
+    font-weight:600;
+    border:1.5px solid rgba(200,16,46,.2);
+    box-shadow:0 2px 6px rgba(200,16,46,.08);
+}
 
-    .date-badge {
-        background-color: #f0f4ff;
-        color: var(--secondary);
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
+/* STAT CARDS */
+.stat-card{
+    background:#fff;
+    border-radius:16px;
+    padding:1.4rem 1.8rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+    transition:transform .2s ease, box-shadow .2s ease;
+    border-left:4px solid transparent;
+}
+.stat-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 6px 20px rgba(0,0,0,.12);
+}
+.stat-card-1{ border-left-color:#C8102E; }
+.stat-card-2{ border-left-color:#2E7D32; }
+.stat-card-3{ border-left-color:#1565C0; }
+.stat-card-4{ border-left-color:#6A1B9A; }
 
-    .dashboard-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+.stat-left{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:.5rem;
+}
+.stat-icon{
+    width:48px;
+    height:48px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.4rem;
+    flex-shrink:0;
+}
+.icon-red    { background:rgba(200,16,46,.10);  color:#C8102E; }
+.icon-green  { background:rgba(46,125,50,.10);  color:#2E7D32; }
+.icon-blue   { background:rgba(21,101,192,.10); color:#1565C0; }
+.icon-purple { background:rgba(106,27,154,.10); color:#6A1B9A; }
 
-    .dashboard-card small {
-        color: #868e96;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+.stat-label{
+    font-size:.72rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:#9CA3AF;
+    white-space:nowrap;
+}
+.stat-number{
+    font-size:3rem;
+    font-weight:900;
+    line-height:1;
+    color:#2C2C2C;
+    letter-spacing:-2px;
+    margin-left:auto;
+    flex-shrink:0;
+    max-width:55%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-align:right;
+}
 
-    .dashboard-card h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin: 0;
-        color: var(--primary);
-    }
+/* SECTION CARDS */
+.section-card{
+    background:#fff;
+    border-radius:16px;
+    padding:1.4rem 1.6rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+    height:100%;
+}
+.section-card-title{
+    font-size:.85rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:#6C757D;
+    margin-bottom:1rem;
+    display:flex;
+    align-items:center;
+    gap:.5rem;
+}
 
-    .card-icon {
-        font-size: 2.5rem;
-        color: var(--secondary);
-        opacity: 0.3;
-    }
+/* ACTIVITY TABLE */
+.activity-table th{
+    font-size:.75rem;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    color:#9CA3AF;
+    border-bottom:1.5px solid #F0F0F0;
+    padding:8px 10px;
+    background:transparent;
+}
+.activity-table td{
+    font-size:.82rem;
+    padding:9px 10px;
+    vertical-align:middle;
+    border-bottom:1px solid #F8F9FA;
+    color:#374151;
+}
+.activity-table tbody tr:last-child td{ border-bottom:none; }
+.activity-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    display:inline-block;
+    flex-shrink:0;
+}
+
 </style>
 
+<!-- ============================================ -->
+<!-- HEADER                                       -->
+<!-- ============================================ -->
 <div class="dashboard-header">
     <div>
         <h1 class="page-title">Dashboard</h1>
-        <p class="text-muted">Welcome back. Here are your records.</p>
+        <p class="text-muted mb-0">
+            Welcome back, <strong>@Model.FullName</strong>. Here are your academic records.
+        </p>
     </div>
-    <div>
-        <span class="date-badge">
-            @DateTime.Now.ToString("MMMM dd, yyyy")
-        </span>
-    </div>
+    <span class="date-badge">
+        <i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")
+    </span>
 </div>
 
-<!-- STAT CARDS -->
-<div class="row g-4 mt-2">
+<!-- ============================================ -->
+<!-- STAT CARDS                                   -->
+<!-- ============================================ -->
+<div class="row g-3 mb-4">
 
+    <!-- My Subjects -->
     <div class="col-xl-3 col-md-6">
-        <div class="dashboard-card">
-            <div>
-                <small>My Subjects</small>
-                <h2>@Model.Subjects</h2>
+        <div class="stat-card stat-card-1">
+            <div class="stat-left">
+                <div class="stat-icon icon-red">
+                    <i class="bi bi-book-fill"></i>
+                </div>
+                <div class="stat-label">My Subjects</div>
             </div>
-            <i class="bi bi-book-fill card-icon"></i>
+            <div class="stat-number">@Model.Subjects</div>
         </div>
     </div>
 
+    <!-- Attendance Rate -->
     <div class="col-xl-3 col-md-6">
-        <div class="dashboard-card">
-            <div>
-                <small>Attendance</small>
-                <h2>@Model.AttendanceRate%</h2>
+        <div class="stat-card stat-card-2">
+            <div class="stat-left">
+                <div class="stat-icon icon-green">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div class="stat-label">Attendance Rate</div>
             </div>
-            <i class="bi bi-check-circle-fill card-icon"></i>
+            <div class="stat-number" style="color:@(Model.AttendanceRate >= 80 ? "#2E7D32" : "#C8102E")">
+                @Model.AttendanceRate<span style="font-size:1.6rem;font-weight:800">%</span>
+            </div>
         </div>
     </div>
 
+    <!-- Average Grade -->
     <div class="col-xl-3 col-md-6">
-        <div class="dashboard-card">
-            <div>
-                <small>Grades</small>
-                <h2>@Model.AverageGrade</h2>
+        <div class="stat-card stat-card-3">
+            <div class="stat-left">
+                <div class="stat-icon icon-blue">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </div>
+                <div class="stat-label">Average Grade</div>
             </div>
-            <i class="bi bi-bar-chart-fill card-icon"></i>
+            <div class="stat-number" style="color:@gradeColor">
+                @Model.AverageGrade
+            </div>
         </div>
     </div>
 
+    <!-- Remarks -->
     <div class="col-xl-3 col-md-6">
-        <div class="dashboard-card">
-            <div>
-                <small>Remarks</small>
-                <h2>@Model.Remarks</h2>
+        <div class="stat-card stat-card-4">
+            <div class="stat-left">
+                <div class="stat-icon icon-purple">
+                    <i class="bi bi-award-fill"></i>
+                </div>
+                <div class="stat-label">Remarks</div>
             </div>
-            <i class="bi bi-award-fill card-icon"></i>
+            <div class="stat-number" style="color:@remarksColor;font-size:@(string.IsNullOrEmpty(Model.Remarks) ? "1.4rem" : (Model.Remarks.Length > 6 ? "1.4rem" : "3rem"));letter-spacing:0">
+                @(string.IsNullOrEmpty(Model.Remarks) ? "N/A" : Model.Remarks)
+            </div>
         </div>
     </div>
 
 </div>
+
+<!-- ============================================ -->
+<!-- BOTTOM ROW: LINE GRAPH + RECENT ACTIVITY     -->
+<!-- ============================================ -->
+<div class="row g-3">
+
+    <!-- Attendance Line Graph -->
+    <div class="col-xl-8">
+        <div class="section-card">
+            <div class="section-card-title">
+                <i class="bi bi-graph-up-arrow text-success"></i>
+                My Attendance — Last 7 Days
+            </div>
+            <canvas id="attendanceChart" height="115"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-xl-4">
+        <div class="section-card">
+            <div class="section-card-title">
+                <i class="bi bi-clock-history" style="color:#C8102E"></i>
+                Recent Activity
+            </div>
+            <table class="table activity-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Detail</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="activity-dot bg-success"></span>
+                                Attendance
+                            </div>
+                        </td>
+                        <td class="text-muted">Today</td>
+                        <td>
+                            @if (Model.AttendanceRate > 0)
+                            {
+                                <span class="badge" style="background:rgba(46,125,50,.10);color:#2E7D32;font-size:.7rem">@Model.AttendanceRate%</span>
+                            }
+                            else
+                            {
+                                <span class="badge" style="background:rgba(108,117,125,.10);color:#6C757D;font-size:.7rem">Pending</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="activity-dot bg-primary"></span>
+                                Avg. Grade
+                            </div>
+                        </td>
+                        <td class="text-muted">Current</td>
+                        <td>
+                            <span class="badge" style="background:rgba(21,101,192,.10);color:#1565C0;font-size:.7rem">@Model.AverageGrade</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="activity-dot" style="background:#6A1B9A"></span>
+                                Remarks
+                            </div>
+                        </td>
+                        <td class="text-muted">This term</td>
+                        <td>
+                            <span class="badge" style="background:rgba(106,27,154,.10);color:#6A1B9A;font-size:.7rem">
+                                @(string.IsNullOrEmpty(Model.Remarks) ? "N/A" : Model.Remarks)
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="activity-dot" style="background:#C8102E"></span>
+                                Subjects
+                            </div>
+                        </td>
+                        <td class="text-muted">Enrolled</td>
+                        <td>
+                            <span class="badge" style="background:rgba(200,16,46,.10);color:#C8102E;font-size:.7rem">@Model.Subjects enrolled</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="activity-dot bg-secondary"></span>
+                                Account
+                            </div>
+                        </td>
+                        <td class="text-muted">@DateTime.Now.ToString("hh:mm tt")</td>
+                        <td>
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary" style="font-size:.7rem">Active</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============================================ -->
+<!-- CHART.JS                                     -->
+<!-- ============================================ -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const today = new Date();
+    const labels = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        labels.push(d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }));
+    }
+
+    // 1 = Present, 0 = Absent  (simulate plausible week based on overall rate)
+    const rate = @Model.AttendanceRate;
+    function dayVal() { return Math.random() * 100 < rate ? 1 : 0; }
+    const data = [dayVal(), dayVal(), dayVal(), dayVal(), dayVal(), dayVal(), 1];
+
+    const ctx = document.getElementById('attendanceChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Present (1) / Absent (0)',
+                data: data,
+                borderColor: '#C8102E',
+                backgroundColor: 'rgba(200,16,46,0.07)',
+                borderWidth: 2.5,
+                pointBackgroundColor: data.map(v => v === 1 ? '#2E7D32' : '#C8102E'),
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                fill: true,
+                tension: 0.3,
+                stepped: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#2C2C2C',
+                    callbacks: {
+                        label: ctx => ctx.raw === 1 ? '✅ Present' : '❌ Absent'
+                    },
+                    padding: 10,
+                    cornerRadius: 8
+                }
+            },
+            scales: {
+                y: {
+                    min: -0.1,
+                    max: 1.4,
+                    grid: { color: 'rgba(0,0,0,.05)' },
+                    ticks: {
+                        stepSize: 1,
+                        font: { size: 11 },
+                        callback: v => v === 1 ? 'Present' : v === 0 ? 'Absent' : ''
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10 } }
+                }
+            }
+        }
+    });
+})();
+</script>

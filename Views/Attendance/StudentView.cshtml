@@ -1,0 +1,426 @@
+@model MalikongkongNHS.Models.ViewModels.StudentAttendanceVM
+
+@{
+    ViewData["Title"] = "My Attendance";
+
+    // Chart data — last 30 records, newest last (for chart L→R = oldest→newest)
+    var chartRecords = Model.Records.Take(30).Reverse().ToList();
+    var chartLabels  = chartRecords.Select(r => r.Date.ToString("MMM d")).ToList();
+    var chartData    = chartRecords.Select(r => r.Status == "Present" ? 1
+                                              : r.Status == "Late"    ? 0.5
+                                              : r.Status == "Excused" ? 0.5
+                                              : 0).ToList();
+    var chartColors  = chartRecords.Select(r => r.Status == "Present" ? "#2E7D32"
+                                              : r.Status == "Late"    ? "#F57C00"
+                                              : r.Status == "Excused" ? "#1565C0"
+                                              : "#C8102E").ToList();
+}
+
+<style>
+
+/* HEADER */
+.page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1.5rem;
+}
+.page-title{
+    font-size:2rem;
+    font-weight:700;
+    color:#2C2C2C;
+    margin:0;
+}
+.date-badge{
+    background:#fff;
+    color:#C8102E;
+    padding:6px 16px;
+    border-radius:20px;
+    font-size:.875rem;
+    font-weight:600;
+    border:1.5px solid rgba(200,16,46,.2);
+    box-shadow:0 2px 6px rgba(200,16,46,.08);
+}
+
+/* STAT CARDS */
+.stat-card{
+    background:#fff;
+    border-radius:16px;
+    padding:1.4rem 1.8rem;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+    transition:transform .2s ease,box-shadow .2s ease;
+    border-left:4px solid transparent;
+}
+.stat-card:hover{ transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.12); }
+.stat-card-1{ border-left-color:#2E7D32; }
+.stat-card-2{ border-left-color:#C8102E; }
+.stat-card-3{ border-left-color:#F57C00; }
+.stat-card-4{ border-left-color:#1565C0; }
+.stat-card-5{ border-left-color:#6A1B9A; }
+
+.stat-left{ display:flex; flex-direction:column; align-items:flex-start; gap:.5rem; }
+.stat-icon{
+    width:48px; height:48px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; flex-shrink:0;
+}
+.icon-green  { background:rgba(46,125,50,.10);  color:#2E7D32; }
+.icon-red    { background:rgba(200,16,46,.10);  color:#C8102E; }
+.icon-orange { background:rgba(245,124,0,.10);  color:#F57C00; }
+.icon-blue   { background:rgba(21,101,192,.10); color:#1565C0; }
+.icon-purple { background:rgba(106,27,154,.10); color:#6A1B9A; }
+
+.stat-label{
+    font-size:.72rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.6px; color:#9CA3AF; white-space:nowrap;
+}
+.stat-number{
+    font-size:3rem; font-weight:900; line-height:1; color:#2C2C2C;
+    letter-spacing:-2px; margin-left:auto; flex-shrink:0;
+}
+
+/* SECTION CARD */
+.section-card{
+    background:#fff; border-radius:16px;
+    padding:1.4rem 1.6rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+    height:100%;
+}
+.section-card-title{
+    font-size:.85rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.6px; color:#6C757D; margin-bottom:1rem;
+    display:flex; align-items:center; gap:.5rem;
+}
+
+/* BADGE */
+.status-badge{
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.4px;
+}
+.badge-present { background:rgba(46,125,50,.12);  color:#2E7D32; }
+.badge-absent  { background:rgba(200,16,46,.12);  color:#C8102E; }
+.badge-late    { background:rgba(245,124,0,.12);  color:#F57C00; }
+.badge-excused { background:rgba(21,101,192,.12); color:#1565C0; }
+
+/* TABLE */
+.att-table th{
+    font-size:.72rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; color:#9CA3AF; border-bottom:1.5px solid #F0F0F0;
+    padding:10px 12px; background:transparent;
+}
+.att-table td{
+    font-size:.84rem; padding:10px 12px; vertical-align:middle;
+    border-bottom:1px solid #F8F9FA; color:#374151;
+}
+.att-table tbody tr:last-child td{ border-bottom:none; }
+.att-table tbody tr:hover td{ background:#FAFAFA; }
+
+/* RATE CIRCLE */
+.rate-ring{
+    width:120px; height:120px; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:conic-gradient(#2E7D32 0% @(Model.AttendanceRate)%, #F0F0F0 @(Model.AttendanceRate)% 100%);
+    box-shadow:0 4px 12px rgba(0,0,0,.1);
+}
+.rate-inner{
+    width:90px; height:90px; border-radius:50%; background:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+}
+.rate-pct  { font-size:1.2rem; font-weight:900; color:#2C2C2C; line-height:1; }
+.rate-label{ font-size:.6rem; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
+
+</style>
+
+<!-- HEADER -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My Attendance</h1>
+        <p class="text-muted mb-0">
+            <i class="bi bi-building me-1"></i>Section: <strong>@Model.SectionName</strong>
+        </p>
+    </div>
+    <span class="date-badge">
+        <i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")
+    </span>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success border-0 rounded-3 mb-3">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+    </div>
+}
+
+<!-- STAT CARDS -->
+<div class="row g-3 mb-4">
+
+    <div class="col-xl col-md-4 col-6">
+        <div class="stat-card stat-card-1">
+            <div class="stat-left">
+                <div class="stat-icon icon-green"><i class="bi bi-calendar-check-fill"></i></div>
+                <div class="stat-label">Present</div>
+            </div>
+            <div class="stat-number" style="color:#2E7D32">@Model.Present</div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-4 col-6">
+        <div class="stat-card stat-card-2">
+            <div class="stat-left">
+                <div class="stat-icon icon-red"><i class="bi bi-x-circle-fill"></i></div>
+                <div class="stat-label">Absent</div>
+            </div>
+            <div class="stat-number" style="color:#C8102E">@Model.Absent</div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-4 col-6">
+        <div class="stat-card stat-card-3">
+            <div class="stat-left">
+                <div class="stat-icon icon-orange"><i class="bi bi-clock-fill"></i></div>
+                <div class="stat-label">Late</div>
+            </div>
+            <div class="stat-number" style="color:#F57C00">@Model.Late</div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-4 col-6">
+        <div class="stat-card stat-card-4">
+            <div class="stat-left">
+                <div class="stat-icon icon-blue"><i class="bi bi-shield-check-fill"></i></div>
+                <div class="stat-label">Excused</div>
+            </div>
+            <div class="stat-number" style="color:#1565C0">@Model.Excused</div>
+        </div>
+    </div>
+
+    <div class="col-xl col-md-4 col-6">
+        <div class="stat-card stat-card-5">
+            <div class="stat-left">
+                <div class="stat-icon icon-purple"><i class="bi bi-bar-chart-fill"></i></div>
+                <div class="stat-label">Total Days</div>
+            </div>
+            <div class="stat-number" style="color:#6A1B9A">@Model.TotalDays</div>
+        </div>
+    </div>
+
+</div>
+
+<!-- CHART + RATE -->
+<div class="row g-3 mb-4">
+
+    <!-- Line Chart -->
+    <div class="col-xl-8">
+        <div class="section-card">
+            <div class="section-card-title">
+                <i class="bi bi-graph-up-arrow text-success"></i>
+                Attendance Trend — Last 30 Records
+            </div>
+            @if (Model.Records.Count == 0)
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-x" style="font-size:3rem;opacity:.3"></i>
+                    <p class="mt-2">No attendance records yet. Check back after your teacher records attendance.</p>
+                </div>
+            }
+            else
+            {
+                <canvas id="attendanceChart" height="110"></canvas>
+            }
+        </div>
+    </div>
+
+    <!-- Rate Ring -->
+    <div class="col-xl-4">
+        <div class="section-card d-flex flex-column align-items-center justify-content-center gap-3">
+            <div class="section-card-title w-100">
+                <i class="bi bi-pie-chart-fill" style="color:#2E7D32"></i>
+                Attendance Rate
+            </div>
+            <div class="rate-ring">
+                <div class="rate-inner">
+                    <span class="rate-pct">@Model.AttendanceRate%</span>
+                    <span class="rate-label">Rate</span>
+                </div>
+            </div>
+            <div class="d-flex gap-3 flex-wrap justify-content-center mt-2">
+                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2E7D32;margin-right:4px"></span><small>Present</small></span>
+                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F57C00;margin-right:4px"></span><small>Late</small></span>
+                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1565C0;margin-right:4px"></span><small>Excused</small></span>
+                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C8102E;margin-right:4px"></span><small>Absent</small></span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- RECORDS TABLE -->
+<div class="section-card">
+    <div class="section-card-title">
+        <i class="bi bi-table" style="color:#C8102E"></i>
+        Attendance Records
+        <span class="ms-auto badge" style="background:rgba(200,16,46,.1);color:#C8102E;font-size:.7rem;font-weight:700">
+            @Model.TotalDays total
+        </span>
+    </div>
+
+    @if (Model.Records.Count == 0)
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox" style="font-size:3rem;opacity:.3"></i>
+            <p class="mt-2">No attendance records found. Your teacher has not recorded any attendance yet.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Filter buttons -->
+        <div class="d-flex gap-2 mb-3 flex-wrap">
+            <button class="btn btn-sm filter-btn active" data-filter="all"
+                    style="border-radius:20px;font-size:.75rem;font-weight:600;border:1.5px solid #dee2e6">
+                All (@Model.TotalDays)
+            </button>
+            <button class="btn btn-sm filter-btn" data-filter="Present"
+                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(46,125,50,.08);color:#2E7D32;border:1.5px solid rgba(46,125,50,.2)">
+                Present (@Model.Present)
+            </button>
+            <button class="btn btn-sm filter-btn" data-filter="Absent"
+                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(200,16,46,.08);color:#C8102E;border:1.5px solid rgba(200,16,46,.2)">
+                Absent (@Model.Absent)
+            </button>
+            <button class="btn btn-sm filter-btn" data-filter="Late"
+                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(245,124,0,.08);color:#F57C00;border:1.5px solid rgba(245,124,0,.2)">
+                Late (@Model.Late)
+            </button>
+            <button class="btn btn-sm filter-btn" data-filter="Excused"
+                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(21,101,192,.08);color:#1565C0;border:1.5px solid rgba(21,101,192,.2)">
+                Excused (@Model.Excused)
+            </button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table att-table mb-0" id="recordsTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Day</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int rowNum = 1; }
+                    @foreach (var rec in Model.Records)
+                    {
+                        var badgeClass = rec.Status switch {
+                            "Present" => "badge-present",
+                            "Absent"  => "badge-absent",
+                            "Late"    => "badge-late",
+                            "Excused" => "badge-excused",
+                            _         => "badge-excused"
+                        };
+                        var rowIcon = rec.Status switch {
+                            "Present" => "bi-check-circle-fill text-success",
+                            "Absent"  => "bi-x-circle-fill text-danger",
+                            "Late"    => "bi-clock-fill text-warning",
+                            "Excused" => "bi-shield-check-fill text-primary",
+                            _         => "bi-question-circle"
+                        };
+                        <tr data-status="@rec.Status">
+                            <td class="text-muted">@rowNum++</td>
+                            <td><strong>@rec.Date.ToString("MMMM dd, yyyy")</strong></td>
+                            <td class="text-muted">@rec.Date.ToString("dddd")</td>
+                            <td>
+                                <span class="status-badge @badgeClass">
+                                    <i class="bi @rowIcon me-1"></i>@rec.Status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(chartLabels));
+    const data   = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(chartData));
+    const colors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(chartColors));
+
+    const canvas = document.getElementById('attendanceChart');
+    if (!canvas) return;
+
+    new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Attendance',
+                data: data,
+                borderColor: '#C8102E',
+                backgroundColor: 'rgba(200,16,46,0.06)',
+                borderWidth: 2.5,
+                pointBackgroundColor: colors,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 7,
+                pointHoverRadius: 9,
+                fill: true,
+                tension: 0.3,
+                stepped: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#2C2C2C',
+                    padding: 10,
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: ctx => {
+                            const v = ctx.raw;
+                            return v === 1 ? '✅ Present' : v === 0.5 ? '⚠️ Late / Excused' : '❌ Absent';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: -0.2, max: 1.4,
+                    grid: { color: 'rgba(0,0,0,.04)' },
+                    ticks: {
+                        stepSize: 0.5,
+                        font: { size: 10 },
+                        callback: v => v === 1 ? 'Present' : v === 0.5 ? 'Late/Exc.' : v === 0 ? 'Absent' : ''
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10 }, maxRotation: 45 }
+                }
+            }
+        }
+    });
+
+    // Filter buttons
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function(){
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.dataset.filter;
+            document.querySelectorAll('#recordsTable tbody tr').forEach(row => {
+                row.style.display = (filter === 'all' || row.dataset.status === filter) ? '' : 'none';
+            });
+        });
+    });
+})();
+</script>

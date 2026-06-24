@@ -208,5 +208,55 @@ namespace MalikongkongNHS.Controllers
 
             return RedirectToAction("Index");
         }
+
+        // ── STUDENT VIEW ──────────────────────────────────────────
+        public async Task<IActionResult> StudentView()
+        {
+            if (HttpContext.Session.GetString("Username") == null)
+                return RedirectToAction("Login", "Account");
+
+            var studentId = HttpContext.Session.GetInt32("UserId") ?? 0;
+
+            var student = await _context.Students
+                .Include(s => s.Section)
+                .FirstOrDefaultAsync(s => s.StudentId == studentId);
+
+            if (student == null)
+                return RedirectToAction("Login", "Account");
+
+            var records = await _context.Attendances
+                .Where(a => a.StudentId == studentId)
+                .OrderByDescending(a => a.Date)
+                .ToListAsync();
+
+            int present  = records.Count(r => r.Status == "Present");
+            int absent   = records.Count(r => r.Status == "Absent");
+            int late     = records.Count(r => r.Status == "Late");
+            int excused  = records.Count(r => r.Status == "Excused");
+            int total    = records.Count;
+
+            double rate = total > 0
+                ? Math.Round((present + late + excused) * 100.0 / total, 1)
+                : 0;
+
+            var vm = new StudentAttendanceVM
+            {
+                StudentName    = $"{student.FirstName} {student.LastName}",
+                SectionName    = student.Section?.SectionName ?? "—",
+                TotalDays      = total,
+                Present        = present,
+                Absent         = absent,
+                Late           = late,
+                Excused        = excused,
+                AttendanceRate = rate,
+                Records        = records.Select(r => new StudentAttendanceDayVM
+                {
+                    Date   = r.Date,
+                    Status = r.Status
+                }).ToList()
+            };
+
+            return View(vm);
+        }
     }
 }

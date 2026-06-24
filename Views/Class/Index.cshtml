@@ -2,252 +2,357 @@
 
 @{
     ViewData["Title"] = "My Classes";
+    int totalStudents = Model.Sum(s => s.Students.Count);
 }
 
 <style>
-    .page-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 0;
-        color: var(--primary);
-    }
+/* ── HEADER ── */
+.page-title  { font-size:2rem; font-weight:700; color:#2C2C2C; margin:0; }
+.date-badge  {
+    background:#fff; color:#C8102E; padding:6px 16px; border-radius:20px;
+    font-size:.875rem; font-weight:600; border:1.5px solid rgba(200,16,46,.2);
+    box-shadow:0 2px 6px rgba(200,16,46,.08);
+}
 
-    .section-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
-        border-left: 5px solid var(--secondary);
-    }
+/* ── STAT CARDS ── */
+.stat-card{
+    background:#fff; border-radius:16px; padding:1.4rem 1.8rem;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+    transition:transform .2s ease,box-shadow .2s ease;
+    border-left:4px solid transparent;
+}
+.stat-card:hover{ transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.12); }
+.stat-card-1{ border-left-color:#C8102E; }
+.stat-card-2{ border-left-color:#2E7D32; }
 
-    .section-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
+.stat-left{ display:flex; flex-direction:column; align-items:flex-start; gap:.5rem; }
+.stat-icon{
+    width:48px; height:48px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.4rem; flex-shrink:0;
+}
+.icon-red    { background:rgba(200,16,46,.10); color:#C8102E; }
+.icon-green  { background:rgba(46,125,50,.10);  color:#2E7D32; }
+.stat-label  {
+    font-size:.72rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.6px; color:#9CA3AF; white-space:nowrap;
+}
+.stat-number {
+    font-size:3rem; font-weight:900; line-height:1; color:#2C2C2C;
+    letter-spacing:-2px; margin-left:auto; flex-shrink:0;
+}
 
-    .section-title {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: var(--primary);
-        margin: 0;
-    }
+/* ── SECTION BLOCK ── */
+.section-block{
+    background:#fff; border-radius:16px;
+    padding:1.4rem 1.6rem; margin-bottom:1.5rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07);
+    border-left:4px solid #C8102E;
+}
+.section-title{ font-size:1.15rem; font-weight:700; color:#2C2C2C; margin:0; }
+.meta-badge{
+    display:inline-block; padding:3px 10px; border-radius:20px;
+    font-size:.72rem; font-weight:700;
+}
+.meta-blue   { background:rgba(21,101,192,.1); color:#1565C0; }
+.meta-red    { background:rgba(200,16,46,.1);  color:#C8102E; }
+.student-count-badge{
+    background:#C8102E; color:#fff; padding:4px 14px; border-radius:20px;
+    font-size:.82rem; font-weight:700; display:inline-flex; align-items:center; gap:4px;
+}
 
-    .section-meta {
-        display: flex;
-        gap: 1rem;
-        margin-top: 4px;
-    }
+/* ── CONTROLS (search + show) ── */
+.table-controls{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; margin-bottom:14px; margin-top:14px;
+}
+.search-wrap{ position:relative; flex:1; min-width:180px; max-width:300px; }
+.search-wrap i{
+    position:absolute; left:11px; top:50%; transform:translateY(-50%);
+    color:#9CA3AF; font-size:.9rem; pointer-events:none;
+}
+.search-wrap input{
+    padding-left:34px; border-radius:10px; border:1.5px solid #dee2e6;
+    font-size:.82rem; height:36px; width:100%;
+    transition:border-color .2s;
+}
+.search-wrap input:focus{ outline:none; border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.08); }
+.show-select{ font-size:.82rem; border-radius:10px; border:1.5px solid #dee2e6; padding:4px 10px; }
 
-    .meta-badge {
-        background: #f0f4ff;
-        color: #3b5bdb;
-        padding: 3px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
+/* ── TABLE ── */
+.class-table th{
+    font-size:.72rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; color:#9CA3AF; border-bottom:1.5px solid #F0F0F0;
+    padding:10px 12px; background:transparent;
+}
+.class-table td{
+    font-size:.84rem; padding:10px 12px; vertical-align:middle;
+    border-bottom:1px solid #F8F9FA; color:#374151;
+}
+.class-table tbody tr:last-child td{ border-bottom:none; }
+.class-table tbody tr:hover td{ background:#FAFAFA; }
 
-    .meta-badge.red {
-        background: #fee2e2;
-        color: var(--secondary);
-    }
-
-    .student-count {
-        background: var(--secondary);
-        color: #fff;
-        padding: 4px 14px;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: #868e96;
-    }
-
-    .empty-state i {
-        font-size: 3rem;
-        display: block;
-        margin-bottom: 1rem;
-        opacity: 0.4;
-    }
-
-    .search-box {
-        position: relative;
-    }
-
-    .search-box i {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #868e96;
-    }
-
-    .search-box input {
-        padding-left: 36px;
-    }
-
-    .btn-view {
-        background: var(--secondary);
-        color: #fff;
-        border: none;
-        padding: 5px 14px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        text-decoration: none;
-        transition: .3s;
-    }
-
-    .btn-view:hover {
-        background: #a00d24;
-        color: #fff;
-    }
-
-    /* STUDENT PREVIEW TABLE ALIGNMENT */
-    .student-preview-table {
-        table-layout: fixed;
-        width: 100%;
-    }
-
-    .student-preview-table th,
-    .student-preview-table td {
-        padding: 10px 12px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .student-preview-table .col-studentno { width: 14%; }
-    .student-preview-table .col-name      { width: 28%; }
-    .student-preview-table .col-gender    { width: 12%; }
-    .student-preview-table .col-guardian  { width: 26%; }
-    .student-preview-table .col-contact   { width: 20%; }
+/* ── PAGINATION ── */
+.pager{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.pager-info{ font-size:.78rem; color:#9CA3AF; }
+.pager-btns{ display:flex; gap:4px; }
+.pager-btn{
+    width:32px; height:32px; border-radius:8px; border:1.5px solid #dee2e6;
+    background:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:.78rem; font-weight:700; cursor:pointer; color:#374151;
+    transition:all .15s;
+}
+.pager-btn:hover:not(:disabled){ background:#C8102E; color:#fff; border-color:#C8102E; }
+.pager-btn.active{ background:#C8102E; color:#fff; border-color:#C8102E; }
+.pager-btn:disabled{ opacity:.4; cursor:not-allowed; }
 </style>
 
 <!-- PAGE HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="page-title">My Classes</h1>
-        <p class="text-muted">View your assigned sections and student lists.</p>
+        <p class="text-muted mb-0">View your assigned sections and student lists.</p>
     </div>
+    <span class="date-badge">
+        <i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")
+    </span>
 </div>
 
 @if (!Model.Any())
 {
-    <div class="empty-state">
-        <i class="bi bi-easel2"></i>
-        <h5>No Classes Assigned Yet</h5>
-        <p>You have no sections assigned to you. Please contact the admin.</p>
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-easel2" style="font-size:3rem;opacity:.3"></i>
+        <h5 class="mt-3">No Classes Assigned Yet</h5>
+        <p>You have no sections assigned. Please contact the admin.</p>
     </div>
 }
 else
 {
-    <!-- SUMMARY ROW -->
+    <!-- STAT CARDS -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="d-flex align-items-center gap-3 bg-white rounded-3 p-3 shadow-sm">
-                <i class="bi bi-easel2-fill fs-2 text-danger opacity-50"></i>
-                <div>
-                    <small class="text-muted text-uppercase" style="font-size:.75rem;">Total Sections</small>
-                    <h4 class="mb-0 fw-bold">@Model.Count</h4>
+        <div class="col-md-6 col-xl-4">
+            <div class="stat-card stat-card-1">
+                <div class="stat-left">
+                    <div class="stat-icon icon-red"><i class="bi bi-easel2-fill"></i></div>
+                    <div class="stat-label">Total Sections</div>
                 </div>
+                <div class="stat-number" style="color:#C8102E">@Model.Count</div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="d-flex align-items-center gap-3 bg-white rounded-3 p-3 shadow-sm">
-                <i class="bi bi-mortarboard-fill fs-2 text-danger opacity-50"></i>
-                <div>
-                    <small class="text-muted text-uppercase" style="font-size:.75rem;">Total Students</small>
-                    <h4 class="mb-0 fw-bold">@Model.Sum(s => s.Students.Count)</h4>
+        <div class="col-md-6 col-xl-4">
+            <div class="stat-card stat-card-2">
+                <div class="stat-left">
+                    <div class="stat-icon icon-green"><i class="bi bi-mortarboard-fill"></i></div>
+                    <div class="stat-label">Total Students</div>
                 </div>
+                <div class="stat-number" style="color:#2E7D32">@totalStudents</div>
             </div>
         </div>
     </div>
 
-    <!-- SECTION CARDS -->
+    <!-- SECTION BLOCKS -->
     @foreach (var cls in Model)
     {
-        <div class="section-card">
-            <div class="section-header">
+        var sectionIdx = Model.IndexOf(cls);
+        var tableId   = $"tbl_{sectionIdx}";
+        var searchId  = $"srch_{sectionIdx}";
+        var showId    = $"show_{sectionIdx}";
+        var pagerId   = $"pgr_{sectionIdx}";
+        var infoId    = $"info_{sectionIdx}";
+
+        <div class="section-block">
+
+            <!-- Section header -->
+            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2">
                 <div>
                     <h5 class="section-title">
                         <i class="bi bi-building me-2 text-danger"></i>@cls.SectionName
                     </h5>
-                    <div class="section-meta">
-                        <span class="meta-badge">Grade @cls.GradeLevel</span>
-                        <span class="meta-badge red">Capacity: @cls.Capacity</span>
+                    <div class="d-flex gap-2 mt-1 flex-wrap">
+                        <span class="meta-badge meta-blue">Grade @cls.GradeLevel</span>
+                        <span class="meta-badge meta-red">Capacity: @cls.Capacity</span>
                     </div>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <span class="student-count">
-                        <i class="bi bi-people-fill me-1"></i>@cls.Students.Count Students
+                    <span class="student-count-badge">
+                        <i class="bi bi-people-fill"></i>@cls.Students.Count Students
                     </span>
                     <a asp-controller="Class" asp-action="Students"
                        asp-route-sectionId="@cls.SectionId"
-                       class="btn-view">
-                        <i class="bi bi-eye me-1"></i> View All
+                       class="btn btn-sm"
+                       style="background:#C8102E;color:#fff;border-radius:10px;font-weight:600;font-size:.8rem;padding:5px 14px">
+                        <i class="bi bi-eye me-1"></i>View All
                     </a>
                 </div>
             </div>
 
-            <!-- STUDENT PREVIEW TABLE (first 5) -->
             @if (cls.Students.Any())
             {
+                <!-- Controls -->
+                <div class="table-controls">
+                    <div class="search-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="@searchId" placeholder="Search students…"
+                               oninput="filterTable('@tableId','@searchId','@pagerId','@infoId',parseInt(document.getElementById('@showId').value))" />
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label style="font-size:.78rem;color:#9CA3AF;white-space:nowrap">Show</label>
+                        <select id="@showId" class="show-select"
+                                onchange="filterTable('@tableId','@searchId','@pagerId','@infoId',parseInt(this.value))">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span style="font-size:.78rem;color:#9CA3AF">entries</span>
+                    </div>
+                </div>
+
+                <!-- Table -->
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 student-preview-table">
-                        <colgroup>
-                            <col class="col-studentno" />
-                            <col class="col-name" />
-                            <col class="col-gender" />
-                            <col class="col-guardian" />
-                            <col class="col-contact" />
-                        </colgroup>
-                        <thead class="table-light">
+                    <table class="table class-table mb-0" id="@tableId">
+                        <thead>
                             <tr>
-                                <th class="col-studentno">Student No.</th>
-                                <th class="col-name">Full Name</th>
-                                <th class="col-gender">Gender</th>
-                                <th class="col-guardian">Guardian</th>
-                                <th class="col-contact">Contact</th>
+                                <th style="width:14%">Student No.</th>
+                                <th style="width:28%">Full Name</th>
+                                <th style="width:12%">Gender</th>
+                                <th style="width:26%">Guardian</th>
+                                <th style="width:20%">Contact</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var student in cls.Students.Take(5))
+                            @foreach (var student in cls.Students)
                             {
                                 <tr>
-                                    <td class="col-studentno"><span class="fw-semibold">@student.StudentNo</span></td>
-                                    <td class="col-name">@student.FullName</td>
-                                    <td class="col-gender">@student.Gender</td>
-                                    <td class="col-guardian">@student.GuardianName</td>
-                                    <td class="col-contact">@student.ContactNumber</td>
+                                    <td><strong>@student.StudentNo</strong></td>
+                                    <td>@student.FullName</td>
+                                    <td>@student.Gender</td>
+                                    <td>@student.GuardianName</td>
+                                    <td>@student.ContactNumber</td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
-                @if (cls.Students.Count > 5)
-                {
-                    <div class="text-center mt-2">
-                        <a asp-controller="Class" asp-action="Students"
-                           asp-route-sectionId="@cls.SectionId"
-                           class="text-danger text-decoration-none" style="font-size:.85rem;">
-                            + @(cls.Students.Count - 5) more students — View All
-                        </a>
-                    </div>
-                }
+
+                <!-- Pagination -->
+                <div class="pager" id="@pagerId">
+                    <span class="pager-info" id="@infoId"></span>
+                    <div class="pager-btns" id="@(pagerId)_btns"></div>
+                </div>
             }
             else
             {
-                <p class="text-muted mb-0" style="font-size:.9rem;">
-                    <i class="bi bi-info-circle me-1"></i> No students enrolled in this section yet.
+                <p class="text-muted mb-0 mt-3" style="font-size:.9rem;">
+                    <i class="bi bi-info-circle me-1"></i>No students enrolled yet.
                 </p>
             }
         </div>
+
+        sectionIdx++;
     }
 }
+
+<script>
+// ── Pagination & Search engine ──────────────────────────────
+(function(){
+    // Init each table on load
+    const tables = document.querySelectorAll('table[id^="tbl_"]');
+    tables.forEach(tbl => {
+        const idx    = tbl.id.split('_')[1];
+        const pgrId  = `pgr_${idx}`;
+        const infoId = `info_${idx}`;
+        const showId = `show_${idx}`;
+        const srchId = `srch_${idx}`;
+        filterTable(tbl.id, srchId, pgrId, infoId, 5);
+    });
+})();
+
+// state per table
+const _state = {};
+
+function filterTable(tableId, searchId, pagerId, infoId, perPage){
+    const tbl    = document.getElementById(tableId);
+    const search = (document.getElementById(searchId)?.value || '').toLowerCase();
+    const rows   = Array.from(tbl.querySelectorAll('tbody tr'));
+
+    // filter
+    const visible = rows.filter(row => {
+        const match = row.textContent.toLowerCase().includes(search);
+        row.style.display = 'none';
+        return match;
+    });
+
+    // save state
+    if (!_state[tableId]) _state[tableId] = { page: 1 };
+    // reset to page 1 on new search
+    if (search !== (_state[tableId].lastSearch || '')) {
+        _state[tableId].page = 1;
+        _state[tableId].lastSearch = search;
+    }
+
+    const totalFiltered = visible.length;
+    const totalPages    = Math.max(1, Math.ceil(totalFiltered / perPage));
+    let   currentPage   = Math.min(_state[tableId].page, totalPages);
+    _state[tableId].page = currentPage;
+
+    const start = (currentPage - 1) * perPage;
+    const end   = start + perPage;
+    visible.forEach((row, i) => {
+        row.style.display = (i >= start && i < end) ? '' : 'none';
+    });
+
+    // Info text
+    const infoEl = document.getElementById(infoId);
+    if (infoEl) {
+        const from = totalFiltered === 0 ? 0 : start + 1;
+        const to   = Math.min(end, totalFiltered);
+        infoEl.textContent = `Showing ${from}–${to} of ${totalFiltered} student${totalFiltered !== 1 ? 's' : ''}`;
+    }
+
+    // Pagination buttons
+    const btnsEl = document.getElementById(pagerId + '_btns');
+    if (!btnsEl) return;
+    btnsEl.innerHTML = '';
+
+    // Prev
+    const prev = document.createElement('button');
+    prev.className = 'pager-btn';
+    prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+    prev.disabled  = currentPage === 1;
+    prev.onclick   = () => { _state[tableId].page = currentPage - 1; filterTable(tableId, searchId, pagerId, infoId, perPage); };
+    btnsEl.appendChild(prev);
+
+    // Page numbers (show up to 5)
+    const range = getPageRange(currentPage, totalPages);
+    range.forEach(p => {
+        if (p === '…') {
+            const dots = document.createElement('button');
+            dots.className = 'pager-btn'; dots.textContent = '…'; dots.disabled = true;
+            btnsEl.appendChild(dots);
+        } else {
+            const btn = document.createElement('button');
+            btn.className = 'pager-btn' + (p === currentPage ? ' active' : '');
+            btn.textContent = p;
+            btn.onclick = () => { _state[tableId].page = p; filterTable(tableId, searchId, pagerId, infoId, perPage); };
+            btnsEl.appendChild(btn);
+        }
+    });
+
+    // Next
+    const next = document.createElement('button');
+    next.className = 'pager-btn';
+    next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+    next.disabled  = currentPage === totalPages;
+    next.onclick   = () => { _state[tableId].page = currentPage + 1; filterTable(tableId, searchId, pagerId, infoId, perPage); };
+    btnsEl.appendChild(next);
+}
+
+function getPageRange(current, total) {
+    if (total <= 7) return Array.from({length: total}, (_, i) => i + 1);
+    if (current <= 4) return [1,2,3,4,5,'…',total];
+    if (current >= total - 3) return [1,'…',total-4,total-3,total-2,total-1,total];
+    return [1,'…',current-1,current,current+1,'…',total];
+}
+</script>

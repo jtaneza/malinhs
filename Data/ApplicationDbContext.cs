@@ -28,5 +28,6 @@ namespace MalikongkongNHS.Data
         public DbSet<Attendance> Attendances { get; set; }
         public DbSet<Grade> Grades { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<SectionSubject> SectionSubjects { get; set; }
     }
 }

@@ -14,5 +14,7 @@ namespace MalikongkongNHS.Repositories.Interfaces
         void Update(Student student);
 
         void Delete(int id);
+
+        void ToggleStatus(int id);
     }
 }

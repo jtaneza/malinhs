@@ -132,13 +132,31 @@ namespace MalikongkongNHS.Migrations
                     b.Property<bool>("IsFinalized")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Quarter")
+                        .HasColumnType("int");
+
                     b.Property<double>("Score")
                         .HasColumnType("float");
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int");
 
                     b.Property<int>("StudentId")
                         .HasColumnType("int");
 
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SectionId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("Grades");
                 });
@@ -209,6 +227,34 @@ namespace MalikongkongNHS.Migrations
                     b.HasKey("SectionId");
 
                     b.ToTable("Sections");
+                });
+
+            modelBuilder.Entity("MalikongkongNHS.Models.Entities.SectionSubject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("SectionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeacherId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SectionId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.HasIndex("TeacherId");
+
+                    b.ToTable("SectionSubjects");
                 });
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Student", b =>
@@ -292,6 +338,9 @@ namespace MalikongkongNHS.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TeacherId"));
+
+                    b.Property<string>("Credentials")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -378,6 +427,60 @@ namespace MalikongkongNHS.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("MalikongkongNHS.Models.Entities.Grade", b =>
+                {
+                    b.HasOne("MalikongkongNHS.Models.Entities.Section", "Section")
+                        .WithMany()
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MalikongkongNHS.Models.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MalikongkongNHS.Models.Entities.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Section");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("MalikongkongNHS.Models.Entities.SectionSubject", b =>
+                {
+                    b.HasOne("MalikongkongNHS.Models.Entities.Section", "Section")
+                        .WithMany("SectionSubjects")
+                        .HasForeignKey("SectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MalikongkongNHS.Models.Entities.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MalikongkongNHS.Models.Entities.Teacher", "Teacher")
+                        .WithMany()
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Section");
+
+                    b.Navigation("Subject");
+
+                    b.Navigation("Teacher");
+                });
+
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Student", b =>
                 {
                     b.HasOne("MalikongkongNHS.Models.Entities.Section", "Section")
@@ -389,6 +492,8 @@ namespace MalikongkongNHS.Migrations
 
             modelBuilder.Entity("MalikongkongNHS.Models.Entities.Section", b =>
                 {
+                    b.Navigation("SectionSubjects");
+
                     b.Navigation("Students");
                 });
 #pragma warning restore 612, 618

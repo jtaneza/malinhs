@@ -41,5 +41,10 @@ namespace MalikongkongNHS.Services.Implementations
         {
             _studentRepository.Delete(id);
         }
+
+        public void ToggleStatus(int id)
+        {
+            _studentRepository.ToggleStatus(id);
+        }
     }
 }

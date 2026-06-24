@@ -59,7 +59,8 @@ public class TeacherController : Controller
             teacherId = teacher.TeacherId,
             fullName = teacher.FullName,
             subjectId = teacher.SubjectId,
-            email = teacher.Email
+            email = teacher.Email,
+            credentials = teacher.Credentials
         });
     }
 

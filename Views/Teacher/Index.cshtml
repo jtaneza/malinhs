@@ -7,7 +7,6 @@
 }
 
 <!-- PAGE HEADER -->
-<!-- PAGE HEADER (MATCH STUDENTS DESIGN) -->
 <div class="d-flex justify-content-between align-items-center mb-4">
 
     <div>
@@ -15,12 +14,12 @@
         <p class="page-subtitle">Manage teacher records</p>
     </div>
 
-<button class="btn btn-add"
-        data-bs-toggle="modal"
-        data-bs-target="#addTeacherModal">
-    <i class="bi bi-plus-circle"></i>
-    Add Teacher
-</button>
+    <button class="btn btn-add"
+            data-bs-toggle="modal"
+            data-bs-target="#addTeacherModal">
+        <i class="bi bi-plus-circle"></i>
+        Add Teacher
+    </button>
 
 </div>
 
@@ -43,34 +42,47 @@
     </div>
 }
 
-<!-- MAIN CARD -->
+<!-- ===== TOOLBAR: OUTSIDE THE CARD ===== -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+
+    <!-- Search (left) -->
+    <div class="search-wrapper">
+        <i class="bi bi-search search-icon"></i>
+        <input type="text"
+               id="teacherSearch"
+               class="form-control search-box"
+               placeholder="Search teacher..." />
+    </div>
+
+    <!-- Entries selector (right) -->
+    <div class="d-flex align-items-center gap-2 text-muted small fw-medium">
+        <span>Show</span>
+        <select id="entriesPerPage" class="form-select form-select-sm entries-select">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+        </select>
+        <span>entries</span>
+    </div>
+
+</div>
+
+<!-- MAIN CARD (TABLE ONLY) -->
 <div class="custom-card">
+    <div class="card-body p-0">
 
-    <div class="card-body">
-
-        <!-- SEARCH -->
-        <div class="row mb-3">
-
-            <div class="col-md-4">
-                <input type="text"
-                       id="teacherSearch"
-                       class="form-control search-box"
-                       placeholder="Search Teacher..." />
-            </div>
-
-        </div>
-
-        <!-- TABLE -->
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle teacher-table">
+            <table class="table table-hover align-middle teacher-table mb-0">
 
                 <thead class="table-light">
                     <tr>
                         <th style="width:5%">#</th>
-                        <th style="width:25%">Full Name</th>
-                        <th style="width:20%">Email</th>
-                        <th style="width:20%">Subject</th>
+                        <th style="width:22%">Full Name</th>
+                        <th style="width:18%">Email</th>
+                        <th style="width:15%">Subject</th>
+                        <th style="width:15%">Credentials</th>
                         <th style="width:15%" class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -97,9 +109,7 @@
                                         <div class="teacher-avatar">
                                             <i class="bi bi-person-workspace"></i>
                                         </div>
-                                        <div>
-                                            <span class="fw-semibold">@teacher.FullName</span>
-                                        </div>
+                                        <span class="fw-semibold">@teacher.FullName</span>
                                     </div>
                                 </td>
 
@@ -125,22 +135,37 @@
                                     }
                                 </td>
 
+                                <td>
+                                    @if (!string.IsNullOrEmpty(teacher.Credentials))
+                                    {
+                                        var credClass = teacher.Credentials switch
+                                        {
+                                            "Board Passer" => "badge-boardpasser",
+                                            "Masteral"     => "badge-masteral",
+                                            "Doctoral"     => "badge-doctoral",
+                                            _              => "badge bg-secondary"
+                                        };
+                                        <span class="cred-badge @credClass">@teacher.Credentials</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted fst-italic">None</span>
+                                    }
+                                </td>
+
                                 <td class="text-center">
                                     <div class="d-inline-flex gap-1">
                                         <button type="button"
                                                 class="btn btn-sm btn-edit"
                                                 onclick="openEditModal(@teacher.TeacherId)"
                                                 title="Edit Teacher">
-                                            <i class="bi bi-pencil-square"></i>
-                                            Edit
+                                            <i class="bi bi-pencil-square"></i> Edit
                                         </button>
-
                                         <button type="button"
                                                 class="btn btn-sm btn-delete"
                                                 onclick="openDeleteModal(@teacher.TeacherId, '@teacher.FullName.Replace("'", "\\'")')"
                                                 title="Delete Teacher">
-                                            <i class="bi bi-trash"></i>
-                                            Delete
+                                            <i class="bi bi-trash"></i> Delete
                                         </button>
                                     </div>
                                 </td>
@@ -152,11 +177,9 @@
                     else
                     {
                         <tr>
-                            <td colspan="5"
-                                class="text-center text-muted py-5">
+                            <td colspan="6" class="text-center text-muted py-5">
                                 <i class="bi bi-person-workspace" style="font-size:3rem;opacity:.3"></i>
-                                <br />
-                                No teacher records found.
+                                <br />No teacher records found.
                             </td>
                         </tr>
                     }
@@ -168,15 +191,23 @@
         </div>
 
     </div>
+</div>
 
+<!-- ===== PAGINATION: OUTSIDE THE CARD (BELOW) ===== -->
+<div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+    <div class="text-muted small" id="paginationInfo"></div>
+    <nav aria-label="Teacher pagination">
+        <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+    </nav>
 </div>
 
 <!-- =========================================== -->
-<!-- ADD TEACHER MODAL                           -->
+<!-- MODALS                                      -->
 <!-- =========================================== -->
 
 @section Modals {
 
+<!-- ADD TEACHER MODAL -->
 <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content modal-custom">
@@ -193,21 +224,15 @@
 
             <form asp-controller="Teacher" asp-action="Create" method="post">
                 @Html.AntiForgeryToken()
-
                 <div class="modal-body p-4">
 
                     <h6 class="text-muted mb-3"><i class="bi bi-person me-1"></i> Personal Information</h6>
-
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
-                            <input type="text"
-                                   name="FullName"
-                                   class="form-control"
-                                   placeholder="e.g. Juan Dela Cruz"
-                                   required />
+                            <input type="text" name="FullName" class="form-control"
+                                   placeholder="e.g. Juan Dela Cruz" required />
                         </div>
-
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Subject</label>
                             <select name="SubjectId" class="form-select">
@@ -226,30 +251,39 @@
 
                     <hr class="my-4" />
 
-                    <h6 class="text-muted mb-3"><i class="bi bi-shield-lock me-1"></i> Account Credentials</h6>
+                    <h6 class="text-muted mb-3"><i class="bi bi-award me-1"></i> Educational Credentials</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Credentials</label>
+                            <select name="Credentials" class="form-select">
+                                <option value="">-- None / Not Applicable --</option>
+                                <option value="Board Passer">Board Passer</option>
+                                <option value="Masteral">Masteral</option>
+                                <option value="Doctoral">Doctoral</option>
+                            </select>
+                            <small class="text-muted">Select the highest credential attained</small>
+                        </div>
+                    </div>
 
+                    <hr class="my-4" />
+
+                    <h6 class="text-muted mb-3"><i class="bi bi-shield-lock me-1"></i> Account Credentials</h6>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Email</label>
-                            <input type="email"
-                                   name="Email"
-                                   class="form-control"
+                            <input type="email" name="Email" class="form-control"
                                    placeholder="e.g. teacher@malikongkong.edu.ph" />
                             <small class="text-muted">Used for teacher login</small>
                         </div>
-
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Password</label>
-                            <input type="password"
-                                   name="Password"
-                                   class="form-control"
+                            <input type="password" name="Password" class="form-control"
                                    placeholder="Set a password" />
                             <small class="text-muted">Used for teacher login</small>
                         </div>
                     </div>
 
                 </div>
-
                 <div class="modal-footer modal-footer-custom">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg me-1"></i>Cancel
@@ -258,17 +292,13 @@
                         <i class="bi bi-check-lg me-1"></i>Save Teacher
                     </button>
                 </div>
-
             </form>
 
         </div>
     </div>
 </div>
 
-<!-- =========================================== -->
-<!-- EDIT TEACHER MODAL                          -->
-<!-- =========================================== -->
-
+<!-- EDIT TEACHER MODAL -->
 <div class="modal fade" id="editTeacherModal" tabindex="-1" aria-labelledby="editTeacherLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content modal-custom">
@@ -285,23 +315,16 @@
 
             <form asp-controller="Teacher" asp-action="Edit" method="post">
                 @Html.AntiForgeryToken()
-
                 <input type="hidden" name="TeacherId" id="editTeacherId" />
 
                 <div class="modal-body p-4">
 
                     <h6 class="text-muted mb-3"><i class="bi bi-person me-1"></i> Personal Information</h6>
-
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
-                            <input type="text"
-                                   name="FullName"
-                                   id="editFullName"
-                                   class="form-control"
-                                   required />
+                            <input type="text" name="FullName" id="editFullName" class="form-control" required />
                         </div>
-
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Subject</label>
                             <select name="SubjectId" id="editSubjectId" class="form-select">
@@ -320,31 +343,38 @@
 
                     <hr class="my-4" />
 
-                    <h6 class="text-muted mb-3"><i class="bi bi-shield-lock me-1"></i> Account Credentials</h6>
+                    <h6 class="text-muted mb-3"><i class="bi bi-award me-1"></i> Educational Credentials</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Credentials</label>
+                            <select name="Credentials" id="editCredentials" class="form-select">
+                                <option value="">-- None / Not Applicable --</option>
+                                <option value="Board Passer">Board Passer</option>
+                                <option value="Masteral">Masteral</option>
+                                <option value="Doctoral">Doctoral</option>
+                            </select>
+                            <small class="text-muted">Select the highest credential attained</small>
+                        </div>
+                    </div>
 
+                    <hr class="my-4" />
+
+                    <h6 class="text-muted mb-3"><i class="bi bi-shield-lock me-1"></i> Account Credentials</h6>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Email</label>
-                            <input type="email"
-                                   name="Email"
-                                   id="editEmail"
-                                   class="form-control"
+                            <input type="email" name="Email" id="editEmail" class="form-control"
                                    placeholder="e.g. teacher@malikongkong.edu.ph" />
                         </div>
-
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Password</label>
-                            <input type="password"
-                                   name="Password"
-                                   id="editPassword"
-                                   class="form-control"
+                            <input type="password" name="Password" id="editPassword" class="form-control"
                                    placeholder="Leave blank to keep current" />
                             <small class="text-muted">Leave blank to keep current password</small>
                         </div>
                     </div>
 
                 </div>
-
                 <div class="modal-footer modal-footer-custom">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                         <i class="bi bi-x-lg me-1"></i>Cancel
@@ -353,17 +383,13 @@
                         <i class="bi bi-save me-1"></i>Update Teacher
                     </button>
                 </div>
-
             </form>
 
         </div>
     </div>
 </div>
 
-<!-- =========================================== -->
-<!-- DELETE CONFIRMATION MODAL                   -->
-<!-- =========================================== -->
-
+<!-- DELETE MODAL -->
 <div class="modal fade" id="deleteTeacherModal" tabindex="-1" aria-labelledby="deleteTeacherLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content modal-custom">
@@ -385,11 +411,9 @@
             </div>
 
             <div class="modal-footer modal-footer-custom justify-content-center">
-
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-lg me-1"></i>Cancel
                 </button>
-
                 <form asp-controller="Teacher" asp-action="Delete" method="post" class="d-inline">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" id="deleteTeacherId" />
@@ -397,7 +421,6 @@
                         <i class="bi bi-trash me-1"></i>Delete
                     </button>
                 </form>
-
             </div>
 
         </div>
@@ -415,25 +438,15 @@
 /* PAGE HEADER */
 .page-title{
     color:#2C2C2C;
-    font-size:3rem;   /* MATCH STUDENTS */
+    font-size:3rem;
     font-weight:700;
     margin-bottom:0;
 }
-
 .page-subtitle{
     color:#6C757D;
     font-size:1rem;
     margin-top:5px;
-    font-weight:400;  /* IMPORTANT FIX */
-}
-
-/* CARD */
-.custom-card{
-    background:#FFFFFF;
-    border:none;
-    border-radius:16px;
-    overflow:visible;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    font-weight:400;
 }
 
 /* ADD BUTTON */
@@ -444,23 +457,68 @@
     padding:10px 18px;
     border-radius:10px;
     font-weight:600;
-    transition: all .2s ease;
+    transition:all .2s ease;
 }
-
 .btn-add:hover{
     background:#A50D25;
     color:#FFFFFF;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(200,16,46,.3);
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(200,16,46,.3);
+}
+
+/* SEARCH WRAPPER (outside card) */
+.search-wrapper{
+    position:relative;
+    width:260px;
+}
+.search-icon{
+    position:absolute;
+    left:14px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#9CA3AF;
+    font-size:.9rem;
+    pointer-events:none;
+    z-index:2;
+}
+.search-box{
+    border-radius:10px;
+    border:1px solid #DEE2E6;
+    padding-left:2.4rem;
+    background:#fff;
+}
+.search-box:focus{
+    border-color:#2C2C2C;
+    box-shadow:0 0 0 3px rgba(44,44,44,.10);
+}
+
+/* ENTRIES SELECT */
+.entries-select{
+    width:72px;
+    border-radius:8px;
+    border:1px solid #DEE2E6;
+    font-size:.82rem;
+    color:#2C2C2C;
+}
+.entries-select:focus{
+    border-color:#2C2C2C;
+    box-shadow:0 0 0 3px rgba(44,44,44,.10);
+}
+
+/* CARD */
+.custom-card{
+    background:#FFFFFF;
+    border:none;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
 }
 
 /* TABLE */
 .teacher-table{
     table-layout:fixed;
     width:100%;
-    margin-bottom:0;
 }
-
 .teacher-table thead th{
     border-bottom:2px solid #E9ECEF;
     color:#2C2C2C;
@@ -468,21 +526,19 @@
     font-size:.85rem;
     text-transform:uppercase;
     letter-spacing:.5px;
-    padding:14px 12px;
+    padding:14px 16px;
+    background:#F8F9FA;
 }
-
 .teacher-table tbody td{
     vertical-align:middle;
-    padding:14px 12px;
+    padding:14px 16px;
     overflow:hidden;
     text-overflow:ellipsis;
     white-space:nowrap;
 }
-
 .teacher-table tbody tr{
-    transition: background .15s ease;
+    transition:background .15s ease;
 }
-
 .teacher-table tbody tr:hover{
     background:rgba(200,16,46,.03);
 }
@@ -491,7 +547,7 @@
 .teacher-avatar{
     width:36px;
     height:36px;
-    background:linear-gradient(135deg, #2C2C2C, #555);
+    background:linear-gradient(135deg,#2C2C2C,#555);
     border-radius:10px;
     display:flex;
     align-items:center;
@@ -510,16 +566,14 @@
     padding:5px 12px;
     font-size:.8rem;
     font-weight:500;
-    transition: all .2s ease;
+    transition:all .2s ease;
 }
-
 .btn-edit:hover{
     background:#1F1F1F;
     color:#fff;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(44,44,44,.25);
+    transform:translateY(-1px);
+    box-shadow:0 3px 8px rgba(44,44,44,.25);
 }
-
 .btn-delete{
     background:#C8102E;
     color:#fff;
@@ -528,55 +582,67 @@
     padding:5px 12px;
     font-size:.8rem;
     font-weight:500;
-    transition: all .2s ease;
+    transition:all .2s ease;
 }
-
 .btn-delete:hover{
     background:#A50D25;
     color:#fff;
-    transform: translateY(-1px);
-    box-shadow: 0 3px 8px rgba(200,16,46,.25);
+    transform:translateY(-1px);
+    box-shadow:0 3px 8px rgba(200,16,46,.25);
 }
 
-/* INPUT */
-.search-box{
-    border-radius:10px;
-    border:1px solid #DEE2E6;
+/* PAGINATION (outside card) */
+.pagination .page-link{
+    color:#2C2C2C;
+    border-radius:8px !important;
+    margin:0 2px;
+    border:1px solid #E9ECEF;
+    padding:5px 12px;
+    font-size:.82rem;
+    font-weight:500;
+    transition:all .15s ease;
 }
-
-.search-box:focus{
+.pagination .page-link:hover{
+    background:#2C2C2C;
+    color:#fff;
     border-color:#2C2C2C;
-    box-shadow:0 0 0 3px rgba(44,44,44,.10);
+}
+.pagination .page-item.active .page-link{
+    background:#C8102E;
+    border-color:#C8102E;
+    color:#fff;
+    box-shadow:0 3px 8px rgba(200,16,46,.3);
+}
+.pagination .page-item.disabled .page-link{
+    color:#ADB5BD;
+    background:#F8F9FA;
+    border-color:#E9ECEF;
 }
 
-/* MODAL CUSTOM */
+/* MODALS */
 .modal-custom{
     border:none;
     border-radius:16px;
     overflow:hidden;
     box-shadow:0 20px 60px rgba(0,0,0,.15);
 }
-
 .modal-header-custom{
-    background:linear-gradient(135deg, #2C2C2C, #444);
+    background:linear-gradient(135deg,#2C2C2C,#444);
     color:#fff;
     border:none;
     padding:20px 24px;
 }
-
 .modal-header-delete{
-    background:linear-gradient(135deg, #C8102E, #E8304A);
+    background:linear-gradient(135deg,#C8102E,#E8304A);
     color:#fff;
     border:none;
     padding:20px 24px;
 }
-
 .modal-footer-custom{
     border-top:1px solid #f0f0f0;
     padding:16px 24px;
     background:#FAFAFA;
 }
-
 .btn-save{
     background:#C8102E;
     color:#fff;
@@ -584,23 +650,19 @@
     border-radius:10px;
     padding:10px 24px;
     font-weight:600;
-    transition: all .2s ease;
+    transition:all .2s ease;
 }
-
 .btn-save:hover{
     background:#A50D25;
     color:#fff;
-    transform: translateY(-1px);
+    transform:translateY(-1px);
     box-shadow:0 4px 12px rgba(200,16,46,.3);
 }
-
 .form-control:focus,
 .form-select:focus{
     border-color:#2C2C2C;
     box-shadow:0 0 0 3px rgba(44,44,44,.10);
 }
-
-/* DELETE ICON WRAPPER */
 .delete-icon-wrapper{
     width:70px;
     height:70px;
@@ -612,37 +674,34 @@
     margin:0 auto;
 }
 
-/* ALERT STYLING */
+/* ALERTS */
 .alert{
     border-radius:12px;
     border:none;
     font-weight:500;
 }
+.alert-success{ background:rgba(25,135,84,.08); color:#198754; }
+.alert-danger{  background:rgba(200,16,46,.08);  color:#C8102E; }
 
-.alert-success{
-    background:rgba(25,135,84,.08);
-    color:#198754;
+/* CREDENTIALS BADGES */
+.cred-badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:.75rem;
+    font-weight:600;
+    letter-spacing:.4px;
 }
-
-.alert-danger{
-    background:rgba(200,16,46,.08);
-    color:#C8102E;
-}
+.badge-boardpasser{ background:linear-gradient(135deg,#1565C0,#1E88E5); color:#fff; }
+.badge-masteral{    background:linear-gradient(135deg,#2E7D32,#43A047);  color:#fff; }
+.badge-doctoral{    background:linear-gradient(135deg,#6A1B9A,#8E24AA);  color:#fff; }
 
 /* RESPONSIVE */
 @@media(max-width:768px){
-
-    .page-title{
-        font-size:1.5rem;
-    }
-
-    .btn-add{
-        margin-top:10px;
-    }
-
-    .teacher-table{
-        table-layout:auto;
-    }
+    .page-title{ font-size:1.5rem; }
+    .btn-add{ margin-top:10px; }
+    .teacher-table{ table-layout:auto; }
+    .search-wrapper{ width:100%; }
 }
 
 </style>
@@ -655,65 +714,108 @@
 
 <script>
 
-// ===== SEARCH =====
-document.getElementById("teacherSearch").addEventListener("keyup", function () {
+// ===== PAGINATION + SEARCH ENGINE =====
+const allRows    = Array.from(document.querySelectorAll('#teacherTable tr'));
+let currentPage  = 1;
+let rowsPerPage  = parseInt(document.getElementById('entriesPerPage').value);
+let filteredRows = [...allRows];
 
-    let value = this.value.toLowerCase();
-    let rows = document.querySelectorAll("#teacherTable tr");
+function renderTable() {
+    allRows.forEach(r => r.style.display = 'none');
 
-    rows.forEach(row => {
+    const start    = (currentPage - 1) * rowsPerPage;
+    const end      = start + rowsPerPage;
+    filteredRows.slice(start, end).forEach(r => r.style.display = '');
 
-        let text = row.innerText.toLowerCase();
-        row.style.display = text.includes(value) ? "" : "none";
+    const total  = filteredRows.length;
+    const infoEl = document.getElementById('paginationInfo');
+    if (total === 0) {
+        infoEl.textContent = 'No entries found';
+    } else {
+        infoEl.textContent = `Showing ${start + 1} to ${Math.min(end, total)} of ${total} entries`;
+    }
 
-    });
+    renderPagination(total);
+}
 
+function renderPagination(total) {
+    const totalPages = Math.max(1, Math.ceil(total / rowsPerPage));
+    const ul = document.getElementById('paginationControls');
+    ul.innerHTML = '';
+
+    // Prev
+    const prev = document.createElement('li');
+    prev.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prev.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-left"></i></a>`;
+    prev.addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) { currentPage--; renderTable(); }});
+    ul.appendChild(prev);
+
+    // Page numbers
+    let startP = Math.max(1, currentPage - 2);
+    let endP   = Math.min(totalPages, startP + 4);
+    if (endP - startP < 4) startP = Math.max(1, endP - 4);
+
+    for (let i = startP; i <= endP; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+        const page = i;
+        li.addEventListener('click', e => { e.preventDefault(); currentPage = page; renderTable(); });
+        ul.appendChild(li);
+    }
+
+    // Next
+    const next = document.createElement('li');
+    next.className = `page-item ${currentPage >= totalPages ? 'disabled' : ''}`;
+    next.innerHTML = `<a class="page-link" href="#"><i class="bi bi-chevron-right"></i></a>`;
+    next.addEventListener('click', e => { e.preventDefault(); if (currentPage < totalPages) { currentPage++; renderTable(); }});
+    ul.appendChild(next);
+}
+
+// Search
+document.getElementById('teacherSearch').addEventListener('input', function () {
+    const val    = this.value.toLowerCase().trim();
+    filteredRows = allRows.filter(r => r.innerText.toLowerCase().includes(val));
+    currentPage  = 1;
+    renderTable();
 });
+
+// Entries per page
+document.getElementById('entriesPerPage').addEventListener('change', function () {
+    rowsPerPage = parseInt(this.value);
+    currentPage = 1;
+    renderTable();
+});
+
+// Initial render
+renderTable();
 
 // ===== EDIT MODAL =====
 function openEditModal(teacherId) {
-
     fetch(`/Teacher/GetTeacher?id=${teacherId}`)
-        .then(response => {
-            if (!response.ok) throw new Error("Teacher not found");
-            return response.json();
-        })
+        .then(r => { if (!r.ok) throw new Error("Not found"); return r.json(); })
         .then(data => {
-
-            document.getElementById("editTeacherId").value = data.teacherId;
-            document.getElementById("editFullName").value = data.fullName;
-            document.getElementById("editEmail").value = data.email ?? "";
-            document.getElementById("editPassword").value = "";
-
-            // Set the subject dropdown
-            let subjectSelect = document.getElementById("editSubjectId");
-            subjectSelect.value = data.subjectId ?? "";
-
-            var editModal = new bootstrap.Modal(document.getElementById("editTeacherModal"));
-            editModal.show();
-
+            document.getElementById("editTeacherId").value   = data.teacherId;
+            document.getElementById("editFullName").value    = data.fullName;
+            document.getElementById("editEmail").value       = data.email ?? "";
+            document.getElementById("editPassword").value    = "";
+            document.getElementById("editSubjectId").value   = data.subjectId ?? "";
+            document.getElementById("editCredentials").value = data.credentials ?? "";
+            new bootstrap.Modal(document.getElementById("editTeacherModal")).show();
         })
-        .catch(error => {
-            alert("Error loading teacher data: " + error.message);
-        });
+        .catch(err => alert("Error: " + err.message));
 }
 
 // ===== DELETE MODAL =====
 function openDeleteModal(teacherId, teacherName) {
-
-    document.getElementById("deleteTeacherId").value = teacherId;
+    document.getElementById("deleteTeacherId").value         = teacherId;
     document.getElementById("deleteTeacherName").textContent = teacherName + "?";
-
-    var deleteModal = new bootstrap.Modal(document.getElementById("deleteTeacherModal"));
-    deleteModal.show();
+    new bootstrap.Modal(document.getElementById("deleteTeacherModal")).show();
 }
 
 // ===== AUTO-DISMISS ALERTS =====
-setTimeout(function () {
-    document.querySelectorAll('.alert').forEach(function (alert) {
-        var bsAlert = new bootstrap.Alert(alert);
-        bsAlert.close();
-    });
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => new bootstrap.Alert(a).close());
 }, 4000);
 
 </script>

@@ -13,4 +13,5 @@ public class Section
     public bool IsActive { get; set; } = true;
 
     public ICollection<Student> Students { get; set; } = new List<Student>();
+    public ICollection<SectionSubject> SectionSubjects { get; set; } = new List<SectionSubject>();
 }

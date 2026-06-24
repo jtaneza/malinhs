@@ -11,6 +11,9 @@ namespace MalikongkongNHS.Models.Entities
         public int ClassId { get; set; }          // ClassId = SectionId
         public Section Section { get; set; }
 
+        public int SubjectId { get; set; }         // which subject this grade is for
+        public virtual Subject? Subject { get; set; }
+
         public int Quarter { get; set; }          // 1, 2, 3, 4
 
         public double Score { get; set; }

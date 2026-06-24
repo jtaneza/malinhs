@@ -88,6 +88,20 @@ namespace MalikongkongNHS.Controllers
         public IActionResult Delete(int id)
         {
             _studentService.Delete(id);
+            TempData["Success"] = "Student deleted successfully!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================
+        // TOGGLE STATUS
+        // =========================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ToggleStatus(int id)
+        {
+            _studentService.ToggleStatus(id);
+            TempData["Success"] = "Student status updated successfully!";
             return RedirectToAction(nameof(Index));
         }
     }

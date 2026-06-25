@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MalikongkongNHS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd073c15972bccca54ca99a68b7e141a2d9cf6d6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+35896d9511db069c953ecc6440a6c8e4c1775a38")]
 [assembly: System.Reflection.AssemblyProductAttribute("MalikongkongNHS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MalikongkongNHS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

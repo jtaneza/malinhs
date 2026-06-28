@@ -47,7 +47,6 @@ namespace MalikongkongNHS.Controllers
             _studentService.Add(student);
             return RedirectToAction(nameof(Index));
         }
-
         // =========================
         // EDIT
         // =========================
@@ -64,7 +63,6 @@ namespace MalikongkongNHS.Controllers
 
             return View(student);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Student student)
@@ -74,7 +72,6 @@ namespace MalikongkongNHS.Controllers
                 ViewBag.Sections = _studentService.GetSections();
                 return View(student);
             }
-
             _studentService.Update(student);
             return RedirectToAction(nameof(Index));
         }

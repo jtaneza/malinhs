@@ -85,9 +85,9 @@ public class SectionController : Controller
 
     // ── ASSIGN SUBJECT ───────────────────────────────────────────
     [HttpPost]
-    public IActionResult AssignSubject(int sectionId, int subjectId, int teacherId)
+    public IActionResult AssignSubject(int sectionId, int subjectId, int teacherId,
+                                       string? time, string? roomNumber)
     {
-        // Prevent duplicate
         bool exists = _context.SectionSubjects.Any(ss =>
             ss.SectionId == sectionId && ss.SubjectId == subjectId);
 
@@ -95,9 +95,11 @@ public class SectionController : Controller
         {
             _context.SectionSubjects.Add(new SectionSubject
             {
-                SectionId = sectionId,
-                SubjectId = subjectId,
-                TeacherId = teacherId
+                SectionId  = sectionId,
+                SubjectId  = subjectId,
+                TeacherId  = teacherId,
+                Time       = time,
+                RoomNumber = roomNumber
             });
             _context.SaveChanges();
             TempData["Success"] = "Subject assigned successfully.";
@@ -107,6 +109,23 @@ public class SectionController : Controller
             TempData["Warning"] = "This subject is already assigned to this section.";
         }
 
+        return RedirectToAction(nameof(Edit), new { id = sectionId });
+    }
+
+    // ── EDIT SUBJECT ─────────────────────────────────────────────
+    [HttpPost]
+    public IActionResult EditSubject(int sectionSubjectId, int sectionId, int teacherId,
+                                      string? time, string? roomNumber)
+    {
+        var record = _context.SectionSubjects.Find(sectionSubjectId);
+        if (record != null)
+        {
+            record.TeacherId  = teacherId;
+            record.Time       = time;
+            record.RoomNumber = roomNumber;
+            _context.SaveChanges();
+            TempData["Success"] = "Subject updated successfully.";
+        }
         return RedirectToAction(nameof(Edit), new { id = sectionId });
     }
 

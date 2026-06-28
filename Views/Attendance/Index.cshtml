@@ -7,19 +7,36 @@
 <style>
     .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: var(--primary); }
 
+    /* STAT CARDS */
     .stat-card {
         background: #fff;
-        border-radius: 12px;
-        padding: 1.2rem 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        border-radius: 16px;
+        padding: 1.4rem 1.8rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,.07);
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 1rem;
+        border-left: 4px solid transparent;
+        transition: transform .2s ease, box-shadow .2s ease;
     }
-
-    .stat-card .stat-icon { font-size: 2rem; opacity: 0.35; }
-    .stat-card small     { font-size: .72rem; text-transform: uppercase; color: #868e96; }
-    .stat-card h3        { margin: 0; font-weight: 700; font-size: 1.8rem; color: var(--primary); }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+    .stat-card-1 { border-left-color: #2E7D32; }
+    .stat-card-2 { border-left-color: #C8102E; }
+    .stat-card-3 { border-left-color: #D97706; }
+    .stat-card-4 { border-left-color: #1565C0; }
+    .stat-left { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
+    .stat-icon {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; flex-shrink: 0;
+    }
+    .icon-green  { background: rgba(46,125,50,.10);  color: #2E7D32; }
+    .icon-red    { background: rgba(200,16,46,.10);   color: #C8102E; }
+    .icon-yellow { background: rgba(217,119,6,.10);   color: #D97706; }
+    .icon-blue   { background: rgba(21,101,192,.10);  color: #1565C0; }
+    .stat-label  { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #9CA3AF; white-space: nowrap; }
+    .stat-number { font-size: 3rem; font-weight: 900; line-height: 1; color: #2C2C2C; letter-spacing: -2px; margin-left: auto; flex-shrink: 0; }
 
     .section-card {
         background: #fff;
@@ -73,6 +90,19 @@
 
     .btn-edit-status:hover { background: #111; color: #fff; }
     .btn-edit-status:disabled { background: #adb5bd; cursor: not-allowed; }
+
+    /* SEARCH + PAGINATION */
+    .tbl-search-wrap { position:relative; max-width:260px; }
+    .tbl-search-wrap i { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#9CA3AF; font-size:.82rem; pointer-events:none; }
+    .tbl-search-wrap input { padding-left:32px; border-radius:10px; border:1.5px solid #dee2e6; font-size:.82rem; height:36px; width:100%; transition:border-color .2s; }
+    .tbl-search-wrap input:focus { outline:none; border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.08); }
+    .pager-wrap { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-top:10px; }
+    .pager-info-txt { font-size:.76rem; color:#9CA3AF; }
+    .pager-btns-wrap { display:flex; gap:4px; }
+    .pg-btn { width:30px; height:30px; border-radius:8px; border:1.5px solid #dee2e6; background:#fff; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; cursor:pointer; color:#374151; transition:all .15s; }
+    .pg-btn:hover:not(:disabled) { background:#C8102E; color:#fff; border-color:#C8102E; }
+    .pg-btn.active { background:#C8102E; color:#fff; border-color:#C8102E; }
+    .pg-btn:disabled { opacity:.4; cursor:not-allowed; }
 </style>
 
 <!-- HEADER -->
@@ -120,30 +150,41 @@
     </div>
 }
 
-<!-- TODAY STATS -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <i class="bi bi-person-check-fill stat-icon text-success"></i>
-            <div><small>Present</small><h3>@Model.PresentToday</h3></div>
+        <div class="stat-card stat-card-1">
+            <div class="stat-left">
+                <div class="stat-icon icon-green"><i class="bi bi-person-check-fill"></i></div>
+                <div class="stat-label">Present</div>
+            </div>
+            <div class="stat-number" style="color:#2E7D32">@Model.PresentToday</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <i class="bi bi-person-x-fill stat-icon text-danger"></i>
-            <div><small>Absent</small><h3>@Model.AbsentToday</h3></div>
+        <div class="stat-card stat-card-2">
+            <div class="stat-left">
+                <div class="stat-icon icon-red"><i class="bi bi-person-x-fill"></i></div>
+                <div class="stat-label">Absent</div>
+            </div>
+            <div class="stat-number" style="color:#C8102E">@Model.AbsentToday</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <i class="bi bi-clock-fill stat-icon text-warning"></i>
-            <div><small>Late</small><h3>@Model.LateToday</h3></div>
+        <div class="stat-card stat-card-3">
+            <div class="stat-left">
+                <div class="stat-icon icon-yellow"><i class="bi bi-clock-fill"></i></div>
+                <div class="stat-label">Late</div>
+            </div>
+            <div class="stat-number" style="color:#D97706">@Model.LateToday</div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="stat-card">
-            <i class="bi bi-journal-check stat-icon text-primary"></i>
-            <div><small>Excused</small><h3>@Model.ExcusedToday</h3></div>
+        <div class="stat-card stat-card-4">
+            <div class="stat-left">
+                <div class="stat-icon icon-blue"><i class="bi bi-journal-check"></i></div>
+                <div class="stat-label">Excused</div>
+            </div>
+            <div class="stat-number" style="color:#1565C0">@Model.ExcusedToday</div>
         </div>
     </div>
 </div>
@@ -158,17 +199,24 @@
     }
     else
     {
+        <!-- Controls -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="tbl-search-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" id="summarySearch" placeholder="Search student…" oninput="summaryFilter()" />
+            </div>
+        </div>
+
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" style="table-layout:fixed; width:100%;">
+            <table class="table table-hover align-middle mb-0" id="summaryTable" style="table-layout:fixed; width:100%;">
                 <colgroup>
-                    <col style="width:12%" />
-                    <col style="width:22%" />
-                    <col style="width:9%"  />
-                    <col style="width:9%"  />
-                    <col style="width:9%"  />
-                    <col style="width:9%"  />
-                    <col style="width:18%" />
-                    <col style="width:12%" />
+                    <col style="width:14%" />
+                    <col style="width:28%" />
+                    <col style="width:12%"  />
+                    <col style="width:12%"  />
+                    <col style="width:12%"  />
+                    <col style="width:12%"  />
+                    <col style="width:10%" />
                 </colgroup>
                 <thead class="table-light">
                     <tr>
@@ -178,7 +226,6 @@
                         <th class="text-center">Absent</th>
                         <th class="text-center">Late</th>
                         <th class="text-center">Excused</th>
-                        <th>Rate</th>
                         <th class="text-center">Today</th>
                     </tr>
                 </thead>
@@ -192,14 +239,6 @@
                             <td class="text-center"><span class="badge badge-absent  px-2">@s.Absent</span></td>
                             <td class="text-center"><span class="badge badge-late    px-2">@s.Late</span></td>
                             <td class="text-center"><span class="badge badge-excused px-2">@s.Excused</span></td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="rate-bar flex-grow-1">
-                                        <div class="rate-fill" style="width:@s.AttendanceRate%"></div>
-                                    </div>
-                                    <small class="text-muted" style="white-space:nowrap">@s.AttendanceRate%</small>
-                                </div>
-                            </td>
                             <td class="text-center">
                                 @if (s.TodayAttendanceId.HasValue)
                                 {
@@ -219,6 +258,12 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <div class="pager-wrap" id="summaryPager">
+            <span class="pager-info-txt" id="summaryInfo"></span>
+            <div class="pager-btns-wrap" id="summaryBtns"></div>
+        </div>
     }
 </div>
 
@@ -232,23 +277,41 @@
     }
     else
     {
-        @foreach (var day in Model.RecentHistory)
-        {
-            <div class="mb-3">
-                <p class="fw-semibold mb-1" style="font-size:.9rem;">
-                    <i class="bi bi-calendar3 me-1 text-danger"></i>
-                    @day.Date.ToString("dddd, MMMM dd yyyy")
-                </p>
-                <div class="d-flex flex-wrap gap-2">
-                    @foreach (var r in day.Records)
-                    {
-                        <span class="badge @(r.Status == "Present" ? "badge-present" : r.Status == "Absent" ? "badge-absent" : r.Status == "Late" ? "badge-late" : "badge-excused") px-3 py-2">
-                            @r.FullName — @r.Status
-                        </span>
-                    }
-                </div>
+        <!-- Search -->
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="tbl-search-wrap">
+                <i class="bi bi-search"></i>
+                <input type="text" id="historySearch" placeholder="Search name or date…" oninput="historyFilter()" />
             </div>
-        }
+        </div>
+
+        <div id="historyContainer">
+            @foreach (var day in Model.RecentHistory)
+            {
+                <div class="history-day mb-3"
+                     data-date="@day.Date.ToString("dddd mmmm dd yyyy").ToLower()"
+                     data-names="@string.Join(" ", day.Records.Select(r => r.FullName + " " + r.Status)).ToLower()">
+                    <p class="fw-semibold mb-1" style="font-size:.9rem;">
+                        <i class="bi bi-calendar3 me-1 text-danger"></i>
+                        @day.Date.ToString("dddd, MMMM dd yyyy")
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        @foreach (var r in day.Records)
+                        {
+                            <span class="badge @(r.Status == "Present" ? "badge-present" : r.Status == "Absent" ? "badge-absent" : r.Status == "Late" ? "badge-late" : "badge-excused") px-3 py-2">
+                                @r.FullName — @r.Status
+                            </span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <div class="pager-wrap" id="historyPager">
+            <span class="pager-info-txt" id="historyInfo"></span>
+            <div class="pager-btns-wrap" id="historyBtns"></div>
+        </div>
     }
 </div>
 
@@ -297,10 +360,137 @@
 </div>
 
 <script>
+    // ── Edit Status Modal ──────────────────────────────────────
     function openEditStatus(attendanceId, fullName, currentStatus) {
         document.getElementById('editAttendanceId').value  = attendanceId;
         document.getElementById('editStudentName').textContent = fullName;
         document.getElementById('editStatusSelect').value  = currentStatus;
         new bootstrap.Modal(document.getElementById('editStatusModal')).show();
     }
+
+    // ── STUDENT SUMMARY: search + pagination ──────────────────
+    const SUMMARY_PER_PAGE = 5;
+    let summaryPage = 1;
+    let summaryFiltered = [];
+
+    function summaryAllRows() {
+        return Array.from(document.querySelectorAll('#summaryTable tbody tr'));
+    }
+
+    function summaryFilter() {
+        const q = (document.getElementById('summarySearch')?.value || '').toLowerCase();
+        summaryFiltered = summaryAllRows().filter(r => r.innerText.toLowerCase().includes(q));
+        summaryPage = 1;
+        summaryRender();
+    }
+
+    function summaryRender() {
+        const total = summaryFiltered.length;
+        const pages = Math.max(1, Math.ceil(total / SUMMARY_PER_PAGE));
+        if (summaryPage > pages) summaryPage = pages;
+
+        summaryAllRows().forEach(r => r.style.display = 'none');
+        const start = (summaryPage - 1) * SUMMARY_PER_PAGE;
+        summaryFiltered.slice(start, start + SUMMARY_PER_PAGE).forEach(r => r.style.display = '');
+
+        const infoEl = document.getElementById('summaryInfo');
+        if (infoEl) {
+            const from = total === 0 ? 0 : start + 1;
+            const to   = Math.min(start + SUMMARY_PER_PAGE, total);
+            infoEl.textContent = `Showing ${from}–${to} of ${total} student${total !== 1 ? 's' : ''}`;
+        }
+
+        const btnsEl = document.getElementById('summaryBtns');
+        if (!btnsEl) return;
+        btnsEl.innerHTML = '';
+
+        const prev = document.createElement('button');
+        prev.className = 'pg-btn';
+        prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        prev.disabled  = summaryPage === 1;
+        prev.onclick   = () => { summaryPage--; summaryRender(); };
+        btnsEl.appendChild(prev);
+
+        for (let i = 1; i <= pages; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'pg-btn' + (i === summaryPage ? ' active' : '');
+            btn.textContent = i;
+            btn.onclick = () => { summaryPage = i; summaryRender(); };
+            btnsEl.appendChild(btn);
+        }
+
+        const next = document.createElement('button');
+        next.className = 'pg-btn';
+        next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        next.disabled  = summaryPage === pages;
+        next.onclick   = () => { summaryPage++; summaryRender(); };
+        btnsEl.appendChild(next);
+    }
+
+    // ── RECENT HISTORY: search + pagination ───────────────────
+    const HISTORY_PER_PAGE = 5;
+    let historyPage = 1;
+    let historyFiltered = [];
+
+    function historyAllDays() {
+        return Array.from(document.querySelectorAll('#historyContainer .history-day'));
+    }
+
+    function historyFilter() {
+        const q = (document.getElementById('historySearch')?.value || '').toLowerCase();
+        historyFiltered = historyAllDays().filter(d =>
+            d.dataset.date.includes(q) || d.dataset.names.includes(q)
+        );
+        historyPage = 1;
+        historyRender();
+    }
+
+    function historyRender() {
+        const total = historyFiltered.length;
+        const pages = Math.max(1, Math.ceil(total / HISTORY_PER_PAGE));
+        if (historyPage > pages) historyPage = pages;
+
+        historyAllDays().forEach(d => d.style.display = 'none');
+        const start = (historyPage - 1) * HISTORY_PER_PAGE;
+        historyFiltered.slice(start, start + HISTORY_PER_PAGE).forEach(d => d.style.display = '');
+
+        const infoEl = document.getElementById('historyInfo');
+        if (infoEl) {
+            const from = total === 0 ? 0 : start + 1;
+            const to   = Math.min(start + HISTORY_PER_PAGE, total);
+            infoEl.textContent = `Showing ${from}–${to} of ${total} day${total !== 1 ? 's' : ''}`;
+        }
+
+        const btnsEl = document.getElementById('historyBtns');
+        if (!btnsEl) return;
+        btnsEl.innerHTML = '';
+
+        const prev = document.createElement('button');
+        prev.className = 'pg-btn';
+        prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        prev.disabled  = historyPage === 1;
+        prev.onclick   = () => { historyPage--; historyRender(); };
+        btnsEl.appendChild(prev);
+
+        for (let i = 1; i <= pages; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'pg-btn' + (i === historyPage ? ' active' : '');
+            btn.textContent = i;
+            btn.onclick = () => { historyPage = i; historyRender(); };
+            btnsEl.appendChild(btn);
+        }
+
+        const next = document.createElement('button');
+        next.className = 'pg-btn';
+        next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        next.disabled  = historyPage === pages;
+        next.onclick   = () => { historyPage++; historyRender(); };
+        btnsEl.appendChild(next);
+    }
+
+    // ── Init on DOM ready ──────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        summaryFilter();
+        historyFilter();
+    });
 </script>

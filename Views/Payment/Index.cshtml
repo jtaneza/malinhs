@@ -1,129 +1,52 @@
+@model MalikongkongNHS.Models.ViewModels.CashierDashboardVM
 @{
     ViewData["Title"] = "Payments";
 }
 
 <style>
-    .page-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 0;
-        color: var(--primary);
-    }
+    .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: var(--primary); }
+    .stat-card { background: #fff; border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); height: 100%; }
+    .stat-card small { color: #868e96; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card h2 { font-size: 2rem; font-weight: 700; margin: 0; color: var(--primary); }
+    .card-icon { font-size: 2.5rem; color: var(--secondary); opacity: 0.3; }
+    .section-card { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .nav-tabs .nav-link { color: var(--primary); font-weight: 500; border: none; border-bottom: 3px solid transparent; padding: 10px 20px; }
+    .nav-tabs .nav-link.active { color: var(--secondary); border-bottom: 3px solid var(--secondary); background: none; }
+    .nav-tabs .nav-link:hover { color: var(--secondary); border-bottom: 3px solid var(--secondary); }
+    .nav-tabs { border-bottom: 1px solid #dee2e6; margin-bottom: 1.5rem; }
 
-    .stat-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+    .badge-fullpayment     { background: #d1fae5; color: #065f46;  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-partialpayment  { background: #dbeafe; color: #1e40af;  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-latepayment     { background: #fde8d8; color: #9a3412;  padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
 
-    .stat-card small {
-        color: #868e96;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
+    .receipt-box { border: 1px dashed #ccc; border-radius: 12px; padding: 2rem; background: #fafafa; width: 100%; }
+    .receipt-box h4 { text-align: center; font-weight: 700; color: var(--secondary); font-size: 1.4rem; }
+    .receipt-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 0.95rem; }
+    .receipt-label { color: #6c757d; font-weight: 500; }
+    .receipt-value { font-weight: 600; color: #212529; }
 
-    .stat-card h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin: 0;
-        color: var(--primary);
-    }
+    #studentSuggestions { position: absolute; z-index: 9999; background: #fff; border: 1px solid #ddd; border-radius: 8px; width: 100%; max-height: 200px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    #studentSuggestions .suggestion-item { padding: 8px 12px; cursor: pointer; font-size: 0.9rem; }
+    #studentSuggestions .suggestion-item:hover { background: #f8f9fa; }
 
-    .card-icon {
-        font-size: 2.5rem;
-        color: var(--secondary);
-        opacity: 0.3;
-    }
-
-    .section-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .nav-tabs .nav-link {
-        color: var(--primary);
-        font-weight: 500;
-        border: none;
-        border-bottom: 3px solid transparent;
-        padding: 10px 20px;
-    }
-
-    .nav-tabs .nav-link.active {
-        color: var(--secondary);
-        border-bottom: 3px solid var(--secondary);
-        background: none;
-    }
-
-    .nav-tabs .nav-link:hover {
-        color: var(--secondary);
-        border-bottom: 3px solid var(--secondary);
-    }
-
-    .nav-tabs {
-        border-bottom: 1px solid #dee2e6;
-        margin-bottom: 1.5rem;
-    }
-
-    .badge-paid {
-        background: #d1fae5;
-        color: #065f46;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .badge-pending {
-        background: #fef3c7;
-        color: #92400e;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .badge-overdue {
-        background: #fee2e2;
-        color: #991b1b;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .receipt-box {
-        border: 1px dashed #ccc;
-        border-radius: 12px;
-        padding: 2rem;
-        max-width: 480px;
-        margin: 0 auto;
-        background: #fafafa;
-    }
-
-    .receipt-box h4 {
-        text-align: center;
-        font-weight: 700;
-        color: var(--secondary);
-    }
-
-    .receipt-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 6px 0;
-        border-bottom: 1px dashed #eee;
-        font-size: 0.9rem;
-    }
+    .page-btn { border: 1px solid #dee2e6; background: #fff; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .page-btn.active { background: var(--secondary); color: #fff; border-color: var(--secondary); }
+    .page-btn:hover:not(.active) { background: #f8f9fa; }
 
     @@media print {
+        body * { visibility: hidden !important; }
+        #receiptPrintArea, #receiptPrintArea * { visibility: visible !important; }
+        #receiptPrintArea {
+            position: fixed !important; top: 0 !important; left: 0 !important;
+            width: 100% !important; padding: 40px !important;
+            background: #fff !important; z-index: 99999 !important;
+        }
+        #receiptPrintArea .receipt-box {
+            border: 1px solid #000 !important; border-radius: 0 !important;
+            max-width: 600px !important; margin: 0 auto !important;
+            background: #fff !important; padding: 2rem !important;
+        }
         .no-print { display: none !important; }
-        .receipt-box { border: 1px solid #000; }
     }
 </style>
 
@@ -138,44 +61,49 @@
     </button>
 </div>
 
-<!-- STAT CARDS -->
-<div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
+<!-- STAT CARDS — fixed: row-cols-2 row-cols-lg-4 so always 2 per row, 4 at lg+ -->
+<div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+
+    <div class="col">
         <div class="stat-card">
             <div>
                 <small>Total Revenue</small>
-                <h2>₱0.00</h2>
+                <h2>₱@Model.TotalRevenue.ToString("N2")</h2>
             </div>
             <i class="bi bi-cash-stack card-icon"></i>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+
+    <div class="col">
         <div class="stat-card">
             <div>
-                <small>Paid Students</small>
-                <h2>0</h2>
+                <small>Students with Payments</small>
+                <h2>@Model.PaidStudents</h2>
             </div>
             <i class="bi bi-person-check-fill card-icon"></i>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+
+    <div class="col">
         <div class="stat-card">
             <div>
-                <small>Pending Payments</small>
-                <h2>0</h2>
+                <small>Total Transactions</small>
+                <h2>@Model.TotalTransactions</h2>
             </div>
-            <i class="bi bi-exclamation-circle-fill card-icon"></i>
+            <i class="bi bi-arrow-left-right card-icon"></i>
         </div>
     </div>
-    <div class="col-xl-3 col-md-6">
+
+    <div class="col">
         <div class="stat-card">
             <div>
                 <small>Revenue Today</small>
-                <h2>₱0.00</h2>
+                <h2>₱@Model.RevenueToday.ToString("N2")</h2>
             </div>
             <i class="bi bi-graph-up-arrow card-icon"></i>
         </div>
     </div>
+
 </div>
 
 <!-- TABS -->
@@ -203,12 +131,12 @@
         <!-- TAB 1: TRANSACTIONS -->
         <div class="tab-pane fade show active" id="transactions">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" class="form-control w-25" placeholder="Search student..." />
-                <select class="form-select w-auto">
-                    <option>All Status</option>
-                    <option>Paid</option>
-                    <option>Pending</option>
-                    <option>Overdue</option>
+                <input type="text" id="txnSearch" class="form-control w-25" placeholder="Search student..." />
+                <select id="txnStatus" class="form-select w-auto">
+                    <option value="All Status">All Status</option>
+                    <option value="Full Payment">Full Payment</option>
+                    <option value="Partial Payment">Partial Payment</option>
+                    <option value="Late Payment">Late Payment</option>
                 </select>
             </div>
             <div class="table-responsive">
@@ -225,80 +153,109 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-3 d-block mb-2"></i>
-                                No transactions yet.
-                            </td>
-                        </tr>
+                    <tbody id="txnTableBody">
+                        <tr><td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>Loading...
+                        </td></tr>
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-end align-items-center gap-2 mt-2" id="txnPagination"></div>
         </div>
 
         <!-- TAB 2: PAYMENT HISTORY -->
         <div class="tab-pane fade" id="history">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <input type="text" class="form-control w-25" placeholder="Search student..." />
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <div class="d-flex gap-2">
-                    <input type="date" class="form-control" />
-                    <input type="date" class="form-control" />
+                    <input type="text" id="histSearch" class="form-control" placeholder="Search student..." />
+                    <input type="date" id="histFrom" class="form-control" />
+                    <input type="date" id="histTo" class="form-control" />
                 </div>
+                <button class="btn btn-danger" onclick="downloadHistory()">
+                    <i class="bi bi-download me-1"></i> Download PDF
+                </button>
             </div>
             <div class="table-responsive">
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
+                            <th>#</th>
                             <th>Receipt #</th>
                             <th>Student Name</th>
                             <th>Fee Type</th>
                             <th>Amount Paid</th>
                             <th>Date Paid</th>
+                            <th>Status</th>
                             <th>Cashier</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="bi bi-clock-history fs-3 d-block mb-2"></i>
-                                No payment history yet.
-                            </td>
-                        </tr>
+                    <tbody id="histTableBody">
+                        <tr><td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-clock-history fs-3 d-block mb-2"></i>No payment history yet.
+                        </td></tr>
                     </tbody>
                 </table>
             </div>
+            <div class="d-flex justify-content-end align-items-center gap-2 mt-2" id="histPagination"></div>
         </div>
 
         <!-- TAB 3: PRINT RECEIPT -->
         <div class="tab-pane fade" id="receipt">
-            <div class="row mb-4 no-print">
-                <div class="col-md-4">
+            <div class="row g-4">
+                <div class="col-lg-4">
                     <label class="form-label fw-semibold">Search Student</label>
-                    <input type="text" class="form-control" placeholder="Enter student name or ID..." />
-                </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-danger w-100">
+                    <input type="text" id="receiptSearch" class="form-control mb-2"
+                           placeholder="Enter student name or receipt no..." />
+                    <button class="btn btn-danger w-100" onclick="findReceipt()">
                         <i class="bi bi-search me-1"></i> Find Receipt
                     </button>
                 </div>
-            </div>
-
-            <div class="receipt-box">
-                <h4>Malikongkong NHS</h4>
-                <p class="text-center text-muted mb-3" style="font-size:0.85rem;">Official Payment Receipt</p>
-                <div class="receipt-row"><span>Receipt No.</span><span>#000001</span></div>
-                <div class="receipt-row"><span>Student Name</span><span>—</span></div>
-                <div class="receipt-row"><span>Grade & Section</span><span>—</span></div>
-                <div class="receipt-row"><span>Fee Type</span><span>—</span></div>
-                <div class="receipt-row"><span>Amount Paid</span><span>₱0.00</span></div>
-                <div class="receipt-row"><span>Date</span><span>@DateTime.Now.ToString("MMMM dd, yyyy")</span></div>
-                <div class="receipt-row"><span>Cashier</span><span>—</span></div>
-                <div class="mt-3 text-center">
-                    <button class="btn btn-outline-danger no-print" onclick="window.print()">
-                        <i class="bi bi-printer me-1"></i> Print Receipt
-                    </button>
+                <div class="col-lg-8">
+                    <div id="receiptPrintArea">
+                        <div class="receipt-box">
+                            <h4>Malikongkong NHS</h4>
+                            <p class="text-center text-muted mb-3" style="font-size:0.85rem;">
+                                Official Payment Receipt
+                            </p>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Receipt No.</span>
+                                <span class="receipt-value" id="r-receiptno">—</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Student Name</span>
+                                <span class="receipt-value" id="r-name">—</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Grade & Section</span>
+                                <span class="receipt-value" id="r-section">—</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Fee Type</span>
+                                <span class="receipt-value" id="r-feetype">—</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Amount Paid</span>
+                                <span class="receipt-value" id="r-amount">₱0.00</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Status</span>
+                                <span class="receipt-value" id="r-status">—</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Date</span>
+                                <span class="receipt-value" id="r-date">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+                            </div>
+                            <div class="receipt-row">
+                                <span class="receipt-label">Cashier</span>
+                                <span class="receipt-value" id="r-cashier">—</span>
+                            </div>
+                            <div class="mt-3 text-center no-print">
+                                <button class="btn btn-outline-danger" onclick="window.print()">
+                                    <i class="bi bi-printer me-1"></i> Print Receipt
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -306,8 +263,9 @@
     </div>
 </div>
 
-<!-- NEW PAYMENT MODAL -->
 @section Modals {
+
+<!-- NEW PAYMENT MODAL -->
 <div class="modal fade" id="newPaymentModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -318,17 +276,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
+                <div class="mb-3 position-relative">
                     <label class="form-label fw-semibold">Student Name</label>
-                    <input type="text" class="form-control" placeholder="Search student..." />
+                    <input type="text" id="modalStudentSearch" class="form-control"
+                           placeholder="Search student..." autocomplete="off" />
+                    <div id="studentSuggestions"></div>
+                    <input type="hidden" id="selectedStudentId" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Fee Type</label>
-                    <select class="form-select">
-                        <option>— Select Fee Type —</option>
-                        <option>Tuition Fee</option>
-                        <option>Miscellaneous Fee</option>
-                        <option>Laboratory Fee</option>
+                    <select id="modalFeeType" class="form-select">
+                        <option value="">— Select Fee Type —</option>
+                        <option>PTA (Parent Teacher's Association)</option>
                         <option>Other</option>
                     </select>
                 </div>
@@ -336,25 +295,382 @@
                     <label class="form-label fw-semibold">Amount</label>
                     <div class="input-group">
                         <span class="input-group-text">₱</span>
-                        <input type="number" class="form-control" placeholder="0.00" />
+                        <input type="number" id="modalAmount" class="form-control" placeholder="0.00" />
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Date</label>
-                    <input type="date" class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <input type="date" id="modalDate" class="form-control"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select id="modalStatus" class="form-select">
+                        <option value="Full Payment">Full Payment</option>
+                        <option value="Partial Payment">Partial Payment</option>
+                        <option value="Late Payment">Late Payment</option>
+                    </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Notes (Optional)</label>
-                    <textarea class="form-control" rows="2" placeholder="Additional notes..."></textarea>
+                    <textarea id="modalNotes" class="form-control" rows="2"
+                              placeholder="Additional notes..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-danger">
+                <button class="btn btn-danger" id="savePaymentBtn" onclick="savePayment()">
                     <i class="bi bi-check-lg me-1"></i> Save Payment
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editPaymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-pencil me-2 text-danger"></i>Edit Payment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editPaymentId" />
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Student Name</label>
+                    <input type="text" id="editStudentName" class="form-control" readonly />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Fee Type</label>
+                    <select id="editFeeType" class="form-select">
+                        <option>PTA (Parent Teacher's Association)</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₱</span>
+                        <input type="number" id="editAmount" class="form-control" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Date</label>
+                    <input type="date" id="editDate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Status</label>
+                    <select id="editStatus" class="form-select">
+                        <option value="Full Payment">Full Payment</option>
+                        <option value="Partial Payment">Partial Payment</option>
+                        <option value="Late Payment">Late Payment</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Notes (Optional)</label>
+                    <textarea id="editNotes" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="updatePaymentBtn" onclick="updatePayment()">
+                    <i class="bi bi-check-lg me-1"></i> Update Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+}
+
+@section Scripts {
+<script>
+const PAGE_SIZE = 5;
+
+// ── BADGE HELPER ──────────────────────────────────────────
+function getBadgeClass(status) {
+    const map = {
+        'full payment':    'badge-fullpayment',
+        'partial payment': 'badge-partialpayment',
+        'late payment':    'badge-latepayment',
+    };
+    return map[(status || '').toLowerCase()] || 'badge-partialpayment';
+}
+
+// ── PAGINATION HELPER ─────────────────────────────────────
+function renderPagination(containerId, total, currentPage, onPageClick) {
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    const container  = document.getElementById(containerId);
+    if (!container) return;
+    if (totalPages <= 1) { container.innerHTML = ''; return; }
+
+    let html = '';
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === currentPage ? 'active' : ''}"
+                    onclick="(${onPageClick.toString()})(${i})">${i}</button>`;
+    }
+    container.innerHTML = html;
+}
+
+// ── TRANSACTIONS ──────────────────────────────────────────
+let txnData = [], txnPage = 1;
+
+function loadTransactions() {
+    txnPage = 1;
+    const search = document.getElementById('txnSearch').value;
+    const status = document.getElementById('txnStatus').value;
+    fetch(`/Payment/GetTransactions?search=${encodeURIComponent(search)}&status=${encodeURIComponent(status)}`)
+        .then(r => r.json())
+        .then(data => { txnData = data; renderTxnPage(); });
+}
+
+function renderTxnPage() {
+    const tbody = document.getElementById('txnTableBody');
+    const start = (txnPage - 1) * PAGE_SIZE;
+    const paged = txnData.slice(start, start + PAGE_SIZE);
+
+    if (!txnData.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">
+            <i class="bi bi-inbox fs-3 d-block mb-2"></i>No transactions yet.</td></tr>`;
+        document.getElementById('txnPagination').innerHTML = '';
+        return;
+    }
+
+    tbody.innerHTML = paged.map((p, i) => `
+        <tr>
+            <td>${start + i + 1}</td>
+            <td>${p.studentName}</td>
+            <td>${p.gradeSection}</td>
+            <td>${p.feeType ?? '—'}</td>
+            <td>₱${parseFloat(p.amount).toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+            <td>${p.datePaid}</td>
+            <td><span class="${getBadgeClass(p.status)}">${p.status}</span></td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1"
+                    onclick="openEdit(${p.id},'${escQ(p.studentName)}','${escQ(p.feeType)}',
+                             ${p.amount},'${p.rawDate}','${escQ(p.status)}','${escQ(p.notes ?? '')}')">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deletePayment(${p.id})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </td>
+        </tr>`).join('');
+
+    renderPagination('txnPagination', txnData.length, txnPage,
+        function(p) { txnPage = p; renderTxnPage(); });
+}
+
+function escQ(s) { return (s || '').replace(/'/g, "\\'"); }
+
+document.getElementById('txnSearch').addEventListener('input', loadTransactions);
+document.getElementById('txnStatus').addEventListener('change', loadTransactions);
+loadTransactions();
+
+// ── EDIT ──────────────────────────────────────────────────
+function openEdit(id, studentName, feeType, amount, rawDate, status, notes) {
+    document.getElementById('editPaymentId').value   = id;
+    document.getElementById('editStudentName').value = studentName;
+    document.getElementById('editFeeType').value     = feeType;
+    document.getElementById('editAmount').value      = amount;
+    document.getElementById('editDate').value        = rawDate;
+    document.getElementById('editStatus').value      = status;
+    document.getElementById('editNotes').value       = notes;
+    new bootstrap.Modal(document.getElementById('editPaymentModal')).show();
+}
+
+function updatePayment() {
+    const btn = document.getElementById('updatePaymentBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+    const id      = document.getElementById('editPaymentId').value;
+    const feeType = document.getElementById('editFeeType').value;
+    const amount  = document.getElementById('editAmount').value;
+    const date    = document.getElementById('editDate').value;
+    const status  = document.getElementById('editStatus').value;
+    const notes   = document.getElementById('editNotes').value;
+
+    fetch('/Payment/Edit', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body:    new URLSearchParams({ id, feeType, amount, date, status, notes })
+    })
+    .then(r => r.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Update Payment';
+        if (res.success) {
+            bootstrap.Modal.getInstance(document.getElementById('editPaymentModal')).hide();
+            loadTransactions();
+        } else {
+            alert('Update failed. Please try again.');
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Update Payment';
+        alert('An error occurred. Please try again.');
+    });
+}
+
+// ── DELETE ────────────────────────────────────────────────
+function deletePayment(id) {
+    if (!confirm('Are you sure you want to delete this payment?')) return;
+    fetch('/Payment/Delete', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body:    new URLSearchParams({ id })
+    })
+    .then(r => r.json())
+    .then(res => { if (res.success) loadTransactions(); });
+}
+
+// ── HISTORY ───────────────────────────────────────────────
+let histData = [], histPage = 1;
+
+function loadHistory() {
+    histPage = 1;
+    const search = document.getElementById('histSearch').value;
+    const from   = document.getElementById('histFrom').value;
+    const to     = document.getElementById('histTo').value;
+    fetch(`/Payment/GetHistory?search=${encodeURIComponent(search)}&from=${from}&to=${to}`)
+        .then(r => r.json())
+        .then(data => { histData = data; renderHistPage(); });
+}
+
+function renderHistPage() {
+    const tbody = document.getElementById('histTableBody');
+    const start = (histPage - 1) * PAGE_SIZE;
+    const paged = histData.slice(start, start + PAGE_SIZE);
+
+    if (!histData.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">
+            <i class="bi bi-clock-history fs-3 d-block mb-2"></i>No payment history yet.</td></tr>`;
+        document.getElementById('histPagination').innerHTML = '';
+        return;
+    }
+
+    tbody.innerHTML = paged.map((p, i) => `
+        <tr>
+            <td>${start + i + 1}</td>
+            <td>${p.receiptNo}</td>
+            <td>${p.studentName}</td>
+            <td>${p.feeType ?? '—'}</td>
+            <td>₱${parseFloat(p.amount).toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+            <td>${p.datePaid}</td>
+            <td><span class="${getBadgeClass(p.status)}">${p.status ?? '—'}</span></td>
+            <td>${p.cashier ?? '—'}</td>
+        </tr>`).join('');
+
+    renderPagination('histPagination', histData.length, histPage,
+        function(p) { histPage = p; renderHistPage(); });
+}
+
+document.getElementById('histSearch').addEventListener('input', loadHistory);
+document.getElementById('histFrom').addEventListener('change', loadHistory);
+document.getElementById('histTo').addEventListener('change', loadHistory);
+document.querySelector('a[href="#history"]').addEventListener('shown.bs.tab', loadHistory);
+
+// ── DOWNLOAD HISTORY ──────────────────────────────────────
+function downloadHistory() {
+    const from = document.getElementById('histFrom').value;
+    const to   = document.getElementById('histTo').value;
+    window.location.href = `/Payment/DownloadHistory?from=${from}&to=${to}`;
+}
+
+// ── RECEIPT ───────────────────────────────────────────────
+function findReceipt() {
+    const search = document.getElementById('receiptSearch').value.trim();
+    if (!search) return;
+    fetch(`/Payment/GetReceipt?search=${encodeURIComponent(search)}`)
+        .then(r => r.json())
+        .then(p => {
+            if (!p) { alert('No receipt found.'); return; }
+            document.getElementById('r-receiptno').textContent = p.receiptNo;
+            document.getElementById('r-name').textContent      = p.studentName;
+            document.getElementById('r-section').textContent   = p.gradeSection;
+            document.getElementById('r-feetype').textContent   = p.feeType ?? '—';
+            document.getElementById('r-amount').textContent    =
+                '₱' + parseFloat(p.amount).toLocaleString('en-PH', {minimumFractionDigits:2});
+            document.getElementById('r-status').textContent    = p.status ?? '—';
+            document.getElementById('r-date').textContent      = p.datePaid;
+            document.getElementById('r-cashier').textContent   = p.cashier ?? '—';
+        });
+}
+
+// ── STUDENT AUTOCOMPLETE ──────────────────────────────────
+let debounceTimer;
+document.getElementById('modalStudentSearch').addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    const term = this.value.trim();
+    if (term.length < 2) {
+        document.getElementById('studentSuggestions').innerHTML = '';
+        return;
+    }
+    debounceTimer = setTimeout(() => {
+        fetch(`/Payment/SearchStudents?term=${encodeURIComponent(term)}`)
+            .then(r => r.json())
+            .then(list => {
+                const box = document.getElementById('studentSuggestions');
+                if (!list.length) { box.innerHTML = ''; return; }
+                box.innerHTML = list.map(s => `
+                    <div class="suggestion-item"
+                         onclick="selectStudent(${s.studentId},'${escQ(s.fullName)}')">
+                        ${s.fullName}
+                        <span class="text-muted small">(${s.studentNo})</span>
+                    </div>`).join('');
+            });
+    }, 300);
+});
+
+function selectStudent(id, name) {
+    document.getElementById('selectedStudentId').value  = id;
+    document.getElementById('modalStudentSearch').value = name;
+    document.getElementById('studentSuggestions').innerHTML = '';
+}
+
+// ── SAVE PAYMENT ──────────────────────────────────────────
+function savePayment() {
+    const btn       = document.getElementById('savePaymentBtn');
+    const studentId = document.getElementById('selectedStudentId').value;
+    const feeType   = document.getElementById('modalFeeType').value;
+    const amount    = document.getElementById('modalAmount').value;
+    const date      = document.getElementById('modalDate').value;
+    const status    = document.getElementById('modalStatus').value;
+    const notes     = document.getElementById('modalNotes').value;
+
+    if (!studentId || !feeType || !amount || !date) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+    fetch('/Payment/Create', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body:    new URLSearchParams({ studentId, feeType, amount, date, status, notes })
+    })
+    .then(r => r.json())
+    .then(res => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save Payment';
+        if (res.success) {
+            bootstrap.Modal.getInstance(document.getElementById('newPaymentModal')).hide();
+            alert(`Payment saved! Receipt No: ${res.receiptNo}`);
+            location.reload();
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i> Save Payment';
+        alert('An error occurred. Please try again.');
+    });
+}
+</script>
 }

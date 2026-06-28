@@ -7,39 +7,185 @@
 }
 
 <style>
-.subject-row{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:10px 14px; border-radius:10px; background:#F8F9FA;
-    margin-bottom:8px; gap:12px;
+/* ── PAGE TITLE ── */
+.page-title { font-size: 2.2rem; font-weight: 700; color: #2C2C2C; margin-bottom: 0; }
+.page-subtitle { color: #6C757D; font-size: 1rem; margin-top: 4px; }
+
+/* ── CARD ── */
+.custom-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
 }
-.subject-badge{
-    display:inline-flex; align-items:center; gap:8px;
-    font-weight:600; font-size:.85rem; color:#2C2C2C;
+
+/* ── SECTION LABEL ── */
+.section-label {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: #9CA3AF;
+    margin-bottom: 16px;
 }
-.subject-badge .icon{
-    width:34px; height:34px; border-radius:8px;
-    background:rgba(200,16,46,.1); color:#C8102E;
-    display:flex; align-items:center; justify-content:center;
-    font-size:1rem; flex-shrink:0;
+
+/* ── SUBJECT TABLE ── */
+.subject-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    font-size: .88rem;
 }
-.teacher-tag{
-    font-size:.75rem; color:#6C757D; font-weight:500;
-    background:#fff; border:1px solid #dee2e6;
-    border-radius:20px; padding:3px 10px;
+.subject-table thead th {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: #9CA3AF;
+    padding: 0 14px 8px;
+    border-bottom: 1px solid #F0F0F0;
 }
-.remove-btn{
-    border:none; background:rgba(200,16,46,.1); color:#C8102E;
-    border-radius:8px; width:32px; height:32px;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:all .2s; flex-shrink:0;
+.subject-table tbody tr {
+    background: #F8F9FA;
+    transition: background .15s;
 }
-.remove-btn:hover{ background:#C8102E; color:#fff; }
-.add-subject-form{
-    background:#fff; border:1.5px dashed #dee2e6; border-radius:12px;
-    padding:16px; margin-top:12px;
+.subject-table tbody tr:hover { background: #F0F2F5; }
+.subject-table tbody td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    color: #2C2C2C;
+}
+.subject-table tbody td:first-child { border-radius: 10px 0 0 10px; }
+.subject-table tbody td:last-child  { border-radius: 0 10px 10px 0; }
+
+/* ── SUBJECT ICON ── */
+.subj-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(200,16,46,.1); color: #C8102E;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .9rem; flex-shrink: 0; margin-right: 8px;
+}
+
+/* ── PILL TAGS ── */
+.pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: .73rem; font-weight: 500; color: #4B5563;
+    background: #fff; border: 1px solid #E5E7EB;
+    border-radius: 20px; padding: 3px 10px;
+    white-space: nowrap;
+}
+
+/* ── ACTION BUTTONS ── */
+.btn-edit-row {
+    border: none; background: rgba(44,44,44,.08); color: #2C2C2C;
+    border-radius: 8px; width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .2s; font-size: .85rem;
+}
+.btn-edit-row:hover { background: #2C2C2C; color: #fff; }
+
+.btn-remove-row {
+    border: none; background: rgba(200,16,46,.08); color: #C8102E;
+    border-radius: 8px; width: 32px; height: 32px;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .2s; font-size: .85rem;
+}
+.btn-remove-row:hover { background: #C8102E; color: #fff; }
+
+/* ── SEARCH ── */
+.search-box {
+    position: relative; max-width: 280px;
+}
+.search-box input {
+    padding-left: 36px;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    font-size: .85rem;
+    height: 38px;
+}
+.search-box input:focus {
+    border-color: #C8102E;
+    box-shadow: 0 0 0 3px rgba(200,16,46,.1);
+    outline: none;
+}
+.search-box .bi-search {
+    position: absolute; left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: #9CA3AF; font-size: .85rem;
+}
+
+/* ── PAGINATION ── */
+.pagination-btn {
+    width: 34px; height: 34px; border-radius: 8px; border: 1px solid #E5E7EB;
+    background: #fff; color: #4B5563; font-size: .82rem; font-weight: 600;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .15s;
+}
+.pagination-btn:hover, .pagination-btn.active {
+    background: #C8102E; color: #fff; border-color: #C8102E;
+}
+.pagination-btn:disabled { opacity: .4; cursor: default; }
+
+/* ── ASSIGN FORM ── */
+.assign-form-wrap {
+    background: #fff;
+    border: 1.5px dashed #E5E7EB;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+}
+.assign-form-wrap .assign-title {
+    font-size: .82rem;
+    font-weight: 700;
+    color: #6C757D;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.assign-form-wrap label {
+    font-size: .80rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+    display: block;
+}
+.assign-form-wrap .form-control,
+.assign-form-wrap .form-select {
+    font-size: .85rem;
+    border-radius: 8px;
+    border: 1px solid #E5E7EB;
+    height: 36px;
+    padding: 4px 10px;
+}
+.assign-form-wrap .form-control:focus,
+.assign-form-wrap .form-select:focus {
+    border-color: #C8102E;
+    box-shadow: 0 0 0 3px rgba(200,16,46,.1);
+}
+.btn-assign {
+    background: #C8102E; color: #fff; border: none;
+    border-radius: 8px; font-size: .85rem; font-weight: 600;
+    padding: 7px 18px; transition: all .2s; white-space: nowrap;
+}
+.btn-assign:hover { background: #A50D25; color: #fff; }
+
+/* ── TOP FORM CONSISTENCY ── */
+.custom-card .form-label    { font-size: .88rem; font-weight: 600; }
+.custom-card .form-control,
+.custom-card .form-select   { font-size: .88rem; border-radius: 8px; }
+.custom-card .form-control:focus,
+.custom-card .form-select:focus {
+    border-color: #2C2C2C;
+    box-shadow: 0 0 0 3px rgba(44,44,44,.10);
+}
+
+/* ── EDIT MODAL ── */
+.modal-header-dark {
+    background: linear-gradient(135deg,#2C2C2C,#444);
+    color: #fff; border: none; padding: 18px 22px;
 }
 </style>
 
+<!-- PAGE HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="page-title">Edit Section</h1>
@@ -66,16 +212,14 @@
 <!-- ── SECTION DETAILS ── -->
 <div class="custom-card mb-4">
     <div class="card-body p-4">
-        <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.75rem;letter-spacing:.6px">
-            <i class="bi bi-building me-1"></i>Section Details
-        </h6>
+        <p class="section-label"><i class="bi bi-building me-1"></i>Section Details</p>
 
         <form asp-action="Edit" method="post">
             <input asp-for="SectionId" type="hidden" />
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Grade Level</label>
+                    <label class="form-label">Grade Level</label>
                     <select asp-for="GradeLevel" class="form-select">
                         <option value="">-- Select Grade Level --</option>
                         @if (ViewBag.GradeLevels != null)
@@ -88,14 +232,14 @@
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Section Name</label>
+                    <label class="form-label">Section Name</label>
                     <input asp-for="SectionName" class="form-control" />
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Adviser (Homeroom Teacher)</label>
+                    <label class="form-label">Adviser (Homeroom Teacher)</label>
                     <select asp-for="Adviser" class="form-select">
                         <option value="">-- Select Adviser --</option>
                         @foreach (var t in teachers)
@@ -105,20 +249,20 @@
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-semibold">Capacity</label>
+                    <label class="form-label">Capacity</label>
                     <input asp-for="Capacity" class="form-control" />
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">Status</label>
+            <div class="mb-4">
+                <label class="form-label">Status</label>
                 <select asp-for="IsActive" class="form-select">
                     <option value="true">Active</option>
                     <option value="false">Inactive</option>
                 </select>
             </div>
 
-            <button type="submit" class="btn btn-primary px-4">
+            <button type="submit" class="btn btn-primary px-4" style="font-size:.88rem;border-radius:10px;">
                 <i class="bi bi-floppy-fill me-1"></i>Update Section
             </button>
         </form>
@@ -128,59 +272,114 @@
 <!-- ── SUBJECTS ASSIGNED ── -->
 <div class="custom-card">
     <div class="card-body p-4">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h6 class="fw-bold text-muted text-uppercase mb-0" style="font-size:.75rem;letter-spacing:.6px">
+
+        <!-- HEADER ROW -->
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <p class="section-label mb-0">
                 <i class="bi bi-book-fill me-1" style="color:#C8102E"></i>
                 Subjects Assigned
-                <span class="ms-2 badge" style="background:rgba(200,16,46,.1);color:#C8102E;font-size:.7rem">
+                <span class="ms-2 badge" style="background:rgba(200,16,46,.1);color:#C8102E;font-size:.7rem;border-radius:20px;padding:3px 9px;">
                     @Model.SectionSubjects.Count
                 </span>
-            </h6>
-            <small class="text-muted">Students in this section take all subjects below</small>
+            </p>
+            <small class="text-muted" style="font-size:.8rem;">Students in this section take all subjects below</small>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="search-box mb-3">
+            <i class="bi bi-search"></i>
+            <input type="text" id="subjectSearch" class="form-control" placeholder="Search subject or teacher..." />
         </div>
 
         @if (!Model.SectionSubjects.Any())
         {
-            <div class="text-center py-4 text-muted">
-                <i class="bi bi-book" style="font-size:2.5rem;opacity:.3"></i>
-                <p class="mt-2 mb-0">No subjects assigned yet. Add subjects below.</p>
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-book" style="font-size:2.5rem;opacity:.25"></i>
+                <p class="mt-2 mb-0" style="font-size:.88rem;">No subjects assigned yet. Assign subjects below.</p>
             </div>
         }
         else
         {
-            @foreach (var ss in Model.SectionSubjects)
-            {
-                <div class="subject-row">
-                    <div class="subject-badge">
-                        <span class="icon"><i class="bi bi-book-fill"></i></span>
-                        @ss.Subject?.Name
-                    </div>
-                    <span class="teacher-tag">
-                        <i class="bi bi-person-fill me-1"></i>@(ss.Teacher?.FullName ?? "No teacher")
-                    </span>
-                    <form asp-action="RemoveSubject" method="post" style="margin:0"
-                          onsubmit="return confirm('Remove @ss.Subject?.Name from this section?')">
-                        <input type="hidden" name="sectionSubjectId" value="@ss.Id" />
-                        <input type="hidden" name="sectionId" value="@Model.SectionId" />
-                        <button type="submit" class="remove-btn" title="Remove">
-                            <i class="bi bi-x-lg"></i>
-                        </button>
-                    </form>
-                </div>
-            }
+            <!-- TABLE -->
+            <div class="table-responsive">
+                <table class="subject-table" id="subjectTable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Teacher</th>
+                            <th>Time</th>
+                            <th>Room</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var ss in Model.SectionSubjects)
+                    {
+                        <tr class="subject-row-item">
+                            <td>
+                                <span class="subj-icon"><i class="bi bi-book-fill"></i></span>
+                                <strong>@ss.Subject?.Name</strong>
+                            </td>
+                            <td>
+                                <span class="pill"><i class="bi bi-person-fill"></i>@(ss.Teacher?.FullName ?? "—")</span>
+                            </td>
+                            <td>
+                                <span class="pill"><i class="bi bi-clock-fill"></i>@(ss.Time ?? "No time set")</span>
+                            </td>
+                            <td>
+                                <span class="pill"><i class="bi bi-door-open-fill"></i>@(ss.RoomNumber ?? "No room")</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <div class="d-flex justify-content-end gap-2">
+
+                                    <!-- EDIT BUTTON -->
+                                    <button type="button"
+                                            class="btn-edit-row"
+                                            title="Edit"
+                                            onclick="openEditModal(
+                                                @ss.Id,
+                                                @Model.SectionId,
+                                                '@ss.Teacher?.TeacherId',
+                                                '@(ss.Time ?? "")',
+                                                '@(ss.RoomNumber ?? "")')">
+                                        <i class="bi bi-pencil-fill"></i>
+                                    </button>
+
+                                    <!-- REMOVE BUTTON -->
+                                    <form asp-action="RemoveSubject" method="post" style="margin:0"
+                                          onsubmit="return confirm('Remove @ss.Subject?.Name from this section?')">
+                                        <input type="hidden" name="sectionSubjectId" value="@ss.Id" />
+                                        <input type="hidden" name="sectionId" value="@Model.SectionId" />
+                                        <button type="submit" class="btn-remove-row" title="Remove">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="d-flex align-items-center justify-content-between mt-3 flex-wrap gap-2">
+                <small class="text-muted" id="paginationInfo" style="font-size:.8rem;"></small>
+                <div class="d-flex gap-1" id="paginationControls"></div>
+            </div>
         }
 
-        <!-- ADD SUBJECT FORM -->
-        <div class="add-subject-form">
-            <p class="fw-semibold mb-2" style="font-size:.82rem;color:#6C757D">
-                <i class="bi bi-plus-circle me-1"></i>Add a Subject
-            </p>
+        <!-- ASSIGN SUBJECT FORM -->
+        <div class="assign-form-wrap">
+            <p class="assign-title"><i class="bi bi-plus-circle me-1"></i>Assign Subject, Time and Room</p>
             <form asp-action="AssignSubject" method="post">
                 <input type="hidden" name="sectionId" value="@Model.SectionId" />
-                <div class="row g-2 align-items-end">
-                    <div class="col-md-5">
-                        <label class="form-label mb-1" style="font-size:.78rem;font-weight:600">Subject</label>
-                        <select name="subjectId" class="form-select form-select-sm" required>
+
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <label>Subject</label>
+                        <select name="subjectId" class="form-select" required>
                             <option value="">-- Select Subject --</option>
                             @foreach (var sub in subjects)
                             {
@@ -188,9 +387,9 @@
                             }
                         </select>
                     </div>
-                    <div class="col-md-5">
-                        <label class="form-label mb-1" style="font-size:.78rem;font-weight:600">Teacher</label>
-                        <select name="teacherId" class="form-select form-select-sm" required>
+                    <div class="col-md-6">
+                        <label>Teacher</label>
+                        <select name="teacherId" class="form-select" required>
                             <option value="">-- Select Teacher --</option>
                             @foreach (var t in teachers)
                             {
@@ -198,14 +397,206 @@
                             }
                         </select>
                     </div>
+                </div>
+
+                <div class="row g-2 align-items-end">
+                    <div class="col-md-5">
+                        <label>Time</label>
+<select name="time" class="form-select">
+    <option value="">-- Select Time Slot --</option>
+    <optgroup label="🌅 Morning">
+        <option>7:00 AM – 8:00 AM</option>
+        <option>8:00 AM – 9:00 AM</option>
+    </optgroup>
+    <optgroup label="☕ Break">
+        <option disabled>9:00 AM – 9:15 AM (Recess)</option>
+    </optgroup>
+    <optgroup label="🌤️ Mid-Morning">
+        <option>9:15 AM – 10:15 AM</option>
+        <option>10:15 AM – 11:15 AM</option>
+        <option>11:15 AM – 12:15 PM</option>
+    </optgroup>
+    <optgroup label="🍱 Break">
+        <option disabled>12:15 PM – 1:15 PM (Lunch)</option>
+    </optgroup>
+    <optgroup label="🌇 Afternoon">
+        <option>1:15 PM – 2:15 PM</option>
+        <option>2:15 PM – 3:15 PM</option>
+        <option>3:15 PM – 4:15 PM</option>
+    </optgroup>
+</select>
+                    </div>
+                    <div class="col-md-5">
+                        <label>Room Number</label>
+                        <input name="roomNumber" type="text" class="form-control"
+                               placeholder="e.g. Room 101" />
+                    </div>
                     <div class="col-md-2">
-                        <button type="submit" class="btn btn-sm w-100"
-                                style="background:#C8102E;color:#fff;border-radius:8px;font-weight:600">
+                        <button type="submit" class="btn-assign w-100">
                             <i class="bi bi-plus-lg me-1"></i>Add
                         </button>
                     </div>
                 </div>
             </form>
         </div>
+
     </div>
 </div>
+
+<!-- ── EDIT SUBJECT MODAL ── -->
+<div class="modal fade" id="editSubjectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none;border-radius:16px;overflow:hidden;">
+
+            <form asp-action="EditSubject" method="post">
+                <input type="hidden" name="sectionSubjectId" id="edit_sectionSubjectId" />
+                <input type="hidden" name="sectionId" id="edit_sectionId" />
+
+                <div class="modal-header modal-header-dark">
+                    <div>
+                        <h5 class="modal-title mb-0" style="font-size:1rem;font-weight:700;">
+                            <i class="bi bi-pencil-fill me-2"></i>Edit Subject Assignment
+                        </h5>
+                        <small class="text-white-50" style="font-size:.78rem;">Update teacher, time, and room</small>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:.88rem;font-weight:600;">Teacher</label>
+                        <select name="teacherId" id="edit_teacherId" class="form-select" style="font-size:.88rem;border-radius:8px;" required>
+                            <option value="">-- Select Teacher --</option>
+                            @foreach (var t in teachers)
+                            {
+                                <option value="@t.TeacherId">@t.FullName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" style="font-size:.88rem;font-weight:600;">Time</label>
+<select name="time" id="edit_time" class="form-select" style="font-size:.88rem;border-radius:8px;">
+    <option value="">-- Select Time Slot --</option>
+    <optgroup label="🌅 Morning">
+        <option>7:00 AM – 8:00 AM</option>
+        <option>8:00 AM – 9:00 AM</option>
+    </optgroup>
+    <optgroup label="☕ Break">
+        <option disabled>9:00 AM – 9:15 AM (Recess)</option>
+    </optgroup>
+    <optgroup label="🌤️ Mid-Morning">
+        <option>9:15 AM – 10:15 AM</option>
+        <option>10:15 AM – 11:15 AM</option>
+        <option>11:15 AM – 12:15 PM</option>
+    </optgroup>
+    <optgroup label="🍱 Break">
+        <option disabled>12:15 PM – 1:15 PM (Lunch)</option>
+    </optgroup>
+    <optgroup label="🌇 Afternoon">
+        <option>1:15 PM – 2:15 PM</option>
+        <option>2:15 PM – 3:15 PM</option>
+        <option>3:15 PM – 4:15 PM</option>
+    </optgroup>
+</select>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label" style="font-size:.88rem;font-weight:600;">Room Number</label>
+                        <input name="roomNumber" id="edit_roomNumber" type="text" class="form-control"
+                               style="font-size:.88rem;border-radius:8px;"
+                               placeholder="e.g. Room 101" />
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="border-top:1px solid #F0F0F0;background:#FAFAFA;padding:14px 22px;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-sm px-4"
+                            style="background:#C8102E;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:.88rem;">
+                        <i class="bi bi-check-lg me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+// ── EDIT MODAL ──────────────────────────────────────────────────
+function openEditModal(id, sectionId, teacherId, time, roomNumber) {
+    document.getElementById('edit_sectionSubjectId').value = id;
+    document.getElementById('edit_sectionId').value        = sectionId;
+    document.getElementById('edit_teacherId').value        = teacherId;
+    document.getElementById('edit_time').value             = time;
+    document.getElementById('edit_roomNumber').value       = roomNumber;
+    new bootstrap.Modal(document.getElementById('editSubjectModal')).show();
+}
+
+// ── SEARCH + PAGINATION ─────────────────────────────────────────
+const PAGE_SIZE = 5;
+let currentPage = 1;
+let filteredRows = [];
+
+const rows       = () => Array.from(document.querySelectorAll('#subjectTable tbody .subject-row-item'));
+const searchInput = document.getElementById('subjectSearch');
+const info        = document.getElementById('paginationInfo');
+const controls    = document.getElementById('paginationControls');
+
+function applyFilter() {
+    const q = (searchInput?.value || '').toLowerCase();
+    filteredRows = rows().filter(r => r.innerText.toLowerCase().includes(q));
+    currentPage = 1;
+    renderPage();
+}
+
+function renderPage() {
+    const total = filteredRows.length;
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (currentPage > pages) currentPage = pages;
+
+    rows().forEach(r => r.style.display = 'none');
+    const start = (currentPage - 1) * PAGE_SIZE;
+    filteredRows.slice(start, start + PAGE_SIZE).forEach(r => r.style.display = '');
+
+    if (info) {
+        const from = total === 0 ? 0 : start + 1;
+        const to   = Math.min(start + PAGE_SIZE, total);
+        info.textContent = `Showing ${from}–${to} of ${total} subject${total !== 1 ? 's' : ''}`;
+    }
+
+    if (controls) {
+        controls.innerHTML = '';
+
+        // Prev
+        const prev = document.createElement('button');
+        prev.className = 'pagination-btn';
+        prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        prev.disabled  = currentPage === 1;
+        prev.onclick   = () => { currentPage--; renderPage(); };
+        controls.appendChild(prev);
+
+        // Page numbers
+        for (let i = 1; i <= pages; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+            btn.textContent = i;
+            btn.onclick = () => { currentPage = i; renderPage(); };
+            controls.appendChild(btn);
+        }
+
+        // Next
+        const next = document.createElement('button');
+        next.className = 'pagination-btn';
+        next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        next.disabled  = currentPage === pages;
+        next.onclick   = () => { currentPage++; renderPage(); };
+        controls.appendChild(next);
+    }
+}
+
+if (searchInput) {
+    searchInput.addEventListener('input', applyFilter);
+    applyFilter(); // init on load
+}
+</script>
+}

@@ -12,18 +12,17 @@ public class TeacherController : Controller
         _teacherService = teacherService;
         _subjectService = subjectService;
     }
-
+    
     // =========================
     // LIST
     // =========================
-
     public IActionResult Index()
     {
         var teachers = _teacherService.GetAllTeachers();
         ViewBag.Subjects = _subjectService.GetAll();
         return View(teachers);
     }
-
+    
     // =========================
     // CREATE
     // =========================

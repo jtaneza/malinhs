@@ -119,19 +119,6 @@
 .att-table tbody tr:last-child td{ border-bottom:none; }
 .att-table tbody tr:hover td{ background:#FAFAFA; }
 
-/* RATE CIRCLE */
-.rate-ring{
-    width:120px; height:120px; border-radius:50%;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    background:conic-gradient(#2E7D32 0% @(Model.AttendanceRate)%, #F0F0F0 @(Model.AttendanceRate)% 100%);
-    box-shadow:0 4px 12px rgba(0,0,0,.1);
-}
-.rate-inner{
-    width:90px; height:90px; border-radius:50%; background:#fff;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-}
-.rate-pct  { font-size:1.2rem; font-weight:900; color:#2C2C2C; line-height:1; }
-.rate-label{ font-size:.6rem; font-weight:700; color:#9CA3AF; text-transform:uppercase; letter-spacing:.4px; margin-top:2px; }
 
 </style>
 
@@ -210,12 +197,13 @@
 
 </div>
 
-<!-- CHART + RATE -->
-<div class="row g-3 mb-4">
 
-    <!-- Line Chart -->
-    <div class="col-xl-8">
-        <div class="section-card">
+<!-- CHART + RECORDS (side by side) -->
+<div class="row g-3">
+
+    <!-- LEFT: Attendance Trend Chart -->
+    <div class="col-xl-7">
+        <div class="section-card" style="height:100%">
             <div class="section-card-title">
                 <i class="bi bi-graph-up-arrow text-success"></i>
                 Attendance Trend — Last 30 Records
@@ -229,121 +217,101 @@
             }
             else
             {
-                <canvas id="attendanceChart" height="110"></canvas>
+                <canvas id="attendanceChart" height="130"></canvas>
             }
         </div>
     </div>
 
-    <!-- Rate Ring -->
-    <div class="col-xl-4">
-        <div class="section-card d-flex flex-column align-items-center justify-content-center gap-3">
-            <div class="section-card-title w-100">
-                <i class="bi bi-pie-chart-fill" style="color:#2E7D32"></i>
-                Attendance Rate
+    <!-- RIGHT: Attendance Records -->
+    <div class="col-xl-5">
+        <div class="section-card" style="height:100%">
+            <div class="section-card-title">
+                <i class="bi bi-table" style="color:#C8102E"></i>
+                Attendance Records
+                <span class="ms-auto badge" style="background:rgba(200,16,46,.1);color:#C8102E;font-size:.7rem;font-weight:700">
+                    @Model.TotalDays total
+                </span>
             </div>
-            <div class="rate-ring">
-                <div class="rate-inner">
-                    <span class="rate-pct">@Model.AttendanceRate%</span>
-                    <span class="rate-label">Rate</span>
+
+            @if (Model.Records.Count == 0)
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox" style="font-size:3rem;opacity:.3"></i>
+                    <p class="mt-2">No attendance records found.</p>
                 </div>
-            </div>
-            <div class="d-flex gap-3 flex-wrap justify-content-center mt-2">
-                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#2E7D32;margin-right:4px"></span><small>Present</small></span>
-                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#F57C00;margin-right:4px"></span><small>Late</small></span>
-                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1565C0;margin-right:4px"></span><small>Excused</small></span>
-                <span><span class="activity-dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#C8102E;margin-right:4px"></span><small>Absent</small></span>
-            </div>
+            }
+            else
+            {
+                <!-- Filter buttons -->
+                <div class="d-flex gap-2 mb-3 flex-wrap">
+                    <button class="btn btn-sm filter-btn active" data-filter="all"
+                            style="border-radius:20px;font-size:.72rem;font-weight:600;border:1.5px solid #dee2e6">
+                        All (@Model.TotalDays)
+                    </button>
+                    <button class="btn btn-sm filter-btn" data-filter="Present"
+                            style="border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(46,125,50,.08);color:#2E7D32;border:1.5px solid rgba(46,125,50,.2)">
+                        Present (@Model.Present)
+                    </button>
+                    <button class="btn btn-sm filter-btn" data-filter="Absent"
+                            style="border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(200,16,46,.08);color:#C8102E;border:1.5px solid rgba(200,16,46,.2)">
+                        Absent (@Model.Absent)
+                    </button>
+                    <button class="btn btn-sm filter-btn" data-filter="Late"
+                            style="border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(245,124,0,.08);color:#F57C00;border:1.5px solid rgba(245,124,0,.2)">
+                        Late (@Model.Late)
+                    </button>
+                    <button class="btn btn-sm filter-btn" data-filter="Excused"
+                            style="border-radius:20px;font-size:.72rem;font-weight:600;background:rgba(21,101,192,.08);color:#1565C0;border:1.5px solid rgba(21,101,192,.2)">
+                        Excused (@Model.Excused)
+                    </button>
+                </div>
+
+                <div style="max-height:380px;overflow-y:auto;">
+                    <table class="table att-table mb-0" id="recordsTable">
+                        <thead style="position:sticky;top:0;background:#fff;z-index:1;">
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int rowNum = 1; }
+                            @foreach (var rec in Model.Records)
+                            {
+                                var badgeClass = rec.Status switch {
+                                    "Present" => "badge-present",
+                                    "Absent"  => "badge-absent",
+                                    "Late"    => "badge-late",
+                                    "Excused" => "badge-excused",
+                                    _         => "badge-excused"
+                                };
+                                var rowIcon = rec.Status switch {
+                                    "Present" => "bi-check-circle-fill text-success",
+                                    "Absent"  => "bi-x-circle-fill text-danger",
+                                    "Late"    => "bi-clock-fill text-warning",
+                                    "Excused" => "bi-shield-check-fill text-primary",
+                                    _         => "bi-question-circle"
+                                };
+                                <tr data-status="@rec.Status">
+                                    <td class="text-muted">@rowNum++</td>
+                                    <td><strong>@rec.Date.ToString("MMM dd, yyyy")</strong></td>
+                                    <td class="text-muted">@rec.Date.ToString("ddd")</td>
+                                    <td>
+                                        <span class="status-badge @badgeClass">
+                                            <i class="bi @rowIcon me-1"></i>@rec.Status
+                                        </span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
     </div>
 
-</div>
-
-<!-- RECORDS TABLE -->
-<div class="section-card">
-    <div class="section-card-title">
-        <i class="bi bi-table" style="color:#C8102E"></i>
-        Attendance Records
-        <span class="ms-auto badge" style="background:rgba(200,16,46,.1);color:#C8102E;font-size:.7rem;font-weight:700">
-            @Model.TotalDays total
-        </span>
-    </div>
-
-    @if (Model.Records.Count == 0)
-    {
-        <div class="text-center py-5 text-muted">
-            <i class="bi bi-inbox" style="font-size:3rem;opacity:.3"></i>
-            <p class="mt-2">No attendance records found. Your teacher has not recorded any attendance yet.</p>
-        </div>
-    }
-    else
-    {
-        <!-- Filter buttons -->
-        <div class="d-flex gap-2 mb-3 flex-wrap">
-            <button class="btn btn-sm filter-btn active" data-filter="all"
-                    style="border-radius:20px;font-size:.75rem;font-weight:600;border:1.5px solid #dee2e6">
-                All (@Model.TotalDays)
-            </button>
-            <button class="btn btn-sm filter-btn" data-filter="Present"
-                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(46,125,50,.08);color:#2E7D32;border:1.5px solid rgba(46,125,50,.2)">
-                Present (@Model.Present)
-            </button>
-            <button class="btn btn-sm filter-btn" data-filter="Absent"
-                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(200,16,46,.08);color:#C8102E;border:1.5px solid rgba(200,16,46,.2)">
-                Absent (@Model.Absent)
-            </button>
-            <button class="btn btn-sm filter-btn" data-filter="Late"
-                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(245,124,0,.08);color:#F57C00;border:1.5px solid rgba(245,124,0,.2)">
-                Late (@Model.Late)
-            </button>
-            <button class="btn btn-sm filter-btn" data-filter="Excused"
-                    style="border-radius:20px;font-size:.75rem;font-weight:600;background:rgba(21,101,192,.08);color:#1565C0;border:1.5px solid rgba(21,101,192,.2)">
-                Excused (@Model.Excused)
-            </button>
-        </div>
-
-        <div class="table-responsive">
-            <table class="table att-table mb-0" id="recordsTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>Day</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @{ int rowNum = 1; }
-                    @foreach (var rec in Model.Records)
-                    {
-                        var badgeClass = rec.Status switch {
-                            "Present" => "badge-present",
-                            "Absent"  => "badge-absent",
-                            "Late"    => "badge-late",
-                            "Excused" => "badge-excused",
-                            _         => "badge-excused"
-                        };
-                        var rowIcon = rec.Status switch {
-                            "Present" => "bi-check-circle-fill text-success",
-                            "Absent"  => "bi-x-circle-fill text-danger",
-                            "Late"    => "bi-clock-fill text-warning",
-                            "Excused" => "bi-shield-check-fill text-primary",
-                            _         => "bi-question-circle"
-                        };
-                        <tr data-status="@rec.Status">
-                            <td class="text-muted">@rowNum++</td>
-                            <td><strong>@rec.Date.ToString("MMMM dd, yyyy")</strong></td>
-                            <td class="text-muted">@rec.Date.ToString("dddd")</td>
-                            <td>
-                                <span class="status-badge @badgeClass">
-                                    <i class="bi @rowIcon me-1"></i>@rec.Status
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
 </div>
 
 <!-- CHART.JS -->

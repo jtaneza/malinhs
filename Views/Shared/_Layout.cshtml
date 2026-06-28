@@ -378,38 +378,44 @@
     }
 
     @if (role == "Teacher")
-    {
-        <a asp-controller="Dashboard" asp-action="Teacher"
-           class="@(currentController == "Dashboard" ? "active" : "")">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
+{
+    <a asp-controller="Dashboard" asp-action="Teacher"
+       class="@(currentController == "Dashboard" ? "active" : "")">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+    </a>
 
-        
-        <a asp-controller="Class" asp-action="Index"
-           class="@(currentController == "Class" ? "active" : "")">
-            <i class="bi bi-easel2-fill"></i>
-            <span>My Classes</span>
-        </a>
+    <a asp-controller="Class" asp-action="Index"
+       class="@(currentController == "Class" ? "active" : "")">
+        <i class="bi bi-easel2-fill"></i>
+        <span>My Classes</span>
+    </a>
 
-        <a asp-controller="Attendance" asp-action="Index"
-           class="@(currentController == "Attendance" ? "active" : "")">
-            <i class="bi bi-calendar-check"></i>
-            <span>Attendance</span>
-        </a>
+    <!-- ADD THIS ↓ -->
+    <a asp-controller="Schedule" asp-action="Index"
+       class="@(currentController == "Schedule" ? "active" : "")">
+        <i class="bi bi-calendar-week-fill"></i>
+        <span>My Schedule</span>
+    </a>
 
-        <a asp-controller="Grade" asp-action="Index"
-           class="@(currentController == "Grade" ? "active" : "")">
-            <i class="bi bi-journal-text"></i>
-            <span>Grades</span>
-        </a>
+    <a asp-controller="Attendance" asp-action="Index"
+       class="@(currentController == "Attendance" ? "active" : "")">
+        <i class="bi bi-calendar-check"></i>
+        <span>Attendance</span>
+    </a>
 
-        <a asp-controller="Report" asp-action="Index"
-           class="@(currentController == "Report" ? "active" : "")">
-            <i class="bi bi-bar-chart-line"></i>
-            <span>Reports</span>
-        </a>
-    }
+    <a asp-controller="Grade" asp-action="Index"
+       class="@(currentController == "Grade" ? "active" : "")">
+        <i class="bi bi-journal-text"></i>
+        <span>Grades</span>
+    </a>
+
+    <a asp-controller="Report" asp-action="Index"
+       class="@(currentController == "Report" ? "active" : "")">
+        <i class="bi bi-bar-chart-line"></i>
+        <span>Reports</span>
+    </a>
+}
 
     @if (role == "Cashier")
     {

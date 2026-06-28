@@ -1,0 +1,282 @@
+@using MalikongkongNHS.Models.Entities
+@model List<SectionSubject>
+
+@{
+    ViewData["Title"] = "My Schedule";
+}
+
+<style>
+.page-title { font-size:2rem; font-weight:700; color:#2C2C2C; margin:0; }
+.date-badge {
+    background:#fff; color:#C8102E; padding:6px 16px; border-radius:20px;
+    font-size:.875rem; font-weight:600; border:1.5px solid rgba(200,16,46,.2);
+}
+
+/* STAT CARDS */
+.stat-card {
+    background:#fff; border-radius:16px; padding:1.4rem 1.8rem;
+    display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07); border-left:4px solid transparent;
+    transition:transform .2s ease,box-shadow .2s ease;
+}
+.stat-card:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.12); }
+.stat-card-red   { border-left-color:#C8102E; }
+.stat-card-blue  { border-left-color:#1565C0; }
+.stat-card-green { border-left-color:#2E7D32; }
+.stat-left { display:flex; flex-direction:column; align-items:flex-start; gap:.5rem; }
+.stat-icon {
+    width:48px; height:48px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;
+}
+.icon-red   { background:rgba(200,16,46,.10); color:#C8102E; }
+.icon-blue  { background:rgba(21,101,192,.10); color:#1565C0; }
+.icon-green { background:rgba(46,125,50,.10);  color:#2E7D32; }
+.stat-label  { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#9CA3AF; white-space:nowrap; }
+.stat-number { font-size:3rem; font-weight:900; line-height:1; letter-spacing:-2px; margin-left:auto; flex-shrink:0; }
+
+/* SCHEDULE TABLE */
+.sched-card {
+    background:#fff; border-radius:16px;
+    box-shadow:0 2px 12px rgba(0,0,0,.07); overflow:hidden;
+}
+.sched-table { width:100%; border-collapse:collapse; }
+.sched-table thead tr {
+    background:#F8F9FA;
+    border-bottom:2px solid #F0F0F0;
+}
+.sched-table thead th {
+    font-size:.72rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:.5px; color:#9CA3AF; padding:12px 16px;
+}
+.sched-table tbody tr {
+    border-bottom:1px solid #F8F9FA;
+    transition:background .15s;
+}
+.sched-table tbody tr:hover { background:#FAFAFA; }
+.sched-table tbody tr:last-child { border-bottom:none; }
+.sched-table td { padding:14px 16px; vertical-align:middle; font-size:.88rem; color:#374151; }
+
+/* SUBJECT ICON */
+.subj-icon {
+    width:34px; height:34px; border-radius:8px;
+    background:rgba(200,16,46,.1); color:#C8102E;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.9rem; margin-right:8px; flex-shrink:0;
+}
+
+/* PILLS */
+.pill {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:.75rem; font-weight:500; color:#4B5563;
+    background:#F3F4F6; border-radius:20px; padding:3px 10px;
+    white-space:nowrap;
+}
+.pill-red   { background:rgba(200,16,46,.08); color:#C8102E; }
+.pill-blue  { background:rgba(21,101,192,.08); color:#1565C0; }
+.pill-green { background:rgba(46,125,50,.08);  color:#2E7D32; }
+
+/* SEARCH */
+.search-box { position:relative; max-width:420px; }
+.search-box i {
+    position:absolute; left:11px; top:50%; transform:translateY(-50%);
+    color:#9CA3AF; font-size:.85rem;
+}
+.search-box input {
+    padding-left:34px; border-radius:10px;
+    border:1.5px solid #E5E7EB; font-size:.85rem; height:38px; width:100%;
+}
+.search-box input:focus {
+    outline:none; border-color:#C8102E;
+    box-shadow:0 0 0 3px rgba(200,16,46,.1);
+}
+
+/* PAGINATION */
+.pager-btn {
+    width:32px; height:32px; border-radius:8px; border:1.5px solid #E5E7EB;
+    background:#fff; display:inline-flex; align-items:center; justify-content:center;
+    font-size:.78rem; font-weight:700; cursor:pointer; color:#374151; transition:all .15s;
+}
+.pager-btn:hover:not([disabled]) { background:#C8102E; color:#fff; border-color:#C8102E; }
+.pager-btn.active { background:#C8102E; color:#fff; border-color:#C8102E; }
+.pager-btn[disabled] { opacity:.4; cursor:not-allowed; }
+</style>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="page-title">My Schedule</h1>
+        <p class="text-muted mb-0">All subjects you are assigned to teach.</p>
+    </div>
+    <span class="date-badge">
+        <i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")
+    </span>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-calendar-x" style="font-size:3rem;opacity:.25"></i>
+        <h5 class="mt-3">No Schedule Yet</h5>
+        <p>You have no subjects assigned. Please contact the admin.</p>
+    </div>
+}
+else
+{
+    <!-- STAT CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card stat-card-red">
+                <div class="stat-left">
+                    <div class="stat-icon icon-red"><i class="bi bi-book-fill"></i></div>
+                    <div class="stat-label">Total Subjects</div>
+                </div>
+                <div class="stat-number" style="color:#C8102E">@Model.Count</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card stat-card-blue">
+                <div class="stat-left">
+                    <div class="stat-icon icon-blue"><i class="bi bi-building"></i></div>
+                    <div class="stat-label">Sections Handled</div>
+                </div>
+                <div class="stat-number" style="color:#1565C0">@Model.Select(s => s.SectionId).Distinct().Count()</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card stat-card-green">
+                <div class="stat-left">
+                    <div class="stat-icon icon-green"><i class="bi bi-door-open-fill"></i></div>
+                    <div class="stat-label">Rooms Used</div>
+                </div>
+                <div class="stat-number" style="color:#2E7D32">@Model.Where(s => s.RoomNumber != null).Select(s => s.RoomNumber).Distinct().Count()</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="sched-card">
+        <div class="p-3 d-flex align-items-center justify-content-between border-bottom flex-wrap gap-3">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" id="schedSearch" placeholder="Search..." />
+            </div>
+            <small class="text-muted" style="font-size:.8rem;" id="schedInfo"></small>
+        </div>
+
+        <div class="table-responsive">
+            <table class="sched-table" id="schedTable">
+                <thead>
+                    <tr>
+                        <th style="width:22%">Subject</th>
+                        <th style="width:18%">Section</th>
+                        <th style="width:14%">Grade</th>
+                        <th style="width:26%">Time</th>
+                        <th style="width:20%">Room</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var ss in Model)
+                {
+                    <tr class="sched-row">
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="subj-icon"><i class="bi bi-book-fill"></i></span>
+                                <strong>@(ss.Subject?.Name ?? "—")</strong>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="pill pill-blue">
+                                <i class="bi bi-building"></i>@(ss.Section?.SectionName ?? "—")
+                            </span>
+                        </td>
+                        <td>
+                            <span class="pill">@(ss.Section?.GradeLevel ?? "—")</span>
+                        </td>
+                        <td>
+                            <span class="pill pill-green">
+                                <i class="bi bi-clock-fill"></i>@(ss.Time ?? "No time set")
+                            </span>
+                        </td>
+                        <td>
+                            <span class="pill pill-red">
+                                <i class="bi bi-door-open-fill"></i>@(ss.RoomNumber ?? "No room")
+                            </span>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION -->
+        <div class="d-flex align-items-center justify-content-between p-3 border-top flex-wrap gap-2">
+            <small class="text-muted" id="schedPagerInfo" style="font-size:.8rem;"></small>
+            <div class="d-flex gap-1" id="schedPagerBtns"></div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+const PAGE_SIZE = 10;
+let currentPage = 1;
+let filteredRows = [];
+
+const allRows   = () => Array.from(document.querySelectorAll('#schedTable tbody .sched-row'));
+const searchEl  = document.getElementById('schedSearch');
+const pagerInfo = document.getElementById('schedPagerInfo');
+const pagerBtns = document.getElementById('schedPagerBtns');
+
+function applyFilter() {
+    const q = (searchEl?.value || '').toLowerCase();
+    filteredRows = allRows().filter(r => r.innerText.toLowerCase().includes(q));
+    currentPage = 1;
+    renderPage();
+}
+
+function renderPage() {
+    const total = filteredRows.length;
+    const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    if (currentPage > pages) currentPage = pages;
+
+    allRows().forEach(r => r.style.display = 'none');
+    const start = (currentPage - 1) * PAGE_SIZE;
+    filteredRows.slice(start, start + PAGE_SIZE).forEach(r => r.style.display = '');
+
+    if (pagerInfo) {
+        const from = total === 0 ? 0 : start + 1;
+        const to   = Math.min(start + PAGE_SIZE, total);
+        pagerInfo.textContent = `Showing ${from}–${to} of ${total} subject${total !== 1 ? 's' : ''}`;
+    }
+
+    if (pagerBtns) {
+        pagerBtns.innerHTML = '';
+
+        const prev = document.createElement('button');
+        prev.className = 'pager-btn';
+        prev.innerHTML = '<i class="bi bi-chevron-left"></i>';
+        prev.disabled  = currentPage === 1;
+        prev.onclick   = () => { currentPage--; renderPage(); };
+        pagerBtns.appendChild(prev);
+
+        for (let i = 1; i <= pages; i++) {
+            const btn = document.createElement('button');
+            btn.className = 'pager-btn' + (i === currentPage ? ' active' : '');
+            btn.textContent = i;
+            btn.onclick = () => { currentPage = i; renderPage(); };
+            pagerBtns.appendChild(btn);
+        }
+
+        const next = document.createElement('button');
+        next.className = 'pager-btn';
+        next.innerHTML = '<i class="bi bi-chevron-right"></i>';
+        next.disabled  = currentPage === pages;
+        next.onclick   = () => { currentPage++; renderPage(); };
+        pagerBtns.appendChild(next);
+    }
+}
+
+if (searchEl) searchEl.addEventListener('input', applyFilter);
+applyFilter();
+</script>
+}

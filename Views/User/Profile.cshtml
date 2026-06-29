@@ -1,0 +1,279 @@
+@using Microsoft.AspNetCore.Http
+@using MalikongkongNHS.Models.ViewModels
+@model UserM
+
+@{
+    ViewData["Title"] = "My Profile";
+    var userId   = Context.Session.GetInt32("UserId");
+    var roleVal  = Context.Session.GetString("Role") ?? "Admin";
+    var nameParts = (Model.FullName ?? "").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials  = nameParts.Length >= 2
+        ? $"{nameParts[0][0]}{nameParts[^1][0]}"
+        : (Model.FullName?.Length > 0 ? Model.FullName[0].ToString() : "A");
+    initials = initials.ToUpper();
+    var bannerGrad = roleVal == "Cashier"
+        ? "linear-gradient(135deg,#2E7D32 0%,#1B5E20 60%,#2C2C2C 100%)"
+        : "linear-gradient(135deg,#2C2C2C 0%,#424242 60%,#1a1a1a 100%)";
+    var accentColor = roleVal == "Cashier" ? "#2E7D32" : "#2C2C2C";
+    var accentLight = roleVal == "Cashier" ? "rgba(46,125,50,.1)" : "rgba(44,44,44,.08)";
+}
+
+<style>
+.prof-title { font-size:2rem; font-weight:700; color:#2C2C2C; margin:0; }
+.date-badge { background:#fff; color:#C8102E; padding:6px 16px; border-radius:20px; font-size:.875rem; font-weight:600; border:1.5px solid rgba(200,16,46,.2); }
+.hero-card { background:#fff; border-radius:20px; box-shadow:0 2px 16px rgba(0,0,0,.08); overflow:hidden; margin-bottom:1.5rem; }
+.hero-banner { height:110px; background:@bannerGrad; }
+.hero-body { padding:0 2rem 1.8rem; }
+
+.avatar-wrap { position:relative; display:inline-block; margin-top:-52px; margin-bottom:.8rem; }
+.avatar-circle {
+    width:104px; height:104px; border-radius:50%; border:4px solid #fff;
+    box-shadow:0 4px 16px rgba(0,0,0,.18); background:@accentColor; color:#fff;
+    font-size:2.4rem; font-weight:700; display:flex; align-items:center;
+    justify-content:center; cursor:pointer; overflow:hidden; position:relative;
+}
+.avatar-circle img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
+.avatar-overlay {
+    position:absolute; inset:0; border-radius:50%; background:rgba(0,0,0,.45); color:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:.62rem; font-weight:600; opacity:0; transition:opacity .2s; cursor:pointer; gap:3px;
+}
+.avatar-wrap:hover .avatar-overlay { opacity:1; }
+.avatar-overlay i { font-size:1.3rem; }
+#photoInput { display:none; }
+
+.hero-name { font-size:1.45rem; font-weight:800; color:#2C2C2C; margin:0; }
+.hero-sub  { font-size:.82rem; color:#6C757D; margin-top:2px; }
+.hero-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:.6rem; }
+.hbadge { display:inline-flex; align-items:center; gap:5px; font-size:.72rem; font-weight:600; border-radius:20px; padding:4px 11px; }
+
+.info-card { background:#fff; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,.07); padding:1.4rem 1.6rem; height:100%; }
+.info-card-title { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#9CA3AF; margin-bottom:1.1rem; display:flex; align-items:center; gap:7px; }
+.field-row { display:flex; align-items:flex-start; gap:10px; padding:.7rem 0; border-bottom:1px solid #F3F4F6; }
+.field-row:last-child { border-bottom:none; }
+.field-icon { width:34px; height:34px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.95rem; }
+.fi-dark  { background:rgba(44,44,44,.08); color:#2C2C2C; }
+.fi-green { background:rgba(46,125,50,.08); color:#2E7D32; }
+.fi-gray  { background:#F3F4F6; color:#6C757D; }
+.field-label { font-size:.69rem; font-weight:600; text-transform:uppercase; letter-spacing:.4px; color:#9CA3AF; line-height:1; }
+.field-value { font-size:.88rem; color:#2C2C2C; font-weight:500; margin-top:2px; }
+
+.cred-card { background:linear-gradient(135deg,#1a1a2e 0%,#2C2C2C 100%); border-radius:16px; padding:1.4rem 1.6rem; box-shadow:0 4px 20px rgba(0,0,0,.2); color:#fff; }
+.cred-card-title { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:rgba(255,255,255,.5); margin-bottom:1.1rem; display:flex; align-items:center; gap:7px; }
+.cred-field-row { display:flex; align-items:flex-start; gap:10px; padding:.7rem 0; border-bottom:1px solid rgba(255,255,255,.08); }
+.cred-field-row:last-child { border-bottom:none; }
+.cred-icon { width:34px; height:34px; border-radius:9px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.95rem; background:rgba(255,255,255,.1); color:#fff; }
+.cred-label { font-size:.69rem; font-weight:600; text-transform:uppercase; letter-spacing:.4px; color:rgba(255,255,255,.45); line-height:1; }
+.cred-value { font-size:.88rem; color:#fff; font-weight:500; margin-top:2px; font-family:monospace; letter-spacing:.5px; }
+.pass-wrap { display:flex; align-items:center; gap:8px; }
+.pass-toggle { background:rgba(255,255,255,.12); border:none; color:#fff; border-radius:6px; padding:2px 8px; font-size:.75rem; cursor:pointer; transition:.15s; }
+.pass-toggle:hover { background:rgba(255,255,255,.2); }
+
+.btn-save   { background:@accentColor; color:#fff; border:none; border-radius:10px; padding:8px 22px; font-weight:600; transition:.2s; }
+.btn-save:hover { opacity:.88; color:#fff; }
+.btn-cancel { background:#F3F4F6; color:#2C2C2C; border:none; border-radius:10px; padding:8px 18px; font-weight:600; }
+.modal-content { border-radius:16px; border:none; }
+.modal-header { border-bottom:1px solid #F3F4F6; padding:1.2rem 1.5rem; }
+.modal-footer { border-top:1px solid #F3F4F6; padding:1rem 1.5rem; }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="prof-title">My Profile</h1>
+        <p class="text-muted mb-0">View and manage your account settings.</p>
+    </div>
+    <span class="date-badge"><i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 mb-4" role="alert">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0 mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- HERO -->
+<div class="hero-card">
+    <div class="hero-banner"></div>
+    <div class="hero-body">
+        <div class="d-flex flex-wrap align-items-end gap-3">
+            <div class="avatar-wrap" onclick="document.getElementById('photoInput').click()">
+                <div class="avatar-circle">
+                    <span id="avatarInitials">@initials</span>
+                    <img src="" alt="" id="avatarImg" style="display:none;" />
+                    <div class="avatar-overlay"><i class="bi bi-camera-fill"></i><span>Change Photo</span></div>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" />
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <p class="hero-name">@Model.FullName</p>
+                <p class="hero-sub">@(Model.Username ?? "No username")</p>
+                <div class="hero-badges">
+                    <span class="hbadge" style="background:@accentLight; color:@accentColor;">
+                        <i class="bi bi-shield-fill"></i> @roleVal
+                    </span>
+                </div>
+            </div>
+            <div class="ms-auto">
+                <button class="btn-save" data-bs-toggle="modal" data-bs-target="#changePassModal">
+                    <i class="bi bi-key-fill me-1"></i> Change Password
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- INFO -->
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="info-card">
+            <div class="info-card-title"><i class="bi bi-person-fill" style="color:@accentColor;"></i> Account Information</div>
+            <div class="field-row">
+                <div class="field-icon fi-dark"><i class="bi bi-person-fill"></i></div>
+                <div>
+                    <div class="field-label">Full Name</div>
+                    <div class="field-value">@Model.FullName</div>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field-icon fi-gray"><i class="bi bi-at"></i></div>
+                <div>
+                    <div class="field-label">Username</div>
+                    <div class="field-value">@(Model.Username ?? "—")</div>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field-icon fi-green"><i class="bi bi-shield-fill"></i></div>
+                <div>
+                    <div class="field-label">Role</div>
+                    <div class="field-value">@roleVal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="cred-card">
+            <div class="cred-card-title"><i class="bi bi-shield-lock-fill"></i> Account Credentials</div>
+            <div class="cred-field-row">
+                <div class="cred-icon"><i class="bi bi-person-fill"></i></div>
+                <div>
+                    <div class="cred-label">Username</div>
+                    <div class="cred-value">@(Model.Username ?? "—")</div>
+                </div>
+            </div>
+            <div class="cred-field-row">
+                <div class="cred-icon"><i class="bi bi-key-fill"></i></div>
+                <div style="flex:1;">
+                    <div class="cred-label">Password</div>
+                    <div class="pass-wrap">
+                        <div class="cred-value" id="passDisplay">••••••••</div>
+                        <button class="pass-toggle" id="passToggle" onclick="togglePass()">
+                            <i class="bi bi-eye" id="passIcon"></i> Show
+                        </button>
+                        <button class="pass-toggle" data-bs-toggle="modal" data-bs-target="#changePassModal">
+                            <i class="bi bi-pencil-fill"></i> Change
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Modals {
+<div class="modal fade" id="changePassModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-key-fill me-2" style="color:@accentColor;"></i>Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-controller="User" asp-action="ChangePassword" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" value="@Model.UserId" />
+                <div class="modal-body" style="padding:1.4rem 1.5rem;">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Current Password</label>
+                        <div class="input-group">
+                            <input type="password" name="CurrentPassword" id="currPass" class="form-control" placeholder="Enter current password" required />
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleField('currPass','currPassIcon')"><i class="bi bi-eye" id="currPassIcon"></i></button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">New Password</label>
+                        <div class="input-group">
+                            <input type="password" name="NewPassword" id="newPass" class="form-control" placeholder="Enter new password" required minlength="6" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleField('newPass','newPassIcon')"><i class="bi bi-eye" id="newPassIcon"></i></button>
+                        </div>
+                    </div>
+                    <div class="mb-1">
+                        <label class="form-label fw-semibold small">Confirm New Password</label>
+                        <div class="input-group">
+                            <input type="password" name="ConfirmPassword" id="confPass" class="form-control" placeholder="Confirm new password" required minlength="6" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleField('confPass','confPassIcon')"><i class="bi bi-eye" id="confPassIcon"></i></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-save"><i class="bi bi-check-lg me-1"></i> Update Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+<script>
+const realPass  = '@Html.Raw(Model.Password?.Replace("'", "\\'") ?? "")';
+let passVisible = false;
+
+function togglePass() {
+    passVisible = !passVisible;
+    document.getElementById('passDisplay').textContent = passVisible ? (realPass || '—') : '••••••••';
+    const btn = document.getElementById('passToggle');
+    btn.innerHTML = passVisible
+        ? '<i class="bi bi-eye-slash"></i> Hide'
+        : '<i class="bi bi-eye"></i> Show';
+}
+function toggleField(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    input.type     = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+
+const photoInput = document.getElementById('photoInput');
+const avatarImg  = document.getElementById('avatarImg');
+const avatarInit = document.getElementById('avatarInitials');
+const storageKey = 'profilePhoto_user_@Model.UserId';
+
+const saved = localStorage.getItem(storageKey);
+if (saved) { avatarImg.src = saved; avatarImg.style.display = 'block'; avatarInit.style.display = 'none'; }
+
+photoInput.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file || file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+        avatarImg.src = e.target.result;
+        avatarImg.style.display = 'block';
+        avatarInit.style.display = 'none';
+        localStorage.setItem(storageKey, e.target.result);
+    };
+    reader.readAsDataURL(file);
+});
+
+setTimeout(() => document.querySelectorAll('.alert').forEach(a => bootstrap.Alert.getOrCreateInstance(a)?.close()), 4000);
+</script>
+}

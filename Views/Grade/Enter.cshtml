@@ -1,0 +1,236 @@
+@model MalikongkongNHS.Models.ViewModels.GradeEntryVM
+
+@{
+    ViewData["Title"] = "Enter Grades";
+}
+
+<style>
+.page-title { font-size:1.8rem; font-weight:700; color:#2C2C2C; margin:0; }
+.back-link {
+    color:#1565C0; text-decoration:none; font-weight:600; font-size:.9rem;
+    display:inline-flex; align-items:center; gap:6px; margin-bottom:1rem;
+}
+.back-link:hover { color:#0D47A1; }
+
+.entry-card {
+    background:#fff; border-radius:16px; padding:1.5rem 1.8rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.08); border-left:4px solid #1565C0;
+}
+
+/* Info badges */
+.info-strip {
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:1.5rem;
+}
+.info-chip {
+    display:inline-flex; align-items:center; gap:6px;
+    background:#F3F4F6; color:#374151; border-radius:20px;
+    padding:4px 14px; font-size:.8rem; font-weight:600;
+}
+.info-chip-blue  { background:rgba(21,101,192,.1); color:#1565C0; }
+.info-chip-red   { background:rgba(200,16,46,.1);  color:#C8102E; }
+
+/* Table */
+.entry-table th {
+    font-size:.71rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:#9CA3AF; border-bottom:1.5px solid #F0F0F0; padding:10px 14px;
+}
+.entry-table td { font-size:.86rem; padding:10px 14px; vertical-align:middle; border-bottom:1px solid #F8F9FA; }
+.entry-table tbody tr:last-child td { border-bottom:none; }
+.entry-table tbody tr:hover td { background:#FAFAFA; }
+
+/* Score input */
+.score-input {
+    width:100px; border:1.5px solid #dee2e6; border-radius:9px;
+    padding:6px 10px; font-size:.88rem; font-weight:600; text-align:center;
+    transition:border-color .2s, box-shadow .2s;
+}
+.score-input:focus { outline:none; border-color:#1565C0; box-shadow:0 0 0 3px rgba(21,101,192,.1); }
+.score-input.valid   { border-color:#2E7D32; background:rgba(46,125,50,.04); }
+.score-input.invalid { border-color:#C8102E; background:rgba(200,16,46,.04); }
+
+/* Remark badge */
+.remark-pass { color:#2E7D32; font-weight:700; font-size:.82rem; }
+.remark-fail { color:#C8102E; font-weight:700; font-size:.82rem; }
+.remark-na   { color:#9CA3AF; font-size:.82rem; }
+
+/* Buttons */
+.btn-save {
+    background:#1565C0; color:#fff; border:none; border-radius:10px;
+    padding:10px 28px; font-size:.95rem; font-weight:700; transition:.2s;
+}
+.btn-save:hover { background:#0D47A1; }
+.btn-cancel-lnk {
+    background:#F3F4F6; color:#374151; border:none; border-radius:10px;
+    padding:10px 22px; font-size:.92rem; font-weight:600; text-decoration:none;
+    display:inline-flex; align-items:center; gap:5px;
+}
+.btn-cancel-lnk:hover { background:#e5e7eb; }
+
+/* Mark all buttons */
+.mark-btn {
+    border:1.5px solid #dee2e6; background:#fff; border-radius:8px;
+    padding:5px 14px; font-size:.8rem; font-weight:600; cursor:pointer;
+    transition:.15s; color:#374151;
+}
+.mark-btn:hover { border-color:#1565C0; color:#1565C0; background:#f0f7ff; }
+</style>
+
+<a href="/Grade/Index?sectionId=@Model.SectionId" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to Grades
+</a>
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+    <div>
+        <h1 class="page-title">Enter Grades</h1>
+        <p class="text-muted mb-0">Enter scores for each student.</p>
+    </div>
+</div>
+
+<!-- Info strip -->
+<div class="info-strip mb-3">
+    <span class="info-chip info-chip-blue"><i class="bi bi-building"></i> @Model.SectionName</span>
+    <span class="info-chip info-chip-blue"><i class="bi bi-book-fill"></i> @Model.SubjectName</span>
+    <span class="info-chip info-chip-red"><i class="bi bi-layers-fill"></i> Quarter @Model.Quarter</span>
+    <span class="info-chip"><i class="bi bi-info-circle"></i> Passing grade: 75</span>
+</div>
+
+<div class="entry-card">
+    <!-- Quick actions -->
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+        <span style="font-size:.78rem;color:#9CA3AF;font-weight:600;">Mark All:</span>
+        <button type="button" class="mark-btn" onclick="markAll(75)">75 (Min Pass)</button>
+        <button type="button" class="mark-btn" onclick="markAll(80)">80</button>
+        <button type="button" class="mark-btn" onclick="markAll(90)">90</button>
+        <button type="button" class="mark-btn" onclick="clearAll()">
+            <i class="bi bi-x-circle me-1"></i>Clear All
+        </button>
+    </div>
+
+    <form asp-action="Enter" method="post" id="gradeForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="SectionId"   value="@Model.SectionId" />
+        <input type="hidden" name="SectionName" value="@Model.SectionName" />
+        <input type="hidden" name="SubjectId"   value="@Model.SubjectId" />
+        <input type="hidden" name="SubjectName" value="@Model.SubjectName" />
+        <input type="hidden" name="Quarter"     value="@Model.Quarter" />
+
+        <div class="table-responsive">
+            <table class="table entry-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:15%">LRN</th>
+                        <th style="width:35%">Full Name</th>
+                        <th style="width:20%" class="text-center">Score (0–100)</th>
+                        <th style="width:15%" class="text-center">Remarks</th>
+                        <th style="width:15%" class="text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Students.Count; i++)
+                    {
+                        var s = Model.Students[i];
+                        <tr>
+                            <input type="hidden" name="Students[@i].StudentId" value="@s.StudentId" />
+                            <input type="hidden" name="Students[@i].FullName"  value="@s.FullName" />
+                            <input type="hidden" name="Students[@i].LRN"       value="@s.LRN" />
+                            @if (s.GradeId.HasValue)
+                            {
+                                <input type="hidden" name="Students[@i].GradeId" value="@s.GradeId" />
+                            }
+                            <td class="fw-semibold">@s.LRN</td>
+                            <td>@s.FullName</td>
+                            <td class="text-center">
+                                <input type="number"
+                                       name="Students[@i].Score"
+                                       id="score_@i"
+                                       class="score-input @(s.Score.HasValue ? (s.Score >= 75 ? "valid" : "invalid") : "")"
+                                       value="@(s.Score.HasValue ? s.Score.Value.ToString("0") : "")"
+                                       min="0" max="100" step="0.01"
+                                       placeholder="—"
+                                       oninput="updateRemark(@i, this.value)"
+                                       autocomplete="off" />
+                            </td>
+                            <td class="text-center" id="remark_@i">
+                                @if (s.Score.HasValue)
+                                {
+                                    <span class="@(s.Score >= 75 ? "remark-pass" : "remark-fail")">
+                                        @(s.Score >= 75 ? "Passed" : "Failed")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="remark-na">—</span>
+                                }
+                            </td>
+                            <td class="text-center">
+                                @if (s.GradeId.HasValue)
+                                {
+                                    <span style="font-size:.75rem;color:#2E7D32;font-weight:600;">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Saved
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span style="font-size:.75rem;color:#9CA3AF;font-weight:600;">
+                                        <i class="bi bi-dash-circle me-1"></i>New
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex gap-3 mt-4 align-items-center">
+            <button type="submit" class="btn-save">
+                <i class="bi bi-save2-fill me-2"></i>Save Grades
+            </button>
+            <a href="/Grade/Index?sectionId=@Model.SectionId&quarter=@Model.Quarter" class="btn-cancel-lnk">
+                <i class="bi bi-x-lg"></i> Cancel
+            </a>
+            <span class="ms-auto text-muted" style="font-size:.78rem;">
+                <i class="bi bi-info-circle me-1"></i>Scores are saved as drafts until finalized.
+            </span>
+        </div>
+    </form>
+</div>
+
+<script>
+    const PASS = 75;
+
+    function updateRemark(index, val) {
+        const input  = document.getElementById('score_' + index);
+        const remark = document.getElementById('remark_' + index);
+        const score  = parseFloat(val);
+
+        input.classList.remove('valid', 'invalid');
+        if (val === '' || isNaN(score)) {
+            remark.innerHTML = '<span class="remark-na">—</span>';
+        } else {
+            if (score >= PASS) {
+                input.classList.add('valid');
+                remark.innerHTML = '<span class="remark-pass">Passed</span>';
+            } else {
+                input.classList.add('invalid');
+                remark.innerHTML = '<span class="remark-fail">Failed</span>';
+            }
+        }
+    }
+
+    function markAll(val) {
+        const inputs = document.querySelectorAll('.score-input');
+        inputs.forEach((inp, i) => {
+            inp.value = val;
+            updateRemark(i, val);
+        });
+    }
+
+    function clearAll() {
+        const inputs = document.querySelectorAll('.score-input');
+        inputs.forEach((inp, i) => {
+            inp.value = '';
+            updateRemark(i, '');
+        });
+    }
+</script>

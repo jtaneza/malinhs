@@ -1,0 +1,75 @@
+@model MalikongkongNHS.Models.ViewModels.GradeEditVM
+
+@{
+    ViewData["Title"] = "Edit Grade";
+    var termLabels = new[] { "", "1st Term", "2nd Term", "3rd Term" };
+}
+
+<style>
+.edit-card {
+    background:#fff; border-radius:16px; padding:2rem;
+    box-shadow:0 2px 16px rgba(0,0,0,.09); max-width:480px; margin:2rem auto;
+}
+.edit-card h4 { font-weight:800; color:#2C2C2C; margin-bottom:1.5rem; }
+.info-row { display:flex; justify-content:space-between; padding:8px 0;
+    border-bottom:1px solid #F1F3F5; font-size:.88rem; }
+.info-row .lbl { color:#9CA3AF; font-weight:600; }
+.info-row .val { font-weight:700; color:#2C2C2C; }
+.score-input {
+    width:100%; border:2px solid #dee2e6; border-radius:12px;
+    padding:10px 16px; font-size:1.1rem; font-weight:700; text-align:center;
+    transition:border-color .2s; margin-top:1rem;
+}
+.score-input:focus { outline:none; border-color:#F59E0B; box-shadow:0 0 0 3px rgba(245,158,11,.1); }
+.btn-save {
+    background:#1565C0; color:#fff; border:none; border-radius:10px;
+    padding:10px 28px; font-size:.92rem; font-weight:700; width:100%;
+    margin-top:1rem; cursor:pointer; transition:.2s;
+}
+.btn-save:hover { background:#0D47A1; }
+.btn-cancel {
+    display:block; text-align:center; margin-top:.6rem;
+    color:#9CA3AF; font-size:.84rem; text-decoration:none;
+}
+.btn-cancel:hover { color:#C8102E; }
+.old-score-note { font-size:.78rem; color:#9CA3AF; text-align:center; margin-top:.4rem; }
+</style>
+
+<div class="edit-card">
+    <h4><i class="bi bi-pencil-square me-2 text-warning"></i>Edit Grade</h4>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger border-0 rounded-3 mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            @Html.ValidationSummary(true)
+        </div>
+    }
+
+    <div class="info-row"><span class="lbl">Student</span><span class="val">@Model.StudentName</span></div>
+    <div class="info-row"><span class="lbl">Subject</span><span class="val">@Model.SubjectName</span></div>
+    <div class="info-row"><span class="lbl">Term</span><span class="val">@termLabels[Model.Quarter]</span></div>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="GradeId" />
+        <input type="hidden" asp-for="StudentName" />
+        <input type="hidden" asp-for="SubjectName" />
+        <input type="hidden" asp-for="Quarter" />
+        <input type="hidden" asp-for="OldScore" />
+        <input type="hidden" asp-for="SectionId" />
+
+        <input asp-for="NewScore"
+               type="number" min="0" max="100" step="0.01"
+               class="score-input"
+               placeholder="Enter corrected score" />
+        <p class="old-score-note">Previous score: <strong>@Model.OldScore.ToString("0.00")</strong></p>
+
+        <button type="submit" class="btn-save">
+            <i class="bi bi-check-lg me-2"></i>Save Changes
+        </button>
+    </form>
+
+    <a href="/Grade/Enter?sectionId=@Model.SectionId&subjectId=0&quarter=@Model.Quarter"
+       class="btn-cancel">← Cancel</a>
+</div>

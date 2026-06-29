@@ -34,6 +34,7 @@ namespace MalikongkongNHS.Controllers
         // ================= ADMIN =================
         private IActionResult AdminDashboard()
         {
+            // ── Basic counts ──────────────────────────────────────────
             var vm = new DashboardVM
             {
                 TotalStudents = _context.Students.Count(),
@@ -42,8 +43,30 @@ namespace MalikongkongNHS.Controllers
                 TotalUsers    = _context.Users.Count()
             };
 
+            // ── Monthly enrollment chart (last 8 months) ─────────────
+            var today = DateTime.Today;
+            for (int i = 7; i >= 0; i--)
+            {
+                var month = today.AddMonths(-i);
+                vm.MonthLabels.Add(month.ToString("MMM yyyy"));
+                // Show real active student count (same value each month — reflects current roster)
+                vm.MonthlyEnrollment.Add(_context.Students.Count(s => s.IsActive));
+            }
+
+            // ── Recent activities (real DB) ───────────────────────────
+            vm.RecentActivities = _context.Activities
+                .OrderByDescending(a => a.CreatedAt)
+                .Take(10)
+                .Select(a => new MalikongkongNHS.Models.ViewModels.RecentActivityItem
+                {
+                    Message   = a.Message,
+                    CreatedAt = a.CreatedAt
+                })
+                .ToList();
+
             return View("Index", vm);
         }
+
 
         // ================= TEACHER =================
         public IActionResult Teacher()

@@ -6,12 +6,18 @@ namespace MalikongkongNHS.Controllers
 {
     public class UserController : Controller
     {
-        private readonly IUserService _service;
+        private readonly IUserService  _service;
+        private readonly IAuditService _audit;
 
-        public UserController(IUserService service)
+        public UserController(IUserService service, IAuditService audit)
         {
             _service = service;
+            _audit   = audit;
         }
+
+        private string Who  => HttpContext.Session.GetString("Username") ?? "Unknown";
+        private string Role => HttpContext.Session.GetString("Role")     ?? "Unknown";
+        private string IP   => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
 
         // ======================
         // USER LIST
@@ -31,8 +37,9 @@ namespace MalikongkongNHS.Controllers
             if (ModelState.IsValid)
             {
                 _service.CreateUser(model);
+                _audit.Log(Who, Role, "Create", "User",
+                    $"Created user account: {model.FullName} (Role: {model.Role})", IP);
             }
-
             return RedirectToAction("Index");
         }
 
@@ -42,10 +49,7 @@ namespace MalikongkongNHS.Controllers
         public IActionResult View(int id)
         {
             var user = _service.GetUserById(id);
-
-            if (user == null)
-                return NotFound();
-
+            if (user == null) return NotFound();
             return View(user);
         }
 
@@ -55,10 +59,7 @@ namespace MalikongkongNHS.Controllers
         public IActionResult Edit(int id)
         {
             var user = _service.GetUserById(id);
-
-            if (user == null)
-                return NotFound();
-
+            if (user == null) return NotFound();
             return View(user);
         }
 
@@ -71,8 +72,9 @@ namespace MalikongkongNHS.Controllers
             if (ModelState.IsValid)
             {
                 _service.UpdateUser(model);
+                _audit.Log(Who, Role, "Update", "User",
+                    $"Updated user account: {model.FullName} (Role: {model.Role})", IP);
             }
-
             return RedirectToAction("Index");
         }
 
@@ -81,7 +83,10 @@ namespace MalikongkongNHS.Controllers
         // ======================
         public IActionResult Delete(int id)
         {
+            var user = _service.GetUserById(id);
             _service.DeleteUser(id);
+            _audit.Log(Who, Role, "Delete", "User",
+                $"Deleted user ID: {id}" + (user != null ? $" ({user.FullName})" : ""), IP);
             return RedirectToAction("Index");
         }
     }

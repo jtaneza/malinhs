@@ -18,7 +18,7 @@ namespace MalikongkongNHS.Services.Implementations
             return _context.Teachers.ToList();
         }
 
-        public Teacher GetById(int id)
+        public Teacher? GetById(int id)  // ← added ? (nullable return)
         {
             return _context.Teachers.Find(id);
         }

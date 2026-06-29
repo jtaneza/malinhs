@@ -3,17 +3,24 @@ using Microsoft.EntityFrameworkCore;
 using MalikongkongNHS.Data;
 using MalikongkongNHS.Models.Entities;
 using MalikongkongNHS.Models.ViewModels;
+using MalikongkongNHS.Services.Interfaces;
 
 namespace MalikongkongNHS.Controllers
 {
     public class PaymentController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuditService        _audit;
 
-        public PaymentController(ApplicationDbContext context)
+        public PaymentController(ApplicationDbContext context, IAuditService audit)
         {
             _context = context;
+            _audit   = audit;
         }
+
+        private string Who  => HttpContext.Session.GetString("Username") ?? "Unknown";
+        private string Role => HttpContext.Session.GetString("Role")     ?? "Unknown";
+        private string IP   => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
 
         // ── INDEX ──────────────────────────────────────────────
         public async Task<IActionResult> Index()
@@ -175,6 +182,11 @@ namespace MalikongkongNHS.Controllers
 
             _context.Payments.Add(payment);
             await _context.SaveChangesAsync();
+
+            var student = await _context.Students.FindAsync(studentId);
+            _audit.Log(Who, Role, "Create", "Payment",
+                $"Recorded payment {receiptNo} for {student?.FirstName} {student?.LastName} — ₱{amount:N2} ({feeType})", IP);
+
             return Json(new { success = true, receiptNo });
         }
 
@@ -193,6 +205,8 @@ namespace MalikongkongNHS.Controllers
             payment.Notes    = notes;
 
             await _context.SaveChangesAsync();
+            _audit.Log(Who, Role, "Update", "Payment",
+                $"Updated payment ID {id} (Receipt: {payment.ReceiptNo}) — ₱{amount:N2} ({feeType}, {status})", IP);
             return Json(new { success = true });
         }
 
@@ -205,6 +219,8 @@ namespace MalikongkongNHS.Controllers
 
             _context.Payments.Remove(payment);
             await _context.SaveChangesAsync();
+            _audit.Log(Who, Role, "Delete", "Payment",
+                $"Deleted payment ID {id} (Receipt: {payment.ReceiptNo}, ₱{payment.Amount:N2})", IP);
             return Json(new { success = true });
         }
 

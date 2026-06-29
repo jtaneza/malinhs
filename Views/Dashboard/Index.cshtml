@@ -4,218 +4,236 @@
     ViewData["Title"] = "Dashboard";
 }
 
+<style>
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.page-title {
+    color: #2C2C2C;
+    font-size: 3rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.date-badge {
+    background: #2C2C2C;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ── STAT CARDS (same as Attendance) ─────────────────── */
+.stat-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 1.4rem 1.8rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-left: 4px solid transparent;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+.stat-card-students { border-left-color: #C8102E; }
+.stat-card-teachers { border-left-color: #2E7D32; }
+.stat-card-sections { border-left-color: #D97706; }
+.stat-card-users    { border-left-color: #1565C0; }
+
+.stat-left  { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
+.stat-icon  {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+}
+.icon-red    { background: rgba(200,16,46,.10);   color: #C8102E; }
+.icon-green  { background: rgba(46,125,50,.10);   color: #2E7D32; }
+.icon-yellow { background: rgba(217,119,6,.10);   color: #D97706; }
+.icon-blue   { background: rgba(21,101,192,.10);  color: #1565C0; }
+
+.stat-label  {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .6px; color: #9CA3AF; white-space: nowrap;
+}
+.stat-number {
+    font-size: 3rem; font-weight: 900; line-height: 1;
+    color: #2C2C2C; letter-spacing: -2px; margin-left: auto; flex-shrink: 0;
+}
+
+/* ── SECTION CARDS ─────────────────────────────────── */
+.section-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.section-card .card-header-custom {
+    font-weight: 700;
+    color: var(--primary, #2C2C2C);
+    border-bottom: 2px solid #f1f3f5;
+    padding-bottom: .6rem;
+    margin-bottom: 1rem;
+    font-size: .95rem;
+}
+
+/* ── ACTIVITY LIST ─────────────────────────────────── */
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .65rem 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #C8102E; margin-top: 6px; flex-shrink: 0;
+}
+.activity-msg  { font-size: .86rem; color: #374151; line-height: 1.4; }
+.activity-time { font-size: .73rem; color: #9CA3AF; margin-top: 2px; }
+.no-activity   { font-size: .85rem; color: #9CA3AF; }
+</style>
+
+<!-- HEADER -->
 <div class="dashboard-header">
-
     <div>
-
-        <h1 class="page-title">
-            Dashboard
-        </h1>
-
-        <p class="text-muted">
-            Welcome back, Admin. Here's what's happening today.
-        </p>
-
+        <h1 class="page-title">Dashboard</h1>
+        <p class="text-muted mb-0">Welcome back, Admin. Here's what's happening today.</p>
     </div>
-
     <div>
-
-        <span class="date-badge">
-            @DateTime.Now.ToString("MMMM dd, yyyy")
-        </span>
-
+        <span class="date-badge">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
     </div>
-
 </div>
 
 <!-- STAT CARDS -->
+<div class="row g-3 mt-3">
 
-<div class="row g-4 mt-2">
-
-    <div class="col-xl-3 col-md-6">
-
-        <div class="dashboard-card">
-
-            <div>
-                <small>Total Students</small>
-                <h2>@Model.TotalStudents</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-students">
+            <div class="stat-left">
+                <div class="stat-icon icon-red"><i class="bi bi-mortarboard-fill"></i></div>
+                <div class="stat-label">Total Students</div>
             </div>
-
-            <i class="bi bi-mortarboard-fill card-icon"></i>
-
+            <div class="stat-number" style="color:#C8102E">@Model.TotalStudents</div>
         </div>
-
     </div>
 
-    <div class="col-xl-3 col-md-6">
-
-        <div class="dashboard-card">
-
-            <div>
-                <small>Total Teachers</small>
-                <h2>@Model.TotalTeachers</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-teachers">
+            <div class="stat-left">
+                <div class="stat-icon icon-green"><i class="bi bi-person-workspace"></i></div>
+                <div class="stat-label">Total Teachers</div>
             </div>
-
-            <i class="bi bi-person-workspace card-icon"></i>
-
+            <div class="stat-number" style="color:#2E7D32">@Model.TotalTeachers</div>
         </div>
-
     </div>
 
-    <div class="col-xl-3 col-md-6">
-
-        <div class="dashboard-card">
-
-            <div>
-                <small>Total Sections</small>
-                <h2>@Model.TotalSections</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-sections">
+            <div class="stat-left">
+                <div class="stat-icon icon-yellow"><i class="bi bi-diagram-3-fill"></i></div>
+                <div class="stat-label">Total Sections</div>
             </div>
-
-            <i class="bi bi-diagram-3-fill card-icon"></i>
-
+            <div class="stat-number" style="color:#D97706">@Model.TotalSections</div>
         </div>
-
     </div>
 
-    <div class="col-xl-3 col-md-6">
-
-        <div class="dashboard-card">
-
-            <div>
-                <small>Total Users</small>
-                <h2>@Model.TotalUsers</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card stat-card-users">
+            <div class="stat-left">
+                <div class="stat-icon icon-blue"><i class="bi bi-people-fill"></i></div>
+                <div class="stat-label">Total Users</div>
             </div>
-
-            <i class="bi bi-people-fill card-icon"></i>
-
+            <div class="stat-number" style="color:#1565C0">@Model.TotalUsers</div>
         </div>
-
     </div>
 
 </div>
 
 <!-- CHART + RECENT ACTIVITIES -->
-
 <div class="row mt-4">
 
     <div class="col-lg-8 mb-4">
-
-        <div class="card custom-card h-100">
-
-            <div class="card-header bg-white">
-
-                <h5 class="mb-0">
-                    Student Enrollment Trend
-                </h5>
-
+        <div class="section-card h-100">
+            <div class="card-header-custom">
+                <i class="bi bi-bar-chart-line-fill me-2 text-danger"></i>Student Enrollment Trend
             </div>
-
-            <div class="card-body">
-
-                <canvas id="enrollmentChart" height="110"></canvas>
-
-            </div>
-
+            <canvas id="enrollmentChart" height="110"></canvas>
         </div>
-
     </div>
 
     <div class="col-lg-4 mb-4">
-
-        <div class="card custom-card h-100">
-
-            <div class="card-header bg-white">
-
-                <h5 class="mb-0">
-                    Recent Activities
-                </h5>
-
+        <div class="section-card h-100">
+            <div class="card-header-custom">
+                <i class="bi bi-clock-history me-2 text-danger"></i>Recent Activities
             </div>
 
-            <div class="card-body">
-
-                <ul class="list-group list-group-flush">
-
-                    <li class="list-group-item">New student registered.</li>
-                    <li class="list-group-item">Attendance updated.</li>
-                    <li class="list-group-item">Grade report generated.</li>
-                    <li class="list-group-item">New teacher account created.</li>
-                    <li class="list-group-item">Section schedule updated.</li>
-
-                </ul>
-
-            </div>
-
+            @if (!Model.RecentActivities.Any())
+            {
+                <p class="no-activity">No recent activities recorded yet.</p>
+            }
+            else
+            {
+                foreach (var act in Model.RecentActivities)
+                {
+                    <div class="activity-item">
+                        <div class="activity-dot"></div>
+                        <div>
+                            <div class="activity-msg">@act.Message</div>
+                            <div class="activity-time">@act.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</div>
+                        </div>
+                    </div>
+                }
+            }
         </div>
-
     </div>
 
 </div>
 
-<!-- KEEP YOUR ORIGINAL STYLE (UNCHANGED) -->
-<style>
-.dashboard-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:15px;
-}
-
-.page-title{
-    color:#2C2C2C;
-    font-size:3rem;
-    font-weight:700;
-}
-
-.date-badge{
-    background:#2C2C2C;
-    color:white;
-    padding:10px 16px;
-    border-radius:8px;
-    font-weight:600;
-}
-
-.dashboard-card{
-    background:#FFFFFF;
-    border-radius:16px;
-    padding:25px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-left:5px solid #2C2C2C;
-    box-shadow:0 4px 12px rgba(0,0,0,.08);
-}
-
-.dashboard-card h2{
-    font-size:2rem;
-    font-weight:700;
-    color:#2C2C2C;
-}
-
-.card-icon{
-    font-size:3rem;
-    color:#D8D8D8;
-}
-</style>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-const ctx = document.getElementById("enrollmentChart");
+    const ctx = document.getElementById("enrollmentChart");
 
-new Chart(ctx, {
-    type: "line",
-    data: {
-        labels: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug"],
-        datasets: [{
-            label: "Students",
-            data: [280,300,325,350,375,390,410,425],
-            borderColor: "#C8102E",
-            backgroundColor: "rgba(200,16,46,0.08)",
-            fill: true,
-            tension: .4
-        }]
-    }
-});
+    const labels = @Html.Raw(
+        System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels)
+    );
+    const data   = @Html.Raw(
+        System.Text.Json.JsonSerializer.Serialize(Model.MonthlyEnrollment)
+    );
+
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Students",
+                data: data,
+                borderColor: "#C8102E",
+                backgroundColor: "rgba(200,16,46,0.08)",
+                fill: true,
+                tension: .4,
+                pointBackgroundColor: "#C8102E",
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: "top" }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
 </script>

@@ -2,477 +2,356 @@
 
 @{
     var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var role        = Context.Session.GetString("Role");
+    var username    = Context.Session.GetString("Username") ?? "";
+    var userId      = Context.Session.GetInt32("UserId");
+    var displayName = username;
 
-    var role = Context.Session.GetString("Role");
+    var parts    = displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = parts.Length >= 2
+        ? $"{parts[0][0]}{parts[^1][0]}"
+        : (displayName.Length > 0 ? displayName[0].ToString() : "U");
+    initials = initials.ToUpper();
+
+    var avatarBg = role switch {
+        "Student" => "#C8102E",
+        "Teacher" => "#1565C0",
+        "Admin"   => "#2C2C2C",
+        _         => "#6C757D"
+    };
+
+    var modalAccent = role switch {
+        "Teacher" => "#1565C0",
+        "Cashier" => "#2E7D32",
+        _         => "#2C2C2C"
+    };
+
+    var modalBanner = role switch {
+        "Teacher" => "linear-gradient(135deg,#1565C0,#0D47A1)",
+        "Cashier" => "linear-gradient(135deg,#2E7D32,#1B5E20)",
+        _         => "linear-gradient(135deg,#2C2C2C,#424242)"
+    };
 }
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <title>@ViewData["Title"] - Malikongkong NHS SIS</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet" />
-
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-          rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
     <style>
+.header-actions button, .header-actions a { position:relative; z-index:20; pointer-events:auto; }
 
-.header-actions button,
-.header-actions a{
-    position: relative;
-    z-index: 20;
-    pointer-events: auto;
+:root { --primary:#2C2C2C; --secondary:#C8102E; --background:#F5F5F5; --white:#FFFFFF; }
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif; }
+body { background:var(--background); overflow-x:hidden; }
+
+/* ── TOPBAR ── */
+.topbar {
+    position:fixed; top:0; left:0; right:0; height:70px; background:#fff;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:0 25px; box-shadow:0 2px 15px rgba(0,0,0,.08); z-index:1200;
 }
+.brand { display:flex; align-items:center; gap:15px; }
+.brand img { width:45px; height:45px; object-fit:contain; }
+.brand h5 { margin:0; color:var(--primary); font-weight:700; }
+.header-right { display:flex; align-items:center; gap:8px; }
+.menu-btn { display:none; border:none; background:none; font-size:28px; color:var(--primary); }
 
-        :root{
-    --primary:#2C2C2C;
-    --secondary:#C8102E;
-    --background:#F5F5F5;
-    --white:#FFFFFF;
+/* ── NOTIFICATION BELL ── */
+.notif-wrap { position:relative; }
+.notif-btn {
+    width:40px; height:40px; border-radius:10px; border:none;
+    background:#F5F5F5; color:#2C2C2C; display:flex;
+    align-items:center; justify-content:center; font-size:1.1rem;
+    cursor:pointer; transition:.2s; position:relative;
 }
-
-        *{
-            margin:0;
-            padding:0;
-            box-sizing:border-box;
-            font-family:'Poppins',sans-serif;
-        }
-
-        body{
-            background:var(--background);
-            overflow-x:hidden;
-        }
-
-        /* ================= HEADER ================= */
-
-        .topbar{
-            position:fixed;
-            top:0;
-            left:0;
-            right:0;
-            height:70px;
-            background:#fff;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            padding:0 25px;
-            box-shadow:0 2px 15px rgba(0,0,0,.08);
-            z-index:1200;
-        }
-
-        .brand{
-            display:flex;
-            align-items:center;
-            gap:15px;
-        }
-
-        .brand img{
-            width:45px;
-            height:45px;
-            object-fit:contain;
-        }
-
-        .brand h5{
-            margin:0;
-            color:var(--primary);
-            font-weight:700;
-        }
-
-        .header-right{
-            display:flex;
-            align-items:center;
-            gap:10px;
-        }
-
-        .profile-btn{
-    border:none;
-    background:#F5F5F5;
-    border-radius:10px;
-    padding:8px 15px;
-    color:#2C2C2C;
+.notif-btn:hover { background:#EBEBEB; }
+.notif-badge {
+    position:absolute; top:6px; right:6px; width:8px; height:8px;
+    border-radius:50%; background:#C8102E; border:2px solid #fff; display:none;
 }
+.notif-badge.show { display:block; }
 
-        .menu-btn{
-            display:none;
-            border:none;
-            background:none;
-            font-size:28px;
-            color:var(--primary);
-        }
+/* ── NOTIFICATION DROPDOWN ── */
+.notif-dropdown {
+    position:absolute; top:calc(100% + 10px); right:0; width:340px;
+    background:#fff; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,.14);
+    z-index:3000; display:none; overflow:hidden;
+}
+.notif-dropdown.show { display:block; }
+.notif-header {
+    padding:14px 18px 10px; border-bottom:1px solid #F3F4F6;
+    display:flex; align-items:center; justify-content:space-between;
+}
+.notif-header span { font-size:.82rem; font-weight:700; color:#2C2C2C; text-transform:uppercase; letter-spacing:.4px; }
+.notif-mark-all { font-size:.72rem; color:#C8102E; background:none; border:none; cursor:pointer; font-weight:600; padding:0; }
+.notif-mark-all:hover { text-decoration:underline; }
+.notif-list { max-height:320px; overflow-y:auto; }
+.notif-item {
+    display:flex; align-items:flex-start; gap:11px;
+    padding:12px 18px; border-bottom:1px solid #F9FAFB;
+    transition:background .15s; cursor:pointer;
+}
+.notif-item:hover { background:#FFF5F6; }
+.notif-item.unread { background:#FFF8F8; }
+.notif-item:last-child { border-bottom:none; }
+.notif-icon { width:36px; height:36px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.95rem; }
+.ni-red   { background:rgba(200,16,46,.1);  color:#C8102E; }
+.ni-blue  { background:rgba(21,101,192,.1); color:#1565C0; }
+.ni-green { background:rgba(46,125,50,.1);  color:#2E7D32; }
+.ni-gray  { background:#F3F4F6; color:#6C757D; }
+.notif-text { flex:1; min-width:0; }
+.notif-title { font-size:.8rem; font-weight:600; color:#2C2C2C; line-height:1.3; }
+.notif-sub   { font-size:.72rem; color:#9CA3AF; margin-top:2px; }
+.notif-dot   { width:8px; height:8px; border-radius:50%; background:#C8102E; flex-shrink:0; margin-top:5px; }
+.notif-empty { padding:2rem; text-align:center; color:#9CA3AF; font-size:.82rem; }
+.notif-footer { padding:10px 18px; border-top:1px solid #F3F4F6; text-align:center; }
+.notif-footer a { font-size:.78rem; color:#C8102E; font-weight:600; text-decoration:none; }
+.notif-footer a:hover { text-decoration:underline; }
 
-        /* ================= SIDEBAR ================= */
+/* ── PROFILE BUTTON ── */
+.profile-btn {
+    border:none; background:#F5F5F5; border-radius:10px;
+    padding:6px 12px 6px 6px; color:#2C2C2C;
+    display:flex; align-items:center; gap:8px; cursor:pointer; transition:.2s;
+}
+.profile-btn:hover { background:#EBEBEB; }
+.profile-avatar {
+    width:32px; height:32px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.78rem; font-weight:700; color:#fff; flex-shrink:0;
+    position:relative; overflow:hidden;
+}
+.profile-name { font-size:.8rem; font-weight:600; color:#2C2C2C; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.profile-role { font-size:.65rem; color:#9CA3AF; line-height:1; }
 
-        .sidebar{
-    position:fixed;
-    top:70px;
-    left:0;
-    width:260px;
-    height:calc(100vh - 70px);
-    background:#2C2C2C;
-    display:flex;
-    flex-direction:column;
-    z-index:1100;
-    transition:.3s;
+/* ── MODAL AVATAR HOVER ── */
+.modal-av-wrap { display:inline-block; position:relative; cursor:pointer; }
+.modal-av-wrap:hover .modal-av-overlay { opacity:1 !important; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+    position:fixed; top:70px; left:0; width:260px;
+    height:calc(100vh - 70px); background:#2C2C2C;
+    display:flex; flex-direction:column; z-index:1100; transition:.3s;
     box-shadow:3px 0 15px rgba(0,0,0,.08);
 }
-
-        .sidebar-menu{
-            flex:1;
-            overflow-y:auto;
-            padding-top:10px;
-        }
-
-        .sidebar-bottom{
-            border-top:1px solid rgba(255,255,255,.15);
-        }
-
-        .sidebar a{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    padding:15px 25px;
-    color:#ffffff;
-    text-decoration:none;
-    transition:.3s;
-    font-weight:500;
+.sidebar-menu { flex:1; overflow-y:auto; padding-top:10px; }
+.sidebar-bottom { border-top:1px solid rgba(255,255,255,.15); }
+.sidebar a {
+    display:flex; align-items:center; gap:12px; padding:15px 25px;
+    color:#fff; text-decoration:none; transition:.3s; font-weight:500;
     border-left:4px solid transparent;
 }
+.sidebar a:hover  { background:#C8102E; color:#fff; border-left:4px solid #fff; }
+.sidebar a.active { background:#C8102E; color:#fff; border-left:4px solid #fff; }
+.sidebar i { font-size:18px; }
 
-        .sidebar a:hover{
-    background:#C8102E;
-    color:#fff;
-    border-left:4px solid #ffffff;
+/* ── LOGOUT ── */
+.logout-btn {
+    width:100%; background:none; border:none; color:#fff;
+    padding:15px 25px; display:flex; align-items:center;
+    gap:12px; cursor:pointer; transition:.3s; font-weight:500;
+}
+.logout-btn:hover { background:#C8102E; }
+.logout-btn i { font-size:18px; }
+
+/* ── MODALS ── */
+.page-header, .header-actions { position:relative; z-index:10; }
+.modal          { z-index:2000 !important; }
+.modal-backdrop { z-index:1990 !important; }
+.header-actions button, .header-actions a { pointer-events:auto !important; }
+
+/* ── CONTENT ── */
+.content {
+    margin-top:70px; margin-left:260px;
+    width:calc(100% - 260px); min-height:100vh; padding:30px;
 }
 
-        .sidebar a.active{
-    background:#C8102E;
-    color:#fff;
-    border-left:4px solid #ffffff;
+/* ── OVERLAY ── */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; }
+.overlay.show { display:block; }
+
+/* ── MOBILE ── */
+@@media (max-width:992px) {
+    .menu-btn { display:block; }
+    .sidebar  { transform:translateX(-100%); }
+    .sidebar.show { transform:translateX(0); }
+    .content  { margin-left:0; width:100%; padding:20px; }
+    .brand h5 { color:#2C2C2C; font-weight:700; }
+    .profile-name, .profile-role { display:none; }
+}
+@@media (max-width:576px) {
+    .topbar { padding:0 15px; }
+    .brand h5 { font-size:13px; }
+    .content  { padding:15px; }
 }
 
-        .sidebar i{
-            font-size:18px;
-        }
-
-        /* ================= LOGOUT BUTTON ================= */
-
-        .logout-btn{
-            width:100%;
-            background:none;
-            border:none;
-            color:#fff;
-            padding:15px 25px;
-            display:flex;
-            align-items:center;
-            gap:12px;
-            cursor:pointer;
-            transition:.3s;
-            font-weight:500;
-        }
-
-        .logout-btn:hover{
-    background:#C8102E;
-}
-        .logout-btn i{
-            font-size:18px;
-        }
-        /* ================= CONTENT LAYER FIX ================= */
-
-        /* ================= PAGE HEADER BUTTONS ================= */
-        .page-header,
-.header-actions{
-    position: relative;
-    z-index: 10;
-}
-
-        /* ================= MODAL FIX (CRITICAL) ================= */
-        .modal{
-            z-index: 2000 !important;
-        }
-
-        .modal-backdrop{
-            z-index: 1990 !important;
-        }
-
-        /* ================= BUTTON CLICK FIX ================= */
-        .header-actions button,
-        .header-actions a{
-            pointer-events: auto !important;
-        }
-
-        /* ================= SIDEBAR SAFETY ================= */
-        .sidebar{
-            z-index: 1100;
-        }
-        /* ================= CONTENT ================= */
-
-        .content{
-            margin-top:70px;
-            margin-left:260px;
-            width:calc(100% - 260px);
-            min-height:100vh;
-            padding:30px;
-        }
-
-        /* ================= OVERLAY ================= */
-
-.overlay{
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.45);
-    z-index: 1000;
-}
-
-.overlay.show{
-    display: block;
-}
-
-.modal{
-    z-index: 2000 !important;
-}
-
-.modal-backdrop{
-    z-index: 1990 !important;
-}
-  /* ================= MOBILE ================= */
-
-        @@media (max-width:992px){
-
-            .menu-btn{
-                display:block;
-            }
-
-            .sidebar{
-                transform:translateX(-100%);
-            }
-
-            .sidebar.show{
-                transform:translateX(0);
-            }
-
-            .content{
-                margin-left:0;
-                width:100%;
-                padding:20px;
-            }
-
-           .brand h5{
-    margin:0;
-    color:#2C2C2C;
-    font-weight:700;
-}
-        }
-
-        @@media (max-width:576px){
-
-            .topbar{
-                padding:0 15px;
-            }
-
-            .brand h5{
-                font-size:13px;
-            }
-
-            .content{
-                padding:15px;
-            }
-        }
-#overlay {
-    display: none !important;
-    pointer-events: none;
-}
+#overlay { display:none !important; pointer-events:none; }
     </style>
-
 </head>
 <body>
 
 <div class="overlay" id="overlay"></div>
 
 <header class="topbar">
-
     <div class="d-flex align-items-center gap-3">
-
-        <button class="menu-btn" id="menuBtn">
-            <i class="bi bi-list"></i>
-        </button>
-
+        <button class="menu-btn" id="menuBtn"><i class="bi bi-list"></i></button>
         <div class="brand">
             <img src="~/images/logo.png" alt="Logo" />
             <h5>Malikongkong NHS SErpS</h5>
         </div>
-
     </div>
 
     <div class="header-right">
 
-        <button class="btn btn-light">
-            <i class="bi bi-bell"></i>
-        </button>
+        <!-- NOTIFICATION BELL -->
+        <div class="notif-wrap" id="notifWrap">
+            <button class="notif-btn" id="notifBtn" title="Notifications">
+                <i class="bi bi-bell-fill"></i>
+                <span class="notif-badge" id="notifBadge"></span>
+            </button>
+            <div class="notif-dropdown" id="notifDropdown">
+                <div class="notif-header">
+                    <span>Notifications</span>
+                    <button class="notif-mark-all" id="markAllBtn">Mark all as read</button>
+                </div>
+                <div class="notif-list" id="notifList">
+                    <div class="notif-empty">
+                        <i class="bi bi-bell-slash" style="font-size:2rem;opacity:.25;display:block;margin-bottom:.5rem;"></i>
+                        Loading...
+                    </div>
+                </div>
+                <div class="notif-footer"><a href="#">View all notifications</a></div>
+            </div>
+        </div>
 
-<button class="profile-btn">
-    <i class="bi bi-person-circle"></i>
-    @Context.Session.GetString("Role")
-</button>
+        <!-- PROFILE BUTTON -->
+        @if (role == "Student")
+        {
+            <a href="/Student/Profile" class="profile-btn" style="text-decoration:none;">
+                <div class="profile-avatar" id="headerAvatar" style="background:@avatarBg;">
+                    <span id="headerInitials">@initials</span>
+                    <img id="headerAvatarImg" src="" alt=""
+                         style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" />
+                </div>
+                <div>
+                    <div class="profile-name" id="headerDisplayName">@displayName</div>
+                    <div class="profile-role">@role</div>
+                </div>
+            </a>
+        }
+        else
+        {
+            <button class="profile-btn" data-bs-toggle="modal" data-bs-target="#headerProfileModal">
+                <div class="profile-avatar" id="headerAvatar" style="background:@avatarBg;">
+                    <span id="headerInitials">@initials</span>
+                    <img id="headerAvatarImg" src="" alt=""
+                         style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" />
+                </div>
+                <div>
+                    <div class="profile-name" id="headerDisplayName">@displayName</div>
+                    <div class="profile-role">@role</div>
+                </div>
+            </button>
+        }
 
     </div>
-
 </header>
 
+<!-- ═══════════════════════════════════════
+     SIDEBAR
+════════════════════════════════════════ -->
 <nav class="sidebar" id="sidebar">
-
 <div class="sidebar-menu">
 
     @if (role == "Admin")
     {
-        <a asp-controller="Dashboard" asp-action="Index"
-           class="@(currentController == "Dashboard" ? "active" : "")">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
+        <a asp-controller="Dashboard" asp-action="Index" class="@(currentController=="Dashboard"?"active":"")">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
         </a>
-
-        <a asp-controller="Student" asp-action="Index"
-           class="@(currentController == "Student" ? "active" : "")">
-            <i class="bi bi-mortarboard"></i>
-            <span>Students</span>
+        <a asp-controller="Student" asp-action="Index" class="@(currentController=="Student"?"active":"")">
+            <i class="bi bi-mortarboard"></i><span>Students</span>
         </a>
-
-        <a asp-controller="Teacher" asp-action="Index"
-           class="@(currentController == "Teacher" ? "active" : "")">
-            <i class="bi bi-person-workspace"></i>
-            <span>Teachers</span>
+        <a asp-controller="Teacher" asp-action="Index" class="@(currentController=="Teacher"?"active":"")">
+            <i class="bi bi-person-workspace"></i><span>Teachers</span>
         </a>
-
-        <a asp-controller="Section" asp-action="Index"
-           class="@(currentController == "Section" ? "active" : "")">
-            <i class="bi bi-building"></i>
-            <span>Classes & Sections</span>
+        <a asp-controller="Section" asp-action="Index" class="@(currentController=="Section"?"active":"")">
+            <i class="bi bi-building"></i><span>Classes & Sections</span>
         </a>
-
-        <a asp-controller="Payment" asp-action="Index"
-           class="@(currentController == "Payment" ? "active" : "")">
-            <i class="bi bi-cash-stack"></i>
-            <span>Payments</span>
+        <a asp-controller="Payment" asp-action="Index" class="@(currentController=="Payment"?"active":"")">
+            <i class="bi bi-cash-stack"></i><span>Payments</span>
         </a>
-
-        <a asp-controller="Report" asp-action="Index"
-           class="@(currentController == "Report" ? "active" : "")">
-            <i class="bi bi-bar-chart-line"></i>
-            <span>Reports</span>
+        <a asp-controller="Report" asp-action="Index" class="@(currentController=="Report"?"active":"")">
+            <i class="bi bi-bar-chart-line"></i><span>Reports</span>
         </a>
-
-        <a asp-controller="User" asp-action="Index"
-           class="@(currentController == "User" ? "active" : "")">
-            <i class="bi bi-people"></i>
-            <span>Users</span>
+        <a asp-controller="AuditLog" asp-action="Index" class="@(currentController=="AuditLog"?"active":"")">
+            <i class="bi bi-shield-lock"></i><span>Audit Log</span>
+        </a>
+        <a asp-controller="User" asp-action="Index" class="@(currentController=="User"?"active":"")">
+            <i class="bi bi-people"></i><span>Users</span>
         </a>
     }
 
     @if (role == "Teacher")
-{
-    <a asp-controller="Dashboard" asp-action="Teacher"
-       class="@(currentController == "Dashboard" ? "active" : "")">
-        <i class="bi bi-speedometer2"></i>
-        <span>Dashboard</span>
-    </a>
-
-    <a asp-controller="Class" asp-action="Index"
-       class="@(currentController == "Class" ? "active" : "")">
-        <i class="bi bi-easel2-fill"></i>
-        <span>My Classes</span>
-    </a>
-
-    <!-- ADD THIS ↓ -->
-    <a asp-controller="Schedule" asp-action="Index"
-       class="@(currentController == "Schedule" ? "active" : "")">
-        <i class="bi bi-calendar-week-fill"></i>
-        <span>My Schedule</span>
-    </a>
-
-    <a asp-controller="Attendance" asp-action="Index"
-       class="@(currentController == "Attendance" ? "active" : "")">
-        <i class="bi bi-calendar-check"></i>
-        <span>Attendance</span>
-    </a>
-
-    <a asp-controller="Grade" asp-action="Index"
-       class="@(currentController == "Grade" ? "active" : "")">
-        <i class="bi bi-journal-text"></i>
-        <span>Grades</span>
-    </a>
-
-    <a asp-controller="Report" asp-action="Index"
-       class="@(currentController == "Report" ? "active" : "")">
-        <i class="bi bi-bar-chart-line"></i>
-        <span>Reports</span>
-    </a>
-}
+    {
+        <a asp-controller="Dashboard" asp-action="Teacher" class="@(currentController=="Dashboard"?"active":"")">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+        </a>
+        <a asp-controller="Class" asp-action="Index" class="@(currentController=="Class"?"active":"")">
+            <i class="bi bi-easel2-fill"></i><span>My Classes</span>
+        </a>
+        <a asp-controller="Schedule" asp-action="Index" class="@(currentController=="Schedule"?"active":"")">
+            <i class="bi bi-calendar-week-fill"></i><span>My Schedule</span>
+        </a>
+        <a asp-controller="Attendance" asp-action="Index" class="@(currentController=="Attendance"?"active":"")">
+            <i class="bi bi-calendar-check"></i><span>Attendance</span>
+        </a>
+        <a asp-controller="Grade" asp-action="Index" class="@(currentController=="Grade"?"active":"")">
+            <i class="bi bi-journal-text"></i><span>Grades</span>
+        </a>
+        <a asp-controller="Report" asp-action="Index" class="@(currentController=="Report"?"active":"")">
+            <i class="bi bi-bar-chart-line"></i><span>Reports</span>
+        </a>
+    }
 
     @if (role == "Cashier")
     {
-        <a asp-controller="Payment" asp-action="Index"
-           class="@(currentController == "Payment" ? "active" : "")">
-            <i class="bi bi-cash-stack"></i>
-            <span>Payments</span>
+        <a asp-controller="Payment" asp-action="Index" class="@(currentController=="Payment"?"active":"")">
+            <i class="bi bi-cash-stack"></i><span>Payments</span>
         </a>
     }
 
     @if (role == "Student")
     {
-        <a asp-controller="Dashboard" asp-action="Student"
-           class="@(currentController == "Dashboard" ? "active" : "")">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
+        <a asp-controller="Dashboard" asp-action="Student" class="@(currentController=="Dashboard"?"active":"")">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
         </a>
-
-        <a asp-controller="Student" asp-action="Profile"
-           class="@(currentController == "Student" ? "active" : "")">
-            <i class="bi bi-person"></i>
-            <span>My Profile</span>
+        <a asp-controller="Student" asp-action="Profile" class="@(currentController=="Student"?"active":"")">
+            <i class="bi bi-person"></i><span>My Profile</span>
         </a>
-
-        
-        <a asp-controller="Attendance" asp-action="StudentView"
-           class="@(currentController == "Attendance" ? "active" : "")">
-            <i class="bi bi-calendar-check"></i>
-            <span>My Attendance</span>
+        <a asp-controller="Attendance" asp-action="StudentView" class="@(currentController=="Attendance"?"active":"")">
+            <i class="bi bi-calendar-check"></i><span>My Attendance</span>
         </a>
-
-        
-        <a asp-controller="Grade" asp-action="StudentView"
-           class="@(currentController == "Grade" ? "active" : "")">
-            <i class="bi bi-journal-text"></i>
-            <span>My Grades</span>
+        <a asp-controller="Grade" asp-action="StudentView" class="@(currentController=="Grade"?"active":"")">
+            <i class="bi bi-journal-text"></i><span>My Grades</span>
         </a>
     }
 
 </div>
     <div class="sidebar-bottom">
-
-        <form asp-controller="Account"
-              asp-action="Logout"
-              method="post">
-
+        <form asp-controller="Account" asp-action="Logout" method="post">
             <button type="submit" class="logout-btn">
-
-                <i class="bi bi-box-arrow-right"></i>
-                <span>Logout</span>
-
+                <i class="bi bi-box-arrow-right"></i><span>Logout</span>
             </button>
-
         </form>
-
     </div>
-
 </nav>
 
 <main class="content">
@@ -481,29 +360,353 @@
 
 @RenderSection("Modals", required: false)
 
-<script>
+<!-- ═══════════════════════════════════════
+     PROFILE MODAL — Admin / Teacher / Cashier only
+     (Student uses the dedicated Profile page)
+════════════════════════════════════════ -->
+@if (role != "Student")
+{
+    <!-- Profile Info Modal -->
+    <div class="modal fade" id="headerProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:440px;">
+            <div class="modal-content" style="border-radius:20px;border:none;overflow:hidden;">
 
-    const menuBtn = document.getElementById("menuBtn");
-    const sidebar = document.getElementById("sidebar");
-    const overlay = document.getElementById("overlay");
+                <!-- Coloured banner -->
+                <div style="height:80px;background:@modalBanner;"></div>
 
-    menuBtn?.addEventListener("click", () => {
+                <div style="padding:0 1.5rem 1.4rem;position:relative;">
 
-        sidebar.classList.toggle("show");
-        overlay.classList.toggle("show");
+                    <!-- Avatar with photo picker -->
+                    <div class="modal-av-wrap" style="margin-top:-44px;margin-bottom:.8rem;"
+                         onclick="document.getElementById('modalPhotoInput').click()">
+                        <div id="modalAvatarCircle"
+                             style="width:88px;height:88px;border-radius:50%;border:4px solid #fff;
+                                    background:@modalAccent;color:#fff;font-size:2rem;font-weight:700;
+                                    display:flex;align-items:center;justify-content:center;
+                                    overflow:hidden;position:relative;box-shadow:0 4px 16px rgba(0,0,0,.18);">
+                            <span id="modalInitials">@initials</span>
+                            <img id="modalAvatarImg" src="" alt=""
+                                 style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" />
+                            <div class="modal-av-overlay"
+                                 style="position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.42);
+                                        display:flex;flex-direction:column;align-items:center;justify-content:center;
+                                        opacity:0;transition:.2s;font-size:.6rem;font-weight:600;gap:3px;color:#fff;">
+                                <i class="bi bi-camera-fill" style="font-size:1.1rem;"></i>
+                                <span>Change</span>
+                            </div>
+                        </div>
+                        <input type="file" id="modalPhotoInput" accept="image/*" style="display:none;" />
+                    </div>
 
-    });
+                    <div style="font-size:1.1rem;font-weight:800;color:#2C2C2C;margin-bottom:2px;">@displayName</div>
+                    <div style="font-size:.75rem;color:#9CA3AF;margin-bottom:1rem;">@role</div>
 
-    overlay?.addEventListener("click", () => {
+                    <hr style="border-color:#F3F4F6;margin-bottom:1rem;" />
 
-        sidebar.classList.remove("show");
-        overlay.classList.remove("show");
+                    <!-- Info rows -->
+                    <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1rem;">
+                        <div style="display:flex;align-items:center;gap:10px;padding:.5rem .8rem;background:#F8F9FA;border-radius:10px;">
+                            <i class="bi bi-person-fill" style="color:#9CA3AF;width:16px;font-size:.9rem;"></i>
+                            <div>
+                                <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:.4px;">Full Name</div>
+                                <div style="font-size:.85rem;font-weight:600;color:#2C2C2C;">@displayName</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:.5rem .8rem;background:#F8F9FA;border-radius:10px;">
+                            <i class="bi bi-at" style="color:#9CA3AF;width:16px;font-size:.9rem;"></i>
+                            <div>
+                                <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:.4px;">Username</div>
+                                <div style="font-size:.85rem;font-weight:600;color:#2C2C2C;">@username</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;padding:.5rem .8rem;background:#F8F9FA;border-radius:10px;">
+                            <i class="bi bi-shield-fill" style="color:#9CA3AF;width:16px;font-size:.9rem;"></i>
+                            <div>
+                                <div style="font-size:.62rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;letter-spacing:.4px;">Role</div>
+                                <div style="font-size:.85rem;font-weight:600;color:#2C2C2C;">@role</div>
+                            </div>
+                        </div>
+                    </div>
 
-    });
+                    <!-- Change Password button -->
+                    <button type="button"
+                            class="w-100"
+                            data-bs-dismiss="modal"
+                            data-bs-toggle="modal"
+                            data-bs-target="#headerChangePassModal"
+                            style="background:@modalAccent;color:#fff;border:none;border-radius:10px;
+                                   padding:9px;font-weight:600;font-size:.85rem;font-family:'Poppins',sans-serif;">
+                        <i class="bi bi-key-fill me-1"></i> Change Password
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</script>
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="headerChangePassModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+            <div class="modal-content" style="border-radius:16px;border:none;">
+                <div class="modal-header" style="border-bottom:1px solid #F3F4F6;padding:1.1rem 1.4rem;">
+                    <h6 class="modal-title fw-bold mb-0">
+                        <i class="bi bi-key-fill me-2" style="color:@modalAccent;"></i>Change Password
+                    </h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
+                <form asp-controller="Account" asp-action="ChangePassword" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="UserId"   value="@userId" />
+                    <input type="hidden" name="UserRole" value="@role" />
+                    <div class="modal-body" style="padding:1.2rem 1.4rem;">
+                        @if (TempData["HeaderPassError"] != null)
+                        {
+                            <div class="alert alert-danger py-2 small border-0 rounded-3 mb-3">
+                                <i class="bi bi-exclamation-triangle me-1"></i>@TempData["HeaderPassError"]
+                            </div>
+                        }
+                        @if (TempData["HeaderPassSuccess"] != null)
+                        {
+                            <div class="alert alert-success py-2 small border-0 rounded-3 mb-3">
+                                <i class="bi bi-check-circle me-1"></i>@TempData["HeaderPassSuccess"]
+                            </div>
+                        }
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Current Password</label>
+                            <div class="input-group">
+                                <input type="password" name="CurrentPassword" id="hCurrPass" class="form-control" placeholder="Current password" required />
+                                <button type="button" class="btn btn-outline-secondary" onclick="hToggle('hCurrPass','hCurrIcon')">
+                                    <i class="bi bi-eye" id="hCurrIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">New Password</label>
+                            <div class="input-group">
+                                <input type="password" name="NewPassword" id="hNewPass" class="form-control" placeholder="New password" required minlength="6" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="hToggle('hNewPass','hNewIcon')">
+                                    <i class="bi bi-eye" id="hNewIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mb-1">
+                            <label class="form-label fw-semibold small">Confirm New Password</label>
+                            <div class="input-group">
+                                <input type="password" name="ConfirmPassword" id="hConfPass" class="form-control" placeholder="Confirm password" required minlength="6" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="hToggle('hConfPass','hConfIcon')">
+                                    <i class="bi bi-eye" id="hConfIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid #F3F4F6;padding:.9rem 1.4rem;">
+                        <button type="button" class="btn btn-light rounded-3 fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit"
+                                style="background:@modalAccent;color:#fff;border:none;border-radius:10px;
+                                       padding:8px 20px;font-weight:600;font-family:'Poppins',sans-serif;">
+                            <i class="bi bi-check-lg me-1"></i> Update
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ── SIDEBAR TOGGLE ──
+const menuBtn = document.getElementById("menuBtn");
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+
+menuBtn?.addEventListener("click", () => {
+    sidebar.classList.toggle("show");
+    overlay.classList.toggle("show");
+});
+overlay?.addEventListener("click", () => {
+    sidebar.classList.remove("show");
+    overlay.classList.remove("show");
+});
+
+// ── PROFILE PHOTO SYNC FROM localStorage ──
+(function () {
+    const role = '@role';
+    const uid  = '@userId';
+    if (!uid) return;
+    let storageKey;
+    if (role === 'Student')  storageKey = 'profilePhoto_student_' + uid;
+    else if (role === 'Teacher') storageKey = 'profilePhoto_teacher_' + uid;
+    else storageKey = 'profilePhoto_user_' + uid;
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+        const img  = document.getElementById('headerAvatarImg');
+        const init = document.getElementById('headerInitials');
+        if (img) { img.src = saved; img.style.display = 'block'; }
+        if (init) init.style.display = 'none';
+    }
+})();
+
+// ── MODAL PHOTO PICKER (Admin/Teacher/Cashier) ──
+const modalPhotoInput = document.getElementById('modalPhotoInput');
+const modalAvatarImg  = document.getElementById('modalAvatarImg');
+const modalInitials   = document.getElementById('modalInitials');
+
+// Build the modal storage key (matches profile pages)
+(function () {
+    const role = '@role';
+    const uid  = '@userId';
+    if (!uid) return;
+    let modalKey;
+    if (role === 'Teacher') modalKey = 'profilePhoto_teacher_' + uid;
+    else modalKey = 'profilePhoto_user_' + uid;
+    window._modalStorageKey = modalKey;
+})();
+
+// Load saved photo when modal opens
+document.getElementById('headerProfileModal')?.addEventListener('show.bs.modal', function () {
+    const saved = localStorage.getItem(window._modalStorageKey);
+    if (saved && modalAvatarImg) {
+        modalAvatarImg.src = saved;
+        modalAvatarImg.style.display = 'block';
+        if (modalInitials) modalInitials.style.display = 'none';
+    }
+});
+
+modalPhotoInput?.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB.'); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+        const src = e.target.result;
+        // Update modal
+        if (modalAvatarImg)  { modalAvatarImg.src = src; modalAvatarImg.style.display = 'block'; }
+        if (modalInitials)   modalInitials.style.display = 'none';
+        // Update header avatar
+        const hImg  = document.getElementById('headerAvatarImg');
+        const hInit = document.getElementById('headerInitials');
+        if (hImg)  { hImg.src = src; hImg.style.display = 'block'; }
+        if (hInit) hInit.style.display = 'none';
+        // Persist with the correct per-user key
+        if (window._modalStorageKey) localStorage.setItem(window._modalStorageKey, src);
+    };
+    reader.readAsDataURL(file);
+});
+
+// ── PASSWORD TOGGLE (modal) ──
+function hToggle(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (!input || !icon) return;
+    input.type     = input.type === 'password' ? 'text' : 'password';
+    icon.className = input.type === 'password' ? 'bi bi-eye' : 'bi bi-eye-slash';
+}
+
+// ── NOTIFICATIONS ──
+const notifBtn      = document.getElementById('notifBtn');
+const notifDropdown = document.getElementById('notifDropdown');
+const notifBadge    = document.getElementById('notifBadge');
+const notifList     = document.getElementById('notifList');
+const markAllBtn    = document.getElementById('markAllBtn');
+let notifOpen = false;
+
+notifBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    notifOpen = !notifOpen;
+    notifDropdown.classList.toggle('show', notifOpen);
+    if (notifOpen) loadNotifications();
+});
+
+document.addEventListener('click', (e) => {
+    if (!document.getElementById('notifWrap')?.contains(e.target)) {
+        notifOpen = false;
+        notifDropdown?.classList.remove('show');
+    }
+});
+
+function loadNotifications() {
+    fetch('/Notification/GetNotifications')
+        .then(r => r.json())
+        .then(data => {
+            renderNotifications(data);
+            const unread = data.filter(n => !n.isRead).length;
+            notifBadge.classList.toggle('show', unread > 0);
+        })
+        .catch(() => { notifList.innerHTML = '<div class="notif-empty">Could not load notifications.</div>'; });
+}
+
+function renderNotifications(items) {
+    if (!items || items.length === 0) {
+        notifList.innerHTML = `<div class="notif-empty">
+            <i class="bi bi-bell-slash" style="font-size:2rem;opacity:.25;display:block;margin-bottom:.5rem;"></i>
+            No notifications yet.</div>`;
+        return;
+    }
+    const iconMap = {
+        'attendance': { cls:'ni-red',   icon:'bi-calendar-x-fill' },
+        'grade':      { cls:'ni-blue',  icon:'bi-journal-text' },
+        'system':     { cls:'ni-gray',  icon:'bi-info-circle-fill' },
+        'general':    { cls:'ni-green', icon:'bi-megaphone-fill' }
+    };
+    notifList.innerHTML = items.map(n => {
+        const map = iconMap[n.type] || iconMap['general'];
+        const msg = escHtml((n.message || '').replace(/^\[KEY:[^\]]+\]\s*/, ''));
+        return `
+        <div class="notif-item ${n.isRead ? '' : 'unread'}" onclick="markRead(${n.id}, this)">
+            <div class="notif-icon ${map.cls}"><i class="bi ${map.icon}"></i></div>
+            <div class="notif-text">
+                <div class="notif-title">${escHtml(n.title)}</div>
+                <div class="notif-sub">${msg} · ${formatTime(n.createdAt)}</div>
+            </div>
+            ${!n.isRead ? '<div class="notif-dot"></div>' : ''}
+        </div>`;
+    }).join('');
+}
+
+function markRead(id, el) {
+    fetch('/Notification/MarkRead/' + id, { method:'POST' }).then(() => {
+        el.classList.remove('unread');
+        el.querySelector('.notif-dot')?.remove();
+        notifBadge.classList.toggle('show', document.querySelectorAll('.notif-item.unread').length > 0);
+    });
+}
+
+markAllBtn?.addEventListener('click', () => {
+    fetch('/Notification/MarkAllRead', { method:'POST' }).then(() => {
+        document.querySelectorAll('.notif-item').forEach(el => {
+            el.classList.remove('unread');
+            el.querySelector('.notif-dot')?.remove();
+        });
+        notifBadge.classList.remove('show');
+    });
+});
+
+function formatTime(dateStr) {
+    const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
+    if (diff < 60)    return 'just now';
+    if (diff < 3600)  return Math.floor(diff / 60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+    return Math.floor(diff / 86400) + 'd ago';
+}
+
+function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Badge polling
+setInterval(() => {
+    fetch('/Notification/GetUnreadCount').then(r => r.json())
+        .then(c => notifBadge.classList.toggle('show', c > 0)).catch(() => {});
+}, 60000);
+
+fetch('/Notification/GetUnreadCount').then(r => r.json())
+    .then(c => notifBadge.classList.toggle('show', c > 0)).catch(() => {});
+</script>
 
 @await RenderSectionAsync("Scripts", required: false)
 

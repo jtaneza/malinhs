@@ -1,0 +1,224 @@
+@model MalikongkongNHS.Models.ViewModels.StudentGradeReportVM
+@using Microsoft.AspNetCore.Html
+
+@{
+    ViewData["Title"] = "My Grades";
+    decimal? overallAvg = Model.Subjects.Any(s => s.Average.HasValue)
+        ? Math.Round(Model.Subjects.Where(s => s.Average.HasValue).Average(s => s.Average!.Value), 2)
+        : (decimal?)null;
+}
+
+<style>
+/* ── PAGE ── */
+.page-title { font-size:2rem; font-weight:700; color:#2C2C2C; margin:0; }
+.date-badge  {
+    background:#fff; color:#C8102E; padding:6px 16px; border-radius:20px;
+    font-size:.875rem; font-weight:600; border:1.5px solid rgba(200,16,46,.2);
+}
+
+/* ── HERO CARD ── */
+.hero-card {
+    background:linear-gradient(135deg,#1565C0 0%,#0D47A1 60%,#2C2C2C 100%);
+    border-radius:18px; padding:1.6rem 2rem; color:#fff; margin-bottom:1.5rem;
+    box-shadow:0 4px 20px rgba(21,101,192,.25);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;
+}
+.hero-info h2 { font-size:1.5rem; font-weight:800; margin:0; }
+.hero-info p  { font-size:.88rem; opacity:.8; margin:0; }
+.hero-avg {
+    text-align:center; background:rgba(255,255,255,.15); border-radius:14px;
+    padding:.8rem 1.6rem; backdrop-filter:blur(4px);
+}
+.hero-avg .avg-val { font-size:2.4rem; font-weight:900; line-height:1; }
+.hero-avg .avg-lbl { font-size:.72rem; font-weight:600; opacity:.7; text-transform:uppercase; letter-spacing:.5px; }
+.hero-avg .avg-rmk { font-size:.85rem; font-weight:700; margin-top:4px; }
+
+/* ── GRADE TABLE CARD ── */
+.grade-card {
+    background:#fff; border-radius:16px; padding:1.4rem 1.6rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07); margin-bottom:1.5rem;
+}
+.grade-card h6 {
+    font-weight:700; color:#2C2C2C; border-bottom:2px solid #F1F3F5;
+    padding-bottom:.6rem; margin-bottom:1rem; display:flex; align-items:center; gap:8px;
+}
+
+/* ── TABLE ── */
+.grades-table th {
+    font-size:.71rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:#9CA3AF; border-bottom:1.5px solid #F0F0F0; padding:10px 14px;
+}
+.grades-table td { font-size:.86rem; padding:10px 14px; vertical-align:middle; border-bottom:1px solid #F8F9FA; color:#374151; }
+.grades-table tbody tr:last-child td { border-bottom:none; }
+.grades-table tbody tr:hover td { background:#FAFAFA; }
+
+/* Score badge */
+.gb {
+    display:inline-block; padding:3px 11px; border-radius:8px;
+    font-weight:700; font-size:.83rem; min-width:46px; text-align:center;
+}
+.gb-pass { background:rgba(46,125,50,.1); color:#2E7D32; }
+.gb-fail { background:rgba(200,16,46,.1); color:#C8102E; }
+.gb-none { background:#F3F4F6; color:#9CA3AF; }
+
+/* Overall average row */
+.avg-row td { font-weight:800; background:#F8FAFF !important; color:#2C2C2C; border-top:2px solid #E0E7FF; }
+
+/* Remarks badge */
+.rmk-pass { background:rgba(46,125,50,.1); color:#2E7D32; padding:3px 12px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.rmk-fail { background:rgba(200,16,46,.1); color:#C8102E; padding:3px 12px; border-radius:20px; font-size:.75rem; font-weight:700; }
+.rmk-none { color:#9CA3AF; font-size:.82rem; }
+
+/* Stat mini cards */
+.mini-stat {
+    background:#fff; border-radius:14px; padding:1rem 1.4rem;
+    box-shadow:0 2px 10px rgba(0,0,0,.07); text-align:center;
+}
+.mini-stat-val { font-size:2rem; font-weight:900; line-height:1; }
+.mini-stat-lbl { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#9CA3AF; margin-top:4px; }
+</style>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="page-title">My Grades</h1>
+        <p class="text-muted mb-0">Your academic performance report.</p>
+    </div>
+    <span class="date-badge"><i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+</div>
+
+<!-- HERO CARD -->
+<div class="hero-card mb-4">
+    <div class="hero-info">
+        <h2><i class="bi bi-mortarboard-fill me-2"></i>@Model.StudentName</h2>
+        <p class="mt-1">
+            <i class="bi bi-building me-1"></i>@Model.SectionName &nbsp;·&nbsp;
+            Grade @Model.GradeLevel
+        </p>
+    </div>
+    @if (overallAvg.HasValue)
+    {
+        <div class="hero-avg">
+            <div class="avg-val">@overallAvg.Value.ToString("0.00")</div>
+            <div class="avg-lbl">Overall Average</div>
+            <div class="avg-rmk">@(overallAvg >= 75 ? "✓ Passing" : "✗ Failing")</div>
+        </div>
+    }
+</div>
+
+<!-- MINI STAT CARDS -->
+@{
+    int passCount = Model.Subjects.Count(s => s.Average.HasValue && s.Average >= 75);
+    int failCount = Model.Subjects.Count(s => s.Average.HasValue && s.Average < 75);
+    int pendCount = Model.Subjects.Count(s => !s.Average.HasValue);
+}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+        <div class="mini-stat">
+            <div class="mini-stat-val" style="color:#2E7D32">@passCount</div>
+            <div class="mini-stat-lbl">Subjects Passing</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="mini-stat">
+            <div class="mini-stat-val" style="color:#C8102E">@failCount</div>
+            <div class="mini-stat-lbl">Subjects Failing</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="mini-stat">
+            <div class="mini-stat-val" style="color:#9CA3AF">@pendCount</div>
+            <div class="mini-stat-lbl">Pending</div>
+        </div>
+    </div>
+</div>
+
+<!-- GRADES TABLE -->
+<div class="grade-card">
+    <h6>
+        <i class="bi bi-journal-text text-primary"></i>
+        Grade Report — All Subjects
+    </h6>
+
+    @if (!Model.Subjects.Any())
+    {
+        <p class="text-muted mb-0">
+            <i class="bi bi-info-circle me-1"></i>No grades have been entered yet.
+        </p>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table grades-table mb-0">
+                <thead>
+    <tr>
+        <th style="width:30%">Subject</th>
+        <th style="width:13%" class="text-center">1st Term</th>
+        <th style="width:13%" class="text-center">2nd Term</th>
+        <th style="width:13%" class="text-center">3rd Term</th>
+        <th style="width:11%" class="text-center">Average</th>
+        <th style="width:11%" class="text-center">Remarks</th>
+    </tr>
+</thead>
+                <tbody>
+                    @foreach (var s in Model.Subjects)
+                    {
+                        <tr>
+                            <td class="fw-semibold"><i class="bi bi-book me-2 text-primary"></i>@s.SubjectName</td>
+<td class="text-center">@SBadge(s.Q1)</td>
+<td class="text-center">@SBadge(s.Q2)</td>
+<td class="text-center">@SBadge(s.Q3)</td>
+                            <td class="text-center">
+                                @if (s.Average.HasValue)
+                                {
+                                    <span class="gb @(s.Average >= 75 ? "gb-pass" : "gb-fail") fw-bold">
+                                        @s.Average.Value.ToString("0.00")
+                                    </span>
+                                }
+                                else { <span class="gb gb-none">—</span> }
+                            </td>
+                            <td class="text-center">
+                                @if (!s.Average.HasValue)
+                                { <span class="rmk-none">Pending</span> }
+                                else if (s.Average >= 75)
+                                { <span class="rmk-pass">Passed</span> }
+                                else
+                                { <span class="rmk-fail">Failed</span> }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (overallAvg.HasValue)
+                {
+                    <tfoot>
+                        <tr class="avg-row">
+                            <td colspan="4" class="text-end pe-3" style="font-size:.82rem;color:#6C757D;">
+                                Overall Average:
+                            </td>
+                            <td class="text-center">
+                                <span class="gb @(overallAvg >= 75 ? "gb-pass" : "gb-fail")">
+                                    @overallAvg.Value.ToString("0.00")
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                @if (overallAvg >= 75)
+                                { <span class="rmk-pass">Passing</span> }
+                                else
+                                { <span class="rmk-fail">Failing</span> }
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+    }
+</div>
+
+@functions {
+    IHtmlContent SBadge(decimal? score)
+    {
+        if (!score.HasValue) return new HtmlString("<span class=\"gb gb-none\">—</span>");
+        string cls = score >= 75 ? "gb-pass" : "gb-fail";
+        return new HtmlString($"<span class=\"gb {cls}\">{score.Value:0.00}</span>");
+    }
+}

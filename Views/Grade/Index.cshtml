@@ -1,0 +1,266 @@
+@model MalikongkongNHS.Models.ViewModels.GradeIndexVM
+@using Microsoft.AspNetCore.Html
+
+@{
+    ViewData["Title"] = "Grades";
+    var termLabels = new[] { "", "1st Term", "2nd Term", "3rd Term" };
+}
+
+<style>
+/* ── PAGE ── */
+.page-title { font-size:2rem; font-weight:700; color:#2C2C2C; margin:0; }
+.date-badge {
+    background:#fff; color:#C8102E; padding:6px 16px; border-radius:20px;
+    font-size:.875rem; font-weight:600; border:1.5px solid rgba(200,16,46,.2);
+}
+
+/* ── CONTROLS BAR ── */
+.controls-bar {
+    background:#fff; border-radius:14px; padding:.85rem 1.2rem;
+    box-shadow:0 2px 10px rgba(0,0,0,.07); margin-bottom:1.5rem;
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.ctrl-label { font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:#9CA3AF; white-space:nowrap; }
+.ctrl-select {
+    border:1.5px solid #dee2e6; border-radius:10px; font-size:.84rem;
+    font-weight:600; padding:6px 12px; cursor:pointer; background:#fff;
+    transition:border-color .2s;
+}
+.ctrl-select:focus { outline:none; border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.08); }
+
+/* ── TERM PILLS ── */
+.quarter-pills { display:flex; gap:6px; flex-wrap:wrap; }
+.q-pill {
+    padding:5px 18px; border-radius:20px; font-size:.82rem; font-weight:700;
+    border:1.5px solid #dee2e6; background:#F9FAFB; color:#374151;
+    cursor:pointer; text-decoration:none; transition:all .2s;
+}
+.q-pill:hover { border-color:#C8102E; color:#C8102E; background:#fff5f5; }
+.q-pill.active { background:#C8102E; color:#fff; border-color:#C8102E; }
+
+/* ── SUBJECT CARD ── */
+.subject-card {
+    background:#fff; border-radius:16px; padding:1.4rem 1.6rem;
+    box-shadow:0 2px 12px rgba(0,0,0,.07); margin-bottom:1.5rem;
+    border-left:4px solid #1565C0;
+}
+.subject-card.finalized { border-left-color:#2E7D32; }
+.subject-title { font-size:1.1rem; font-weight:700; color:#2C2C2C; margin:0; }
+.badge-finalized {
+    background:rgba(46,125,50,.1); color:#2E7D32; padding:3px 12px;
+    border-radius:20px; font-size:.72rem; font-weight:700;
+    display:inline-flex; align-items:center; gap:4px;
+}
+.badge-pending {
+    background:rgba(217,119,6,.1); color:#D97706; padding:3px 12px;
+    border-radius:20px; font-size:.72rem; font-weight:700;
+    display:inline-flex; align-items:center; gap:4px;
+}
+
+/* ── TABLE ── */
+.grade-table th {
+    font-size:.71rem; font-weight:700; text-transform:uppercase; letter-spacing:.5px;
+    color:#9CA3AF; border-bottom:1.5px solid #F0F0F0; padding:9px 12px;
+}
+.grade-table td { font-size:.84rem; padding:9px 12px; vertical-align:middle; border-bottom:1px solid #F8F9FA; color:#374151; }
+.grade-table tbody tr:last-child td { border-bottom:none; }
+.grade-table tbody tr:hover td { background:#FAFAFA; }
+
+.score-badge {
+    display:inline-block; padding:3px 10px; border-radius:8px;
+    font-weight:700; font-size:.82rem; min-width:46px; text-align:center;
+}
+.score-pass { background:rgba(46,125,50,.1); color:#2E7D32; }
+.score-fail { background:rgba(200,16,46,.1); color:#C8102E; }
+.score-none { background:#F3F4F6; color:#9CA3AF; }
+
+.btn-enter {
+    background:#1565C0; color:#fff; border:none; border-radius:9px;
+    padding:6px 16px; font-size:.82rem; font-weight:600; text-decoration:none;
+    display:inline-flex; align-items:center; gap:5px; transition:.2s;
+}
+.btn-enter:hover { background:#0D47A1; color:#fff; }
+.btn-finalize {
+    background:#2E7D32; color:#fff; border:none; border-radius:9px;
+    padding:6px 16px; font-size:.82rem; font-weight:600; cursor:pointer; transition:.2s;
+    display:inline-flex; align-items:center; gap:5px;
+}
+.btn-finalize:hover { background:#1B5E20; color:#fff; }
+
+.empty-state { text-align:center; padding:3.5rem; color:#9CA3AF; }
+.empty-state i { font-size:3.5rem; opacity:.25; }
+</style>
+
+<!-- HEADER -->
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h1 class="page-title">Grades</h1>
+        <p class="text-muted mb-0">
+            Section: <strong>@Model.SectionName</strong> &nbsp;|&nbsp;
+            Grade @Model.GradeLevel &nbsp;|&nbsp;
+            @(Model.IsAdviser ? "Advisory Class" : "Subject Teacher")
+        </p>
+    </div>
+    <span class="date-badge"><i class="bi bi-calendar3 me-1"></i>@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 border-0 mb-3">
+        <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 border-0 mb-3">
+        <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Error"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- CONTROLS BAR -->
+<div class="controls-bar">
+    @if (Model.AvailableSections.Count > 1)
+    {
+        <span class="ctrl-label"><i class="bi bi-grid-3x3-gap me-1"></i>Section:</span>
+        <select class="ctrl-select" onchange="switchSection(this.value)">
+            @foreach (var s in Model.AvailableSections)
+            {
+                <option value="@s.SectionId" selected="@(s.SectionId == Model.SectionId)">
+                    @s.SectionName — Grade @s.GradeLevel @(s.IsAdviser ? "(Adviser)" : "(Subject)")
+                </option>
+            }
+        </select>
+        <div class="vr mx-1" style="opacity:.2;"></div>
+    }
+
+    <span class="ctrl-label"><i class="bi bi-layers me-1"></i>Term:</span>
+    <div class="quarter-pills">
+        @for (int t = 1; t <= 3; t++)
+        {
+            var label = termLabels[t];
+            var isActive = Model.Quarter == t ? "active" : "";
+            var url = $"/Grade/Index?sectionId={Model.SectionId}&quarter={t}";
+            <a href="@url" class="q-pill @isActive">@label</a>
+        }
+    </div>
+</div>
+
+@if (!Model.SubjectGroups.Any())
+{
+    <div class="empty-state">
+        <i class="bi bi-journal-x"></i>
+        <h5 class="mt-3">No Subjects Found</h5>
+        <p>No subjects have been assigned to you for this section. Contact the admin.</p>
+    </div>
+}
+else
+{
+    @foreach (var subj in Model.SubjectGroups)
+    {
+        var currentTermLabel = termLabels[Model.Quarter];
+        <div class="subject-card @(subj.IsFinalized ? "finalized" : "")">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <h5 class="subject-title">
+                        <i class="bi bi-book-fill me-2 @(subj.IsFinalized ? "text-success" : "text-primary")"></i>
+                        @subj.SubjectName
+                    </h5>
+                    @if (subj.IsFinalized)
+                    {
+                        <span class="badge-finalized"><i class="bi bi-lock-fill"></i> Finalized</span>
+                    }
+                    else
+                    {
+                        <span class="badge-pending"><i class="bi bi-pencil"></i> Draft</span>
+                    }
+                </div>
+                <div class="d-flex gap-2">
+                    @if (!subj.IsFinalized)
+                    {
+                        <a class="btn-enter"
+                           href="/Grade/Enter?sectionId=@Model.SectionId&subjectId=@subj.SubjectId&quarter=@Model.Quarter">
+                            <i class="bi bi-pencil-square"></i> Enter Grades
+                        </a>
+                        @if (subj.Students.Any(s => s.Q1.HasValue || s.Q2.HasValue || s.Q3.HasValue))
+                        {
+                            <form asp-action="Finalize" method="post" style="display:inline"
+                                  onsubmit="return confirm('Finalize grades for @subj.SubjectName – @currentTermLabel? This cannot be undone.')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="sectionId" value="@Model.SectionId" />
+                                <input type="hidden" name="subjectId" value="@subj.SubjectId" />
+                                <input type="hidden" name="quarter"   value="@Model.Quarter" />
+                                <button type="submit" class="btn-finalize">
+                                    <i class="bi bi-lock-fill"></i> Finalize
+                                </button>
+                            </form>
+                        }
+                    }
+                </div>
+            </div>
+
+            @if (!subj.Students.Any())
+            {
+                <p class="text-muted mb-0"><i class="bi bi-info-circle me-1"></i>No students enrolled.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table grade-table mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width:14%">LRN</th>
+                                <th style="width:32%">Full Name</th>
+                                <th style="width:14%" class="text-center">1st Term</th>
+                                <th style="width:14%" class="text-center">2nd Term</th>
+                                <th style="width:14%" class="text-center">3rd Term</th>
+                                <th style="width:12%" class="text-center">Avg</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var st in subj.Students)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@st.LRN</td>
+                                    <td>@st.FullName</td>
+                                    <td class="text-center">@ScoreBadge(st.Q1)</td>
+                                    <td class="text-center">@ScoreBadge(st.Q2)</td>
+                                    <td class="text-center">@ScoreBadge(st.Q3)</td>
+                                    <td class="text-center">
+                                        @if (st.Average.HasValue)
+                                        {
+                                            <span class="score-badge @(st.Average >= 75 ? "score-pass" : "score-fail")">
+                                                @st.Average.Value.ToString("0.00")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="score-badge score-none">—</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    }
+}
+
+@functions {
+    IHtmlContent ScoreBadge(decimal? score)
+    {
+        if (!score.HasValue)
+            return new HtmlString("<span class=\"score-badge score-none\">—</span>");
+        string cls = score >= 75 ? "score-pass" : "score-fail";
+        return new HtmlString($"<span class=\"score-badge {cls}\">{score.Value:0.00}</span>");
+    }
+}
+
+<script>
+    function switchSection(sectionId) {
+        window.location.href = '/Grade/Index?sectionId=' + sectionId + '&quarter=@Model.Quarter';
+    }
+</script>

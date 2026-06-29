@@ -20,19 +20,22 @@ namespace MalikongkongNHS.Repositories.Implementations
                            .Include(s => s.Section)
                            .ToList();
         }
-public List<Section> GetSections()
-{
-    return _context.Sections
-        .Select(s => new Section
+
+        public List<Section> GetSections()
         {
-            SectionId = s.SectionId,
-            SectionName = s.SectionName ?? "No Section"
-        })
-        .ToList();
-}
+            return _context.Sections
+                .Select(s => new Section
+                {
+                    SectionId   = s.SectionId,
+                    SectionName = s.SectionName ?? "No Section"
+                })
+                .ToList();
+        }
+
         public Student? GetById(int id)
         {
             return _context.Students
+                           .Include(s => s.Section)   // <-- FIXED: loads GradeLevel & SectionName
                            .FirstOrDefault(x => x.StudentId == id);
         }
 

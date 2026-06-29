@@ -21,6 +21,7 @@ namespace MalikongkongNHS.Data
         public DbSet<GradeLevel> GradeLevels { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Activity> Activities { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         // DASHBOARD MODULES
         public DbSet<ClassEntity> Classes { get; set; }
@@ -29,5 +30,6 @@ namespace MalikongkongNHS.Data
         public DbSet<Grade> Grades { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<SectionSubject> SectionSubjects { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
     }
 }

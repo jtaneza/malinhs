@@ -7,7 +7,9 @@ namespace MalikongkongNHS.Models.ViewModels
         public int SectionId { get; set; }
         public string SectionName { get; set; } = string.Empty;
         public string GradeLevel { get; set; } = string.Empty;
+        public string Adviser { get; set; } = string.Empty;
         public int Capacity { get; set; }
+        public bool IsAdviser { get; set; }      // true = advisory class, false = subject teacher only
         public List<StudentListItemVM> Students { get; set; } = new();
     }
 

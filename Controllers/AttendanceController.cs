@@ -16,32 +16,83 @@ namespace MalikongkongNHS.Controllers
         }
 
         // ── helpers ──────────────────────────────────────────────
-        private async Task<(Teacher? teacher, Section? section)> GetTeacherSectionAsync()
+
+        /// <summary>
+        /// Returns all sections this teacher is associated with
+        /// (advisory OR subject-teacher via SectionSubject).
+        /// </summary>
+        private async Task<List<SectionSwitcherItemVM>> GetTeacherSectionsAsync(Teacher teacher)
         {
+            var advisorySectionIds = await _context.Sections
+                .Where(s => s.IsActive && s.Adviser == teacher.FullName)
+                .Select(s => s.SectionId)
+                .ToListAsync();
+
+            var subjectSectionIds = await _context.SectionSubjects
+                .Where(ss => ss.TeacherId == teacher.TeacherId)
+                .Select(ss => ss.SectionId)
+                .Distinct()
+                .ToListAsync();
+
+            var allIds = advisorySectionIds.Union(subjectSectionIds).Distinct().ToList();
+
+            var sections = await _context.Sections
+                .Where(s => s.IsActive && allIds.Contains(s.SectionId))
+                .OrderByDescending(s => advisorySectionIds.Contains(s.SectionId))
+                .ThenBy(s => s.SectionName)
+                .ToListAsync();
+
+            return sections.Select(s => new SectionSwitcherItemVM
+            {
+                SectionId   = s.SectionId,
+                SectionName = s.SectionName,
+                GradeLevel  = s.GradeLevel ?? "—",
+                IsAdviser   = advisorySectionIds.Contains(s.SectionId)
+            }).ToList();
+        }
+
+        // ── INDEX ─────────────────────────────────────────────────
+        public async Task<IActionResult> Index(int? sectionId)
+        {
+            if (HttpContext.Session.GetString("Username") == null)
+                return RedirectToAction("Login", "Account");
+
             var teacherId = HttpContext.Session.GetInt32("UserId");
 
             var teacher = await _context.Teachers
                 .FirstOrDefaultAsync(t => t.TeacherId == teacherId);
 
-            if (teacher == null) return (null, null);
+            if (teacher == null)
+                return View(new AttendanceIndexVM { SectionName = "No Section Assigned" });
+
+            // Get all sections this teacher handles
+            var availableSections = await GetTeacherSectionsAsync(teacher);
+
+            if (!availableSections.Any())
+                return View(new AttendanceIndexVM
+                {
+                    SectionName       = "No Section Assigned",
+                    AvailableSections = availableSections
+                });
+
+            // Resolve which section to show:
+            // - Use sectionId from query if valid, else default to first (advisory first)
+            SectionSwitcherItemVM selectedInfo;
+            if (sectionId.HasValue && availableSections.Any(s => s.SectionId == sectionId.Value))
+                selectedInfo = availableSections.First(s => s.SectionId == sectionId.Value);
+            else
+                selectedInfo = availableSections.First();
 
             var section = await _context.Sections
                 .Include(s => s.Students.Where(st => st.IsActive))
-                .FirstOrDefaultAsync(s => s.IsActive && s.Adviser == teacher.FullName);
+                .FirstOrDefaultAsync(s => s.SectionId == selectedInfo.SectionId);
 
-            return (teacher, section);
-        }
-
-        // ── INDEX ─────────────────────────────────────────────────
-        public async Task<IActionResult> Index()
-        {
-            if (HttpContext.Session.GetString("Username") == null)
-                return RedirectToAction("Login", "Account");
-
-            var (teacher, section) = await GetTeacherSectionAsync();
-
-            if (teacher == null || section == null)
-                return View(new AttendanceIndexVM { SectionName = "No Section Assigned" });
+            if (section == null)
+                return View(new AttendanceIndexVM
+                {
+                    SectionName       = "Section Not Found",
+                    AvailableSections = availableSections
+                });
 
             var today = DateTime.Today;
 
@@ -95,12 +146,14 @@ namespace MalikongkongNHS.Controllers
             {
                 SectionId            = section.SectionId,
                 SectionName          = section.SectionName,
+                IsAdviser            = selectedInfo.IsAdviser,
                 AttendanceTakenToday = todayRecords.Any(),
                 PresentToday         = todayRecords.Count(r => r.Status == "Present"),
                 AbsentToday          = todayRecords.Count(r => r.Status == "Absent"),
                 LateToday            = todayRecords.Count(r => r.Status == "Late"),
                 ExcusedToday         = todayRecords.Count(r => r.Status == "Excused"),
                 TotalStudents        = section.Students.Count,
+                AvailableSections    = availableSections,
                 StudentSummaries     = summaries,
                 RecentHistory        = recentHistory
             };
@@ -109,14 +162,36 @@ namespace MalikongkongNHS.Controllers
         }
 
         // ── TAKE ATTENDANCE (GET) ─────────────────────────────────
-        public async Task<IActionResult> Take()
+        public async Task<IActionResult> Take(int? sectionId)
         {
             if (HttpContext.Session.GetString("Username") == null)
                 return RedirectToAction("Login", "Account");
 
-            var (teacher, section) = await GetTeacherSectionAsync();
+            var teacherId = HttpContext.Session.GetInt32("UserId");
 
-            if (teacher == null || section == null)
+            var teacher = await _context.Teachers
+                .FirstOrDefaultAsync(t => t.TeacherId == teacherId);
+
+            if (teacher == null)
+                return RedirectToAction("Index");
+
+            var availableSections = await GetTeacherSectionsAsync(teacher);
+
+            // Resolve section
+            SectionSwitcherItemVM? selectedInfo = null;
+            if (sectionId.HasValue)
+                selectedInfo = availableSections.FirstOrDefault(s => s.SectionId == sectionId.Value);
+            if (selectedInfo == null)
+                selectedInfo = availableSections.FirstOrDefault();
+
+            if (selectedInfo == null)
+                return RedirectToAction("Index");
+
+            var section = await _context.Sections
+                .Include(s => s.Students.Where(st => st.IsActive))
+                .FirstOrDefaultAsync(s => s.SectionId == selectedInfo.SectionId);
+
+            if (section == null)
                 return RedirectToAction("Index");
 
             var today = DateTime.Today;
@@ -126,8 +201,8 @@ namespace MalikongkongNHS.Controllers
 
             if (alreadyTaken)
             {
-                TempData["Warning"] = "Attendance for today has already been submitted.";
-                return RedirectToAction("Index");
+                TempData["Warning"] = "Attendance for today has already been submitted for this section.";
+                return RedirectToAction("Index", new { sectionId = section.SectionId });
             }
 
             var vm = new AttendanceTakeVM
@@ -166,7 +241,7 @@ namespace MalikongkongNHS.Controllers
             if (alreadyTaken)
             {
                 TempData["Warning"] = "Attendance for today has already been submitted.";
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { sectionId = vm.SectionId });
             }
 
             var records = vm.Students.Select(s => new Attendance
@@ -182,13 +257,13 @@ namespace MalikongkongNHS.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = "Attendance submitted successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { sectionId = vm.SectionId });
         }
 
         // ── EDIT STATUS (POST) ────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditStatus(int attendanceId, string status)
+        public async Task<IActionResult> EditStatus(int attendanceId, string status, int? returnSectionId)
         {
             if (HttpContext.Session.GetString("Username") == null)
                 return RedirectToAction("Login", "Account");
@@ -206,7 +281,7 @@ namespace MalikongkongNHS.Controllers
                 TempData["Error"] = "Attendance record not found.";
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", new { sectionId = returnSectionId });
         }
 
         // ── STUDENT VIEW ──────────────────────────────────────────

@@ -60,7 +60,7 @@
     .btn-submit:hover { background: #a00d24; }
 </style>
 
-<a asp-action="Index" class="back-link">
+<a asp-action="Index" asp-route-sectionId="@Model.SectionId" class="back-link">
     <i class="bi bi-arrow-left"></i> Back to Attendance
 </a>
 
@@ -121,7 +121,7 @@
             <button type="submit" class="btn-submit">
                 <i class="bi bi-send me-2"></i>Submit Attendance
             </button>
-            <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            <a asp-action="Index" asp-route-sectionId="@Model.SectionId" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>

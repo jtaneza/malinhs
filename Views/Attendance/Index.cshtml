@@ -106,26 +106,53 @@
 </style>
 
 <!-- HEADER -->
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
     <div>
         <h1 class="page-title">Attendance</h1>
         <p class="text-muted mb-0">
             Section: <strong>@Model.SectionName</strong> &nbsp;|&nbsp;
+            @(Model.IsAdviser ? "Advisory Class" : "Subject Teacher") &nbsp;|&nbsp;
             @DateTime.Today.ToString("MMMM dd, yyyy")
         </p>
     </div>
-    @if (Model.AttendanceTakenToday)
-    {
-        <span class="btn-take disabled-btn">
-            <i class="bi bi-check-circle me-1"></i> Attendance Taken
-        </span>
-    }
-    else
-    {
-        <a asp-action="Take" class="btn-take">
-            <i class="bi bi-clipboard-check me-1"></i> Take Attendance
-        </a>
-    }
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+        @if (Model.AvailableSections.Count > 1)
+        {
+            <div style="position:relative;">
+                <select id="sectionSwitcher" class="form-select form-select-sm"
+                        style="min-width:190px;border-radius:10px;border:1.5px solid #dee2e6;font-size:.84rem;font-weight:600;"
+                        onchange="switchSection(this.value)">
+                    @foreach (var s in Model.AvailableSections)
+                    {
+                        if (s.SectionId == Model.SectionId)
+                        {
+                            <option value="@s.SectionId" selected="selected">
+                                @s.SectionName — Grade @s.GradeLevel @(s.IsAdviser ? "(Adviser)" : "(Subject)")
+                            </option>
+                        }
+                        else
+                        {
+                            <option value="@s.SectionId">
+                                @s.SectionName — Grade @s.GradeLevel @(s.IsAdviser ? "(Adviser)" : "(Subject)")
+                            </option>
+                        }
+                    }
+                </select>
+            </div>
+        }
+        @if (Model.AttendanceTakenToday)
+        {
+            <span class="btn-take disabled-btn">
+                <i class="bi bi-check-circle me-1"></i> Attendance Taken
+            </span>
+        }
+        else if (Model.SectionId > 0)
+        {
+            <a asp-action="Take" asp-route-sectionId="@Model.SectionId" class="btn-take">
+                <i class="bi bi-clipboard-check me-1"></i> Take Attendance
+            </a>
+        }
+    </div>
 </div>
 
 @if (TempData["Success"] != null)
@@ -330,6 +357,7 @@
             <form asp-action="EditStatus" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="attendanceId" id="editAttendanceId" />
+                <input type="hidden" name="returnSectionId" value="@Model.SectionId" />
 
                 <div class="modal-body p-4">
                     <p class="mb-3">
@@ -493,4 +521,9 @@
         summaryFilter();
         historyFilter();
     });
+
+    // ── Section switcher ───────────────────────────────────────
+    function switchSection(sectionId) {
+        window.location.href = '/Attendance/Index?sectionId=' + sectionId;
+    }
 </script>

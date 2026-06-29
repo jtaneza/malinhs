@@ -10,9 +10,21 @@ namespace MalikongkongNHS.Models.ViewModels
         public int    LateToday            { get; set; }
         public int    ExcusedToday         { get; set; }
         public int    TotalStudents        { get; set; }
+        public bool   IsAdviser            { get; set; }   // whether teacher is adviser of selected section
+
+        // All sections this teacher is associated with (for dropdown)
+        public List<SectionSwitcherItemVM> AvailableSections { get; set; } = new();
 
         public List<StudentAttendanceSummaryVM> StudentSummaries { get; set; } = new();
         public List<AttendanceHistoryDayVM>     RecentHistory    { get; set; } = new();
+    }
+
+    public class SectionSwitcherItemVM
+    {
+        public int    SectionId   { get; set; }
+        public string SectionName { get; set; } = string.Empty;
+        public string GradeLevel  { get; set; } = string.Empty;
+        public bool   IsAdviser   { get; set; }
     }
 
     public class StudentAttendanceSummaryVM

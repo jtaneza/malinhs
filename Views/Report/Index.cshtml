@@ -1,0 +1,525 @@
+@using MalikongkongNHS.Controllers
+@model TeacherReportVM
+
+@{
+    ViewData["Title"] = "Reports";
+    var activeTab = Model.SelectedTab ?? "attendance";
+    var secId     = Model.SelectedSection?.SectionId;
+    var dfrom     = Model.DateFrom ?? "";
+    var dto       = Model.DateTo   ?? "";
+    bool hasRange = !string.IsNullOrEmpty(dfrom) || !string.IsNullOrEmpty(dto);
+}
+
+<style>
+    .report-page, .report-page table, .report-page input,
+    .report-page button, .report-page select {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-weight: 400;
+    }
+
+    .page-title    { color:#1a1a2e; font-size:2.2rem; font-weight:800; letter-spacing:-.5px; margin:0; }
+    .page-subtitle { color:#9CA3AF; font-size:.88rem; margin-top:4px; }
+
+    /* Section picker */
+    .section-picker { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .sec-btn {
+        padding:6px 16px; border-radius:20px; border:1.5px solid #E5E7EB;
+        background:#fff; font-size:.8rem; font-weight:600; color:#6B7280;
+        cursor:pointer; text-decoration:none; transition:all .15s;
+        display:inline-flex; align-items:center; gap:5px;
+    }
+    .sec-btn:hover  { border-color:#C8102E; color:#C8102E; }
+    .sec-btn.active { background:#C8102E; border-color:#C8102E; color:#fff; }
+
+    /* Date range bar */
+    .date-bar {
+        background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,.07);
+        padding:1rem 1.25rem; margin-bottom:1rem;
+        display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+    }
+    .date-bar label {
+        font-size:.73rem; font-weight:700; color:#9CA3AF;
+        text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;
+    }
+    .date-input {
+        border:1.5px solid #E5E7EB; border-radius:9px;
+        padding:7px 11px; font-size:.85rem; font-weight:400; color:#374151;
+        outline:none; background:#FAFAFA; cursor:pointer;
+        transition:border-color .2s; min-width:150px;
+    }
+    .date-input:focus { border-color:#C8102E; box-shadow:0 0 0 3px rgba(200,16,46,.08); }
+
+    .preset-btns { display:flex; gap:.4rem; flex-wrap:wrap; }
+    .preset-btn {
+        padding:5px 12px; border-radius:20px; border:1.5px solid #E5E7EB;
+        background:#fff; font-size:.75rem; font-weight:600; color:#6B7280;
+        cursor:pointer; transition:all .15s; white-space:nowrap;
+    }
+    .preset-btn:hover  { border-color:#C8102E; color:#C8102E; background:#FFF5F7; }
+    .preset-btn.active { background:#C8102E; border-color:#C8102E; color:#fff; }
+
+    .btn-apply {
+        background:#C8102E; color:#fff; border:none;
+        padding:7px 20px; border-radius:9px; font-size:.82rem; font-weight:600;
+        cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+        transition:background .2s, transform .15s;
+        box-shadow:0 4px 12px rgba(200,16,46,.25);
+    }
+    .btn-apply:hover { background:#a50d25; transform:translateY(-1px); }
+    .btn-clear {
+        background:#F3F4F6; color:#6B7280; border:none;
+        padding:7px 14px; border-radius:9px; font-size:.82rem; font-weight:500;
+        cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:4px;
+        transition:background .15s;
+    }
+    .btn-clear:hover { background:#E5E7EB; color:#374151; }
+
+    .range-badge {
+        background:rgba(21,101,192,.1); color:#1565C0;
+        padding:3px 10px; border-radius:99px;
+        font-size:.72rem; font-weight:700; white-space:nowrap;
+    }
+
+    /* Stat cards */
+    .stat-card {
+        background:#fff; border-radius:16px; padding:1.4rem 1.8rem;
+        box-shadow:0 2px 12px rgba(0,0,0,.07);
+        display:flex; align-items:center; justify-content:space-between; gap:1rem;
+        border-left:4px solid transparent;
+        transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .stat-card:hover { transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.12); }
+    .stat-card-students { border-left-color:#C8102E; }
+    .stat-card-green    { border-left-color:#2E7D32; }
+    .stat-card-amber    { border-left-color:#D97706; }
+    .stat-card-blue     { border-left-color:#1565C0; }
+
+    .stat-left { display:flex; flex-direction:column; align-items:flex-start; gap:.5rem; }
+    .stat-icon {
+        width:48px; height:48px; border-radius:12px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.4rem; flex-shrink:0;
+    }
+    .icon-red   { background:rgba(200,16,46,.10);  color:#C8102E; }
+    .icon-green { background:rgba(46,125,50,.10);  color:#2E7D32; }
+    .icon-amber { background:rgba(217,119,6,.10);  color:#D97706; }
+    .icon-blue  { background:rgba(21,101,192,.10); color:#1565C0; }
+
+    .stat-label  {
+        font-size:.72rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:.6px; color:#9CA3AF; white-space:nowrap;
+    }
+    .stat-number {
+        font-size:3rem; font-weight:900; line-height:1;
+        letter-spacing:-2px; margin-left:auto; flex-shrink:0;
+    }
+
+    /* Tab bar */
+    .tab-bar { display:flex; gap:.25rem; border-bottom:2px solid #F3F4F6; margin-bottom:1.25rem; }
+    .tab-link {
+        padding:9px 20px; font-size:.83rem; font-weight:600; color:#9CA3AF;
+        border:none; background:none; cursor:pointer; text-decoration:none;
+        border-bottom:3px solid transparent; margin-bottom:-2px; transition:color .15s;
+    }
+    .tab-link.active { color:#C8102E; border-bottom-color:#C8102E; }
+    .tab-link:hover  { color:#C8102E; }
+
+    /* Report card */
+    .report-card { background:#fff; border-radius:14px; box-shadow:0 4px 20px rgba(0,0,0,.07); overflow:hidden; }
+    .report-card-header {
+        padding:1rem 1.3rem; border-bottom:1.5px solid #F3F4F6;
+        display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:.5rem;
+    }
+    .report-card-title { font-size:.95rem; font-weight:700; color:#1a1a2e; display:flex; align-items:center; gap:7px; }
+
+    .btn-download {
+        background:#2E7D32; color:#fff; border:none; padding:7px 16px;
+        border-radius:8px; font-size:.78rem; font-weight:600; cursor:pointer;
+        display:inline-flex; align-items:center; gap:5px; text-decoration:none;
+        transition:background .15s;
+    }
+    .btn-download:hover { background:#1B5E20; color:#fff; }
+    .btn-print {
+        background:#F3F4F6; color:#6B7280; border:none; padding:7px 14px;
+        border-radius:8px; font-size:.78rem; font-weight:600; cursor:pointer;
+        display:inline-flex; align-items:center; gap:5px; transition:background .15s;
+    }
+    .btn-print:hover { background:#E5E7EB; }
+
+    /* Table */
+    .rep-table { width:100%; border-collapse:collapse; }
+    .rep-table thead th {
+        font-size:.70rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:.07em; color:#B0B7C3; padding:10px 16px;
+        background:#FAFAFA; white-space:nowrap; border-bottom:1.5px solid #F3F4F6;
+    }
+    .rep-table tbody tr { border-bottom:1px solid #F9FAFB; transition:background .12s; }
+    .rep-table tbody tr:hover { background:#FFF5F7; }
+    .rep-table tbody tr:last-child { border-bottom:none; }
+    .rep-table td { padding:13px 16px; font-size:.875rem; color:#374151; vertical-align:middle; }
+
+    .st-name { font-weight:600; color:#111827; font-size:.9rem; }
+    .st-id   { font-size:.75rem; color:#9CA3AF; }
+
+    .grade-pill {
+        display:inline-block; padding:2px 10px; border-radius:99px;
+        font-size:.78rem; font-weight:700; min-width:46px; text-align:center;
+    }
+    .gp-high { background:rgba(46,125,50,.1);  color:#2E7D32; }
+    .gp-mid  { background:rgba(217,119,6,.1);  color:#D97706; }
+    .gp-low  { background:rgba(200,16,46,.1);  color:#C8102E; }
+    .gp-none { color:#B0B7C3; font-size:.8rem; }
+
+    .empty-state { text-align:center; padding:3.5rem 1rem; color:#B0B7C3; }
+    .empty-state i { font-size:2.5rem; display:block; margin-bottom:.75rem; }
+    .empty-state p { font-size:.9rem; margin:0; }
+
+    @@media print {
+        .no-print { display:none !important; }
+        .report-card { box-shadow:none; border:1px solid #ddd; }
+        body { background:#fff; }
+    }
+</style>
+
+<div class="report-page">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h1 class="page-title">
+                <i class="bi bi-bar-chart-line-fill me-2 text-danger" style="font-size:1.7rem;vertical-align:middle;"></i>Reports
+            </h1>
+            <p class="page-subtitle">Filter by date, switch sections, and download your class reports</p>
+        </div>
+    </div>
+
+    @if (!Model.Sections.Any())
+    {
+        <div class="report-card">
+            <div class="empty-state">
+                <i class="bi bi-folder2-open"></i>
+                <p>No active sections assigned to you yet.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- SECTION PICKER -->
+        <div class="section-picker no-print">
+            @foreach (var sec in Model.Sections)
+            {
+                var isSel = Model.SelectedSection?.SectionId == sec.SectionId;
+                <a href="/Report/Index?sectionId=@sec.SectionId&tab=@activeTab&dateFrom=@dfrom&dateTo=@dto"
+                   class="sec-btn @(isSel ? "active" : "")">
+                    <i class="bi bi-people-fill"></i>
+                    @sec.SectionName
+                    @if (!string.IsNullOrEmpty(sec.GradeLevel))
+                    {
+                        <span style="opacity:.7;font-size:.70rem;">(@sec.GradeLevel)</span>
+                    }
+                </a>
+            }
+        </div>
+
+        <!-- DATE RANGE BAR -->
+        <form method="get" action="/Report/Index" class="no-print" id="filterForm">
+            <input type="hidden" name="sectionId" value="@secId" />
+            <input type="hidden" name="tab"       value="@activeTab" />
+            <div class="date-bar">
+                <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+                    <label>From</label>
+                    <input type="date" name="dateFrom" id="dateFrom" class="date-input" value="@dfrom"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <label>To</label>
+                    <input type="date" name="dateTo" id="dateTo" class="date-input" value="@dto"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="preset-btns" id="presetBtns">
+                    <button type="button" class="preset-btn" data-days="7">This Week</button>
+                    <button type="button" class="preset-btn" data-days="30">Last 30 Days</button>
+                    <button type="button" class="preset-btn" data-days="90">Last 3 Months</button>
+                    <button type="button" class="preset-btn" data-month="true">This Month</button>
+                </div>
+
+                <div style="display:flex;gap:.4rem;align-items:center;margin-left:auto;flex-wrap:wrap;">
+                    @if (hasRange)
+                    {
+                        <span class="range-badge no-print">
+                            <i class="bi bi-funnel-fill me-1"></i>
+                            @(string.IsNullOrEmpty(dfrom) ? "All" : DateTime.Parse(dfrom).ToString("MMM dd")) –
+                            @(string.IsNullOrEmpty(dto)   ? "Today" : DateTime.Parse(dto).ToString("MMM dd, yyyy"))
+                        </span>
+                        <a href="/Report/Index?sectionId=@secId&tab=@activeTab" class="btn-clear">
+                            <i class="bi bi-x-circle"></i> Clear
+                        </a>
+                    }
+                    <button type="submit" class="btn-apply">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- STAT CARDS -->
+        <div class="row g-3 mb-4 no-print">
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-blue">
+                    <div class="stat-left">
+                        <div class="stat-icon icon-blue"><i class="bi bi-people-fill"></i></div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-number" style="color:#1565C0;">@Model.TotalStudents</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-green">
+                    <div class="stat-left">
+                        <div class="stat-icon icon-green"><i class="bi bi-calendar-check-fill"></i></div>
+                        <div class="stat-label">Avg Attendance@(hasRange ? "*" : "")</div>
+                    </div>
+                    <div class="stat-number" style="color:#2E7D32;">
+                        @(Model.ClassAvgAttendance.HasValue ? Model.ClassAvgAttendance + "%" : "—")
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-amber">
+                    <div class="stat-left">
+                        <div class="stat-icon icon-amber"><i class="bi bi-journal-text"></i></div>
+                        <div class="stat-label">Avg Grade</div>
+                    </div>
+                    <div class="stat-number" style="color:#D97706;">
+                        @(Model.ClassAvgGrade.HasValue ? Model.ClassAvgGrade.ToString() : "—")
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card stat-card-students">
+                    <div class="stat-left">
+                        <div class="stat-icon icon-red"><i class="bi bi-building"></i></div>
+                        <div class="stat-label">Section</div>
+                    </div>
+                    <div class="stat-number" style="color:#C8102E;font-size:1.6rem;letter-spacing:0;">
+                        @(Model.SelectedSection?.SectionName ?? "—")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB BAR -->
+        <div class="tab-bar no-print">
+            <a href="/Report/Index?sectionId=@secId&tab=attendance&dateFrom=@dfrom&dateTo=@dto"
+               class="tab-link @(activeTab == "attendance" ? "active" : "")">
+                <i class="bi bi-calendar-check me-1"></i>Attendance
+            </a>
+            <a href="/Report/Index?sectionId=@secId&tab=grades&dateFrom=@dfrom&dateTo=@dto"
+               class="tab-link @(activeTab == "grades" ? "active" : "")">
+                <i class="bi bi-journal-text me-1"></i>Grades
+            </a>
+        </div>
+
+        <!-- ── ATTENDANCE TAB ── -->
+        @if (activeTab == "attendance")
+        {
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div class="report-card-title">
+                        <i class="bi bi-calendar-check-fill text-danger"></i>
+                        Attendance Summary — @(Model.SelectedSection?.SectionName)
+                        @if (hasRange)
+                        {
+                            <span class="range-badge">
+                                @(string.IsNullOrEmpty(dfrom) ? "All" : DateTime.Parse(dfrom).ToString("MMM dd")) –
+                                @(string.IsNullOrEmpty(dto)   ? "Today" : DateTime.Parse(dto).ToString("MMM dd, yyyy"))
+                            </span>
+                        }
+                    </div>
+                    <div class="d-flex gap-2 no-print">
+                        <a class="btn-download"
+                           href="/Report/Download?sectionId=@secId&tab=attendance&dateFrom=@dfrom&dateTo=@dto">
+                            <i class="bi bi-download"></i> Download CSV
+                        </a>
+                        <button class="btn-print" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                @if (!Model.AttendanceRows.Any() || Model.AttendanceRows.All(r => r.TotalDays == 0))
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-calendar-x"></i>
+                        <p>No attendance records found@(hasRange ? " for the selected date range" : "").</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="rep-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>Total Days</th>
+                                    <th>Present</th>
+                                    <th>Absent</th>
+                                    <th>Late</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int ai = 1; }
+                                @foreach (var row in Model.AttendanceRows)
+                                {
+                                    var st = row.Rate >= 90 ? "Good" : row.Rate >= 75 ? "Fair" : "At Risk";
+                                    var sc = row.Rate >= 90 ? "gp-high" : row.Rate >= 75 ? "gp-mid" : "gp-low";
+                                    <tr>
+                                        <td style="color:#9CA3AF;font-size:.8rem;font-weight:600;">@(ai++)</td>
+                                        <td>
+                                            <div class="st-name">@row.FullName</div>
+                                            <div class="st-id">ID #@row.StudentId</div>
+                                        </td>
+                                        <td style="font-weight:600;">@row.TotalDays</td>
+                                        <td style="color:#2E7D32;font-weight:600;">@row.Present</td>
+                                        <td style="color:#C8102E;font-weight:600;">@row.Absent</td>
+                                        <td style="color:#D97706;font-weight:600;">@row.Late</td>
+                                        <td><span class="grade-pill @sc">@st</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- ── GRADES TAB ── -->
+        @if (activeTab == "grades")
+        {
+            <div class="report-card">
+                <div class="report-card-header">
+                    <div class="report-card-title">
+                        <i class="bi bi-journal-text text-danger"></i>
+                        Grade Summary — @(Model.SelectedSection?.SectionName)
+                    </div>
+                    <div class="d-flex gap-2 no-print">
+                        <a class="btn-download"
+                           href="/Report/Download?sectionId=@secId&tab=grades">
+                            <i class="bi bi-download"></i> Download CSV
+                        </a>
+                        <button class="btn-print" onclick="window.print()">
+                            <i class="bi bi-printer"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                @if (!Model.GradeRows.Any())
+                {
+                    <div class="empty-state">
+                        <i class="bi bi-journal-x"></i>
+                        <p>No grade records found for this section.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="rep-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Student</th>
+                                    <th>1st Term</th>
+                                    <th>2nd Term</th>
+                                    <th>3rd Term</th>
+                                    <th>Average</th>
+                                    <th>Remark</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int gi = 1; }
+                                @foreach (var row in Model.GradeRows)
+                                {
+                                    string GP(double? v)
+                                    {
+                                        if (!v.HasValue) return "<span class=\"gp-none\">—</span>";
+                                        var c = v >= 85 ? "gp-high" : v >= 75 ? "gp-mid" : "gp-low";
+                                        return $"<span class=\"grade-pill {c}\">{v}</span>";
+                                    }
+                                    var rm = !row.Average.HasValue ? "No Data"
+                                           : row.Average >= 85 ? "Outstanding"
+                                           : row.Average >= 75 ? "Satisfactory" : "Needs Improvement";
+                                    var rc = !row.Average.HasValue ? "gp-none"
+                                           : row.Average >= 85 ? "gp-high"
+                                           : row.Average >= 75 ? "gp-mid" : "gp-low";
+                                    <tr>
+                                        <td style="color:#9CA3AF;font-size:.8rem;font-weight:600;">@(gi++)</td>
+                                        <td>
+                                            <div class="st-name">@row.FullName</div>
+                                            <div class="st-id">ID #@row.StudentId</div>
+                                        </td>
+                                        <td>@Html.Raw(GP(row.Q1))</td>
+                                        <td>@Html.Raw(GP(row.Q2))</td>
+                                        <td>@Html.Raw(GP(row.Q3))</td>
+                                        <td>
+                                            @if (row.Average.HasValue)
+                                            {
+                                                var ac = row.Average >= 85 ? "#2E7D32" : row.Average >= 75 ? "#D97706" : "#C8102E";
+                                                <span style="font-size:1rem;font-weight:900;color:@ac;">@row.Average</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="gp-none">—</span>
+                                            }
+                                        </td>
+                                        <td><span class="grade-pill @rc">@rm</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+</div>
+
+<script>
+const form    = document.getElementById('filterForm');
+const fromInp = document.getElementById('dateFrom');
+const toInp   = document.getElementById('dateTo');
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const today = new Date();
+        const toStr = today.toISOString().split('T')[0];
+        let fromDate;
+
+        if (this.dataset.month) {
+            fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
+        } else {
+            fromDate = new Date(today);
+            fromDate.setDate(today.getDate() - parseInt(this.dataset.days) + 1);
+        }
+        const fromStr = fromDate.toISOString().split('T')[0];
+
+        fromInp.value = fromStr;
+        toInp.value   = toStr;
+
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+
+        form.submit();
+    });
+});
+
+form.addEventListener('submit', function (e) {
+    const from = fromInp.value;
+    const to   = toInp.value;
+    if (from && to && from > to) {
+        alert('Start date must be before end date.');
+        e.preventDefault();
+    }
+});
+</script>

@@ -144,3 +144,12 @@ C:\xampp\htdocs\MALI\MalikongkongNHS\obj\Debug\net8.0\refint\MalikongkongNHS.dll
 C:\xampp\htdocs\MALI\MalikongkongNHS\obj\Debug\net8.0\MalikongkongNHS.pdb
 C:\xampp\htdocs\MALI\MalikongkongNHS\obj\Debug\net8.0\MalikongkongNHS.genruntimeconfig.cache
 C:\xampp\htdocs\MALI\MalikongkongNHS\obj\Debug\net8.0\ref\MalikongkongNHS.dll
+C:\tmp\MalikongkongNHS-audit-build\appsettings.Development.json
+C:\tmp\MalikongkongNHS-audit-build\appsettings.json
+C:\tmp\MalikongkongNHS-audit-build\appsettings.Production.json
+C:\tmp\MalikongkongNHS-audit-build\global.json
+C:\tmp\MalikongkongNHS-audit-build\MalikongkongNHS.staticwebassets.runtime.json
+C:\tmp\MalikongkongNHS-audit-build\MalikongkongNHS.deps.json
+C:\tmp\MalikongkongNHS-audit-build\MalikongkongNHS.runtimeconfig.json
+C:\tmp\MalikongkongNHS-audit-build\MalikongkongNHS.dll
+C:\tmp\MalikongkongNHS-audit-build\MalikongkongNHS.pdb

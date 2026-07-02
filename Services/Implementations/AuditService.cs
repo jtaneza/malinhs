@@ -13,16 +13,17 @@ namespace MalikongkongNHS.Services.Implementations
             _context = context;
         }
 
-        public void Log(string performedBy, string role, string action, string module, string description, string? ipAddress = null)
+        public void Log(string performedBy, string role, string action, string module, string description, string? ipAddress = null, int userId = 0)
         {
             var log = new AuditLog
             {
+                UserId      = userId,
                 PerformedBy = performedBy,
                 Role        = role,
                 Action      = action,
                 Module      = module,
                 Description = description,
-                IpAddress   = ipAddress,
+                IpAddress   = ipAddress ?? "",
                 Timestamp   = DateTime.Now
             };
 

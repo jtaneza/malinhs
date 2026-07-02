@@ -34,7 +34,9 @@ namespace MalikongkongNHS.Controllers
         // ================= ADMIN =================
         private IActionResult AdminDashboard()
         {
-            // ── Basic counts ──────────────────────────────────────────
+            var today = DateTime.Today;
+
+            // ── Basic counts ─────────────────────────────────────────────
             var vm = new DashboardVM
             {
                 TotalStudents = _context.Students.Count(),
@@ -43,24 +45,42 @@ namespace MalikongkongNHS.Controllers
                 TotalUsers    = _context.Users.Count()
             };
 
-            // ── Monthly enrollment chart (last 8 months) ─────────────
-            var today = DateTime.Today;
+            // ── Monthly enrollment trend (last 8 months, cumulative) ──────
+            // We derive the count for each past month by taking the current
+            // total and subtracting any student-Create audit events that
+            // happened AFTER that month — giving a realistic growth curve.
+            var eightMonthsAgo = new DateTime(today.AddMonths(-7).Year, today.AddMonths(-7).Month, 1);
+
+            var createTimestamps = _context.AuditLogs
+                .Where(a => a.Action == "Create" && a.Module == "Student")
+                .Select(a => a.Timestamp)
+                .ToList();
+
+            int currentTotal = _context.Students.Count();
+
             for (int i = 7; i >= 0; i--)
             {
-                var month = today.AddMonths(-i);
+                var month    = today.AddMonths(-i);
+                var monthEnd = new DateTime(month.Year, month.Month,
+                                   DateTime.DaysInMonth(month.Year, month.Month), 23, 59, 59);
+
+                // Estimated count at end of this month:
+                // current total minus students created AFTER this month
+                int addedAfter = createTimestamps.Count(t => t > monthEnd);
+                int estimated  = Math.Max(0, currentTotal - addedAfter);
+
                 vm.MonthLabels.Add(month.ToString("MMM yyyy"));
-                // Show real active student count (same value each month — reflects current roster)
-                vm.MonthlyEnrollment.Add(_context.Students.Count(s => s.IsActive));
+                vm.MonthlyEnrollment.Add(estimated);
             }
 
-            // ── Recent activities (real DB) ───────────────────────────
-            vm.RecentActivities = _context.Activities
-                .OrderByDescending(a => a.CreatedAt)
+            // ── Recent activities from AuditLogs ─────────────────────────
+            vm.RecentActivities = _context.AuditLogs
+                .OrderByDescending(a => a.Timestamp)
                 .Take(10)
-                .Select(a => new MalikongkongNHS.Models.ViewModels.RecentActivityItem
+                .Select(a => new RecentActivityItem
                 {
-                    Message   = a.Message,
-                    CreatedAt = a.CreatedAt
+                    Message   = a.PerformedBy + " [" + a.Role + "] " + a.Action + "d " + a.Module + ": " + a.Description,
+                    CreatedAt = a.Timestamp
                 })
                 .ToList();
 

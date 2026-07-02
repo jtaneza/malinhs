@@ -6,10 +6,14 @@
     int pages    = ViewBag.Pages;
     int total    = ViewBag.Total;
     int pageSize = ViewBag.PageSize;
+    int creates  = ViewBag.Creates;
+    int updates  = ViewBag.Updates;
+    int deletes  = ViewBag.Deletes;
 }
 
 <style>
-    .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: #2C2C2C; }
+    /* ── TYPOGRAPHY ──────────────────────────────────── */
+    .page-title { font-size: 1.8rem; font-weight: 800; margin: 0; color: #1a1a2e; letter-spacing: -0.5px; }
 
     /* ── FILTER CARD ─────────────────────────────── */
     .filter-card {
@@ -19,7 +23,6 @@
         box-shadow: 0 2px 10px rgba(0,0,0,.06);
         margin-bottom: 1.5rem;
     }
-
     .filter-card .form-select,
     .filter-card .form-control {
         border-radius: 10px;
@@ -28,12 +31,25 @@
         height: 38px;
         transition: border-color .2s;
     }
-
     .filter-card .form-select:focus,
     .filter-card .form-control:focus {
         border-color: #C8102E;
         box-shadow: 0 0 0 3px rgba(200,16,46,.08);
     }
+    .btn-today {
+        background: #e0e7ff;
+        color: #3730a3;
+        border: none;
+        height: 38px;
+        padding: 0 14px;
+        border-radius: 10px;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: .2s;
+    }
+    .btn-today:hover { background: #c7d2fe; }
 
     /* ── STAT CARDS ──────────────────────────────── */
     .stat-card {
@@ -60,9 +76,9 @@
         font-size: 1.2rem; flex-shrink: 0;
     }
     .icon-dark   { background: rgba(44,44,44,.10);   color: #2C2C2C; }
-    .icon-green  { background: rgba(46,125,50,.10);   color: #2E7D32; }
-    .icon-yellow { background: rgba(217,119,6,.10);   color: #D97706; }
-    .icon-red    { background: rgba(200,16,46,.10);   color: #C8102E; }
+    .icon-green  { background: rgba(46,125,50,.10);  color: #2E7D32; }
+    .icon-yellow { background: rgba(217,119,6,.10);  color: #D97706; }
+    .icon-red    { background: rgba(200,16,46,.10);  color: #C8102E; }
     .stat-label  { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #9CA3AF; }
     .stat-number { font-size: 2rem; font-weight: 900; line-height: 1; letter-spacing: -1px; }
 
@@ -73,7 +89,6 @@
         box-shadow: 0 2px 10px rgba(0,0,0,.06);
         overflow: hidden;
     }
-
     .table-card .card-header-custom {
         padding: 1rem 1.5rem;
         font-weight: 700;
@@ -86,7 +101,6 @@
         flex-wrap: wrap;
         gap: .5rem;
     }
-
     .table-card .table { margin: 0; }
     .table-card .table th {
         background: #f8f9fa;
@@ -166,21 +180,74 @@
     .search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #9CA3AF; font-size: .82rem; pointer-events: none; }
     .search-wrap input { padding-left: 32px; }
 
-    /* ── CLEAR BTN ───────────────────────────────── */
+    /* ── ACTION BUTTONS ──────────────────────────── */
     .btn-clear {
-        background: #fee2e2;
-        color: #991b1b;
-        border: none;
-        padding: 7px 16px;
-        border-radius: 8px;
-        font-size: .78rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: .2s;
+        background: #fee2e2; color: #991b1b; border: none;
+        padding: 7px 14px; border-radius: 8px; font-size: .78rem;
+        font-weight: 600; cursor: pointer; transition: .2s;
+        display: flex; align-items: center; gap: 4px;
     }
     .btn-clear:hover { background: #fca5a5; }
+    .btn-export {
+        background: #d1fae5; color: #065f46; border: none;
+        padding: 7px 14px; border-radius: 8px; font-size: .78rem;
+        font-weight: 600; cursor: pointer; transition: .2s; text-decoration: none;
+        display: flex; align-items: center; gap: 4px;
+    }
+    .btn-export:hover { background: #a7f3d0; color: #065f46; }
 
     .no-logs { text-align: center; padding: 3rem; color: #9CA3AF; font-size: .9rem; }
+
+    /* ── USERNAME LINK ───────────────────────────── */
+    .user-link {
+        color: #C8102E; text-decoration: none; font-weight: 600;
+        cursor: pointer; border-bottom: 1px dashed rgba(200,16,46,.4);
+        transition: border-color .15s;
+    }
+    .user-link:hover { border-bottom-color: #C8102E; }
+
+    /* ── USER ACTIVITY MODAL ─────────────────────── */
+    #userModal .modal-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #C8102E 100%);
+        color: #fff; border-radius: 14px 14px 0 0;
+    }
+    #userModal .modal-content { border-radius: 14px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    #userModal .modal-body { padding: 0; }
+    .user-modal-stats {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+        padding: 1.2rem 1.5rem; background: #f8fafc; border-bottom: 1px solid #e9ecef;
+    }
+    .ums-card {
+        background: #fff; border-radius: 10px; padding: .8rem 1rem;
+        text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.07);
+    }
+    .ums-num  { font-size: 1.4rem; font-weight: 900; line-height: 1.1; }
+    .ums-lbl  { font-size: .65rem; font-weight: 700; text-transform: uppercase; color: #9CA3AF; margin-top: 2px; }
+
+    .timeline-wrap { padding: 1rem 1.5rem; max-height: 420px; overflow-y: auto; }
+    .tl-item {
+        display: flex; gap: 12px; padding: .75rem 0;
+        border-bottom: 1px solid #f1f3f5; position: relative;
+    }
+    .tl-item:last-child { border-bottom: none; }
+    .tl-dot {
+        width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: .8rem;
+        margin-top: 2px;
+    }
+    .tl-body { flex: 1; min-width: 0; }
+    .tl-meta { font-size: .7rem; color: #9CA3AF; margin-bottom: 2px; }
+    .tl-desc { font-size: .8rem; color: #374151; }
+    .loading-spin { text-align: center; padding: 2rem; color: #9CA3AF; }
+    .empty-state  { text-align: center; padding: 2rem; color: #9CA3AF; font-size: .85rem; }
+
+    /* ── ACTIVE USER FILTER INDICATOR ───────────── */
+    .user-filter-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #fee2e2; color: #991b1b; border-radius: 20px;
+        padding: 4px 10px; font-size: .75rem; font-weight: 700;
+    }
+    .user-filter-badge a { color: #991b1b; line-height: 1; }
 </style>
 
 <!-- HEADER -->
@@ -202,13 +269,7 @@
     </div>
 }
 
-<!-- STAT MINI-CARDS -->
-@{
-    var allLogs   = Model.ToList();
-    int creates   = allLogs.Count(l => l.Action == "Create");
-    int updates   = allLogs.Count(l => l.Action == "Update");
-    int deletes   = allLogs.Count(l => l.Action == "Delete");
-}
+<!-- STAT MINI-CARDS — counts come from full DB via ViewBag -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
         <div class="stat-card sc-total">
@@ -256,13 +317,14 @@
                 <label class="form-label fw-semibold" style="font-size:.75rem;">Search</label>
                 <div class="search-wrap">
                     <i class="bi bi-search"></i>
-                    <input type="text" name="search" class="form-control" placeholder="Username or description…"
+                    <input type="text" name="search" id="searchInput" class="form-control"
+                           placeholder="Username or description…"
                            value="@ViewBag.Search" style="padding-left:32px;" />
                 </div>
             </div>
             <div class="col-6 col-md-2">
                 <label class="form-label fw-semibold" style="font-size:.75rem;">Module</label>
-                <select name="module" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                <select name="module" id="moduleSelect" class="form-select" onchange="document.getElementById('filterForm').submit()">
                     @foreach (var m in (string[])ViewBag.Modules)
                     {
                         <option value="@m" selected="@(ViewBag.Module == m ? "selected" : null)">@m</option>
@@ -271,7 +333,7 @@
             </div>
             <div class="col-6 col-md-2">
                 <label class="form-label fw-semibold" style="font-size:.75rem;">Action</label>
-                <select name="action" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                <select name="action" id="actionSelect" class="form-select" onchange="document.getElementById('filterForm').submit()">
                     @foreach (var a in (string[])ViewBag.Actions)
                     {
                         <option value="@a" selected="@(ViewBag.Action == a ? "selected" : null)">@a</option>
@@ -280,7 +342,7 @@
             </div>
             <div class="col-6 col-md-2">
                 <label class="form-label fw-semibold" style="font-size:.75rem;">Role</label>
-                <select name="role" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                <select name="role" id="roleSelect" class="form-select" onchange="document.getElementById('filterForm').submit()">
                     @foreach (var r in (string[])ViewBag.Roles)
                     {
                         <option value="@r" selected="@(ViewBag.Role == r ? "selected" : null)">@r</option>
@@ -289,13 +351,13 @@
             </div>
             <div class="col-6 col-md-1">
                 <label class="form-label fw-semibold" style="font-size:.75rem;">From</label>
-                <input type="date" name="from" class="form-control" value="@ViewBag.From" />
+                <input type="date" name="from" id="fromDate" class="form-control" value="@ViewBag.From" />
             </div>
             <div class="col-6 col-md-1">
                 <label class="form-label fw-semibold" style="font-size:.75rem;">To</label>
-                <input type="date" name="to" class="form-control" value="@ViewBag.To" />
+                <input type="date" name="to" id="toDate" class="form-control" value="@ViewBag.To" />
             </div>
-            <div class="col-12 col-md-1 d-flex gap-2">
+            <div class="col-12 col-md-1 d-flex gap-1">
                 <button type="submit" class="btn btn-sm w-100"
                         style="background:#C8102E;color:#fff;border:none;border-radius:8px;font-weight:600;height:38px;">
                     <i class="bi bi-search"></i>
@@ -306,14 +368,37 @@
                 </a>
             </div>
         </div>
+        <!-- hidden userId field — set when clicking a username -->
+        <input type="hidden" name="userId" id="userIdFilter" value="@ViewBag.UserId" />
     </form>
+
+    <!-- Today quick-filter + user filter indicator -->
+    <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+        <button class="btn-today" onclick="filterToday()">
+            <i class="bi bi-calendar-day me-1"></i>Today's Logs
+        </button>
+        <button class="btn-today" style="background:#f0fdf4;color:#166534;" onclick="filterRole('Admin')">
+            <i class="bi bi-person-badge me-1"></i>Admin Only
+        </button>
+        <button class="btn-today" style="background:#eff6ff;color:#1d4ed8;" onclick="filterRole('Cashier')">
+            <i class="bi bi-cash-coin me-1"></i>Cashier Only
+        </button>
+        @if (!string.IsNullOrWhiteSpace(ViewBag.UserId as string) && ViewBag.UserId != "0")
+        {
+            <span class="user-filter-badge">
+                <i class="bi bi-person-fill"></i>
+                Filtered by User ID: @ViewBag.UserId
+                <a asp-action="Index" title="Clear user filter"><i class="bi bi-x-lg"></i></a>
+            </span>
+        }
+    </div>
 </div>
 
 <!-- TABLE -->
 <div class="table-card">
     <div class="card-header-custom">
         <span><i class="bi bi-clock-history me-2 text-danger"></i>Transaction Logs</span>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="pager-info" style="margin: 0;">
                 @{
                     var showFrom = total == 0 ? 0 : (page - 1) * pageSize + 1;
@@ -321,10 +406,16 @@
                 }
                 Showing @(showFrom)–@(showTo) of @(total)
             </span>
+            <!-- Export PDF -->
+            <a href="@Url.Action("ExportPdf", new { search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To, userId = ViewBag.UserId })"
+               class="btn-export" title="Export current filter results to PDF">
+                <i class="bi bi-download"></i>Export PDF
+            </a>
+            <!-- Clear All -->
             <form asp-action="Clear" method="post" onsubmit="return confirm('Clear ALL audit logs? This cannot be undone.');">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn-clear">
-                    <i class="bi bi-trash me-1"></i>Clear All
+                    <i class="bi bi-trash"></i>Clear All
                 </button>
             </form>
         </div>
@@ -369,7 +460,18 @@
                                     <div style="width:30px;height:30px;border-radius:8px;background:rgba(200,16,46,.10);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                         <i class="bi bi-person-fill" style="color:#C8102E;font-size:.85rem;"></i>
                                     </div>
-                                    <span class="fw-semibold">@log.PerformedBy</span>
+                                    <div>
+                                        <!-- Clicking name opens user activity modal -->
+                                        <span class="user-link"
+                                              onclick="openUserModal('@log.PerformedBy', '@log.UserId')"
+                                              title="View all activity for @log.PerformedBy">
+                                            @log.PerformedBy
+                                        </span>
+                                        @if (log.UserId > 0)
+                                        {
+                                            <div style="font-size:.68rem;color:#9CA3AF;">ID: @log.UserId</div>
+                                        }
+                                    </div>
                                 </div>
                             </td>
                             <td>
@@ -422,18 +524,18 @@
         <div class="pager-wrap">
             <span class="pager-info">Page @(page) of @(pages)</span>
             <div class="d-flex gap-1 flex-wrap">
-                <a href="@Url.Action("Index", new { page = (page - 1), search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To })"
+                <a href="@Url.Action("Index", new { page = (page - 1), search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To, userId = ViewBag.UserId })"
                    class="pg-btn @(page == 1 ? "disabled" : "")">
                     <i class="bi bi-chevron-left"></i>
                 </a>
 
                 @for (int pg = Math.Max(1, page - 2); pg <= Math.Min(pages, page + 2); pg++)
                 {
-                    <a href="@Url.Action("Index", new { page = pg, search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To })"
+                    <a href="@Url.Action("Index", new { page = pg, search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To, userId = ViewBag.UserId })"
                        class="pg-btn @(pg == page ? "active" : "")">@(pg)</a>
                 }
 
-                <a href="@Url.Action("Index", new { page = page + 1, search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To })"
+                <a href="@Url.Action("Index", new { page = page + 1, search = ViewBag.Search, module = ViewBag.Module, action = ViewBag.Action, role = ViewBag.Role, from = ViewBag.From, to = ViewBag.To, userId = ViewBag.UserId })"
                    class="pg-btn @(page == pages ? "disabled" : "")">
                     <i class="bi bi-chevron-right"></i>
                 </a>
@@ -441,3 +543,151 @@
         </div>
     }
 </div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- USER ACTIVITY MODAL -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-3">
+                <div>
+                    <h5 class="modal-title mb-0 fw-bold" id="userModalLabel">
+                        <i class="bi bi-person-circle me-2"></i><span id="modalUsername">–</span>
+                    </h5>
+                    <small style="opacity:.75;font-size:.75rem;">Complete activity history for this account</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Summary Stats -->
+            <div class="user-modal-stats" id="modalStats">
+                <div class="ums-card">
+                    <div class="ums-num" id="ms-total">–</div>
+                    <div class="ums-lbl">Total Actions</div>
+                </div>
+                <div class="ums-card">
+                    <div class="ums-num" style="color:#2E7D32" id="ms-creates">–</div>
+                    <div class="ums-lbl">Creates</div>
+                </div>
+                <div class="ums-card">
+                    <div class="ums-num" style="color:#D97706" id="ms-updates">–</div>
+                    <div class="ums-lbl">Updates</div>
+                </div>
+                <div class="ums-card">
+                    <div class="ums-num" style="color:#C8102E" id="ms-deletes">–</div>
+                    <div class="ums-lbl">Deletes</div>
+                </div>
+            </div>
+            <div style="padding:.5rem 1.5rem;background:#f8fafc;border-bottom:1px solid #e9ecef;font-size:.75rem;color:#6b7280;">
+                <i class="bi bi-clock me-1"></i>Last seen: <span id="ms-lastseen">–</span>
+            </div>
+
+            <!-- Timeline -->
+            <div class="modal-body p-0">
+                <div class="timeline-wrap" id="activityTimeline">
+                    <div class="loading-spin">
+                        <div class="spinner-border spinner-border-sm text-danger me-2" role="status"></div>
+                        Loading activity…
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="border-top:1px solid #f1f3f5;padding:.75rem 1.5rem;">
+                <small class="text-muted me-auto">Showing last 100 actions. <a id="filterByUser" href="#" class="text-danger fw-semibold">View all in table →</a></small>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ── QUICK FILTERS ─────────────────────────────────────────────────
+    function filterToday() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('fromDate').value = today;
+        document.getElementById('toDate').value   = today;
+        document.getElementById('filterForm').submit();
+    }
+
+    function filterRole(role) {
+        document.getElementById('roleSelect').value = role;
+        document.getElementById('filterForm').submit();
+    }
+
+    // ── USER ACTIVITY MODAL ───────────────────────────────────────────
+    function openUserModal(username, userId) {
+        document.getElementById('modalUsername').textContent = username;
+        document.getElementById('activityTimeline').innerHTML =
+            '<div class="loading-spin"><div class="spinner-border spinner-border-sm text-danger me-2" role="status"></div>Loading activity…</div>';
+
+        // Reset stats
+        ['ms-total','ms-creates','ms-updates','ms-deletes'].forEach(id => {
+            document.getElementById(id).textContent = '–';
+        });
+        document.getElementById('ms-lastseen').textContent = '–';
+
+        // "View all in table" link
+        document.getElementById('filterByUser').href =
+            '@Url.Action("Index")' + '?search=' + encodeURIComponent(username);
+
+        // Fetch activity
+        fetch('@Url.Action("GetUserActivity")?username=' + encodeURIComponent(username))
+            .then(r => r.json())
+            .then(data => {
+                // Populate summary
+                const s = data.summary;
+                document.getElementById('ms-total').textContent   = s.totalActions;
+                document.getElementById('ms-creates').textContent = s.creates;
+                document.getElementById('ms-updates').textContent = s.updates;
+                document.getElementById('ms-deletes').textContent = s.deletes;
+                document.getElementById('ms-lastseen').textContent =
+                    s.lastSeen ? new Date(s.lastSeen).toLocaleString('en-PH') : '–';
+
+                // Populate timeline
+                const timeline = document.getElementById('activityTimeline');
+                if (!data.logs || data.logs.length === 0) {
+                    timeline.innerHTML = '<div class="empty-state"><i class="bi bi-inbox" style="font-size:2rem;"></i><p class="mt-2 mb-0">No activity found for this user.</p></div>';
+                    return;
+                }
+
+                timeline.innerHTML = data.logs.map(log => {
+                    const actionConfig = {
+                        'Create': { cls: 'ba-create', dot: 'icon-green', icon: 'bi-plus-circle-fill' },
+                        'Update': { cls: 'ba-update', dot: 'icon-yellow', icon: 'bi-pencil-fill' },
+                        'Delete': { cls: 'ba-delete', dot: 'icon-red', icon: 'bi-trash-fill' },
+                        'Login':  { cls: 'ba-login',  dot: '', icon: 'bi-box-arrow-in-right', dotStyle: 'background:#e0e7ff;color:#3730a3;' },
+                        'Logout': { cls: 'ba-logout', dot: '', icon: 'bi-box-arrow-right',    dotStyle: 'background:#f3f4f6;color:#6b7280;' }
+                    };
+                    const cfg = actionConfig[log.action] || { cls: 'ba-default', dot: '', icon: 'bi-circle', dotStyle: 'background:#f1f5f9;color:#475569;' };
+                    const dotStyle = cfg.dot
+                        ? `class="tl-dot ${cfg.dot}"`
+                        : `class="tl-dot" style="${cfg.dotStyle}"`;
+
+                    return `
+                        <div class="tl-item">
+                            <div ${dotStyle}>
+                                <i class="bi ${cfg.icon}"></i>
+                            </div>
+                            <div class="tl-body">
+                                <div class="tl-meta">
+                                    ${log.timestamp}
+                                    &nbsp;·&nbsp;
+                                    <span class="badge-action ${cfg.cls}">${log.action}</span>
+                                    &nbsp;·&nbsp;
+                                    <span class="badge-module">${log.module}</span>
+                                    ${log.ipAddress ? `&nbsp;·&nbsp;<span style="font-size:.7rem;color:#9CA3AF;">${log.ipAddress}</span>` : ''}
+                                </div>
+                                <div class="tl-desc">${log.description}</div>
+                            </div>
+                        </div>`;
+                }).join('');
+            })
+            .catch(() => {
+                document.getElementById('activityTimeline').innerHTML =
+                    '<div class="empty-state text-danger"><i class="bi bi-exclamation-circle" style="font-size:2rem;"></i><p class="mt-2 mb-0">Failed to load activity. Please try again.</p></div>';
+            });
+
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+    }
+</script>

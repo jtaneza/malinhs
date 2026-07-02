@@ -20,6 +20,7 @@ namespace MalikongkongNHS.Controllers
         private string Who  => HttpContext.Session.GetString("Username") ?? "Unknown";
         private string Role => HttpContext.Session.GetString("Role")     ?? "Unknown";
         private string IP   => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+        private int    UId  => HttpContext.Session.GetInt32("UserId") ?? 0;
 
         // =========================
         // LIST
@@ -47,7 +48,7 @@ namespace MalikongkongNHS.Controllers
 
             _teacherService.Add(teacher);
             _audit.Log(Who, Role, "Create", "Teacher",
-                $"Added teacher: {teacher.FullName} (Email: {teacher.Email})", IP);
+                $"Added teacher: {teacher.FullName} (Email: {teacher.Email})", IP, UId);
             TempData["Success"] = "Teacher added successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -88,7 +89,7 @@ namespace MalikongkongNHS.Controllers
 
             _teacherService.Update(teacher);
             _audit.Log(Who, Role, "Update", "Teacher",
-                $"Updated teacher: {teacher.FullName} (ID: {teacher.TeacherId})", IP);
+                $"Updated teacher: {teacher.FullName} (ID: {teacher.TeacherId})", IP, UId);
             TempData["Success"] = "Teacher updated successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -104,7 +105,7 @@ namespace MalikongkongNHS.Controllers
             var teacher = _teacherService.GetById(id);
             _teacherService.Delete(id);
             _audit.Log(Who, Role, "Delete", "Teacher",
-                $"Deleted teacher ID: {id}" + (teacher != null ? $" ({teacher.FullName})" : ""), IP);
+                $"Deleted teacher ID: {id}" + (teacher != null ? $" ({teacher.FullName})" : ""), IP, UId);
             TempData["Success"] = "Teacher deleted successfully!";
             return RedirectToAction(nameof(Index));
         }

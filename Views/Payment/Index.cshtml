@@ -5,10 +5,45 @@
 
 <style>
     .page-title { font-size: 1.8rem; font-weight: 700; margin: 0; color: var(--primary); }
-    .stat-card { background: #fff; border-radius: 12px; padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); height: 100%; }
-    .stat-card small { color: #868e96; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .stat-card h2 { font-size: 2rem; font-weight: 700; margin: 0; color: var(--primary); }
-    .card-icon { font-size: 2.5rem; color: var(--secondary); opacity: 0.3; }
+    /* ── STAT CARDS — Dashboard style ────────────────────── */
+    .stat-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 1.4rem 1.8rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,.07);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        border-left: 4px solid transparent;
+        transition: transform .2s ease, box-shadow .2s ease;
+        height: 100%;
+    }
+    .stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+    .sc-revenue      { border-left-color: #C8102E; }
+    .sc-paid         { border-left-color: #2E7D32; }
+    .sc-txn          { border-left-color: #D97706; }
+    .sc-today        { border-left-color: #1565C0; }
+
+    .stat-left  { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; }
+    .stat-icon  {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; flex-shrink: 0;
+    }
+    .icon-red    { background: rgba(200,16,46,.10);  color: #C8102E; }
+    .icon-green  { background: rgba(46,125,50,.10);  color: #2E7D32; }
+    .icon-yellow { background: rgba(217,119,6,.10);  color: #D97706; }
+    .icon-blue   { background: rgba(21,101,192,.10); color: #1565C0; }
+
+    .stat-label  {
+        font-size: .72rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .6px; color: #9CA3AF; white-space: nowrap;
+    }
+    .stat-number {
+        font-size: 2.6rem; font-weight: 900; line-height: 1;
+        letter-spacing: -1.5px; margin-left: auto; flex-shrink: 0;
+    }
     .section-card { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
     .nav-tabs .nav-link { color: var(--primary); font-weight: 500; border: none; border-bottom: 3px solid transparent; padding: 10px 20px; }
     .nav-tabs .nav-link.active { color: var(--secondary); border-bottom: 3px solid var(--secondary); background: none; }
@@ -62,45 +97,45 @@
 </div>
 
 <!-- STAT CARDS — fixed: row-cols-2 row-cols-lg-4 so always 2 per row, 4 at lg+ -->
-<div class="row row-cols-2 row-cols-lg-4 g-3 mb-4">
+<div class="row g-3 mb-4">
 
-    <div class="col">
-        <div class="stat-card">
-            <div>
-                <small>Total Revenue</small>
-                <h2>₱@Model.TotalRevenue.ToString("N2")</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card sc-revenue">
+            <div class="stat-left">
+                <div class="stat-icon icon-red"><i class="bi bi-cash-stack"></i></div>
+                <div class="stat-label">Total Revenue</div>
             </div>
-            <i class="bi bi-cash-stack card-icon"></i>
+            <div class="stat-number" style="color:#C8102E">₱@Model.TotalRevenue.ToString("N2")</div>
         </div>
     </div>
 
-    <div class="col">
-        <div class="stat-card">
-            <div>
-                <small>Students with Payments</small>
-                <h2>@Model.PaidStudents</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card sc-paid">
+            <div class="stat-left">
+                <div class="stat-icon icon-green"><i class="bi bi-person-check-fill"></i></div>
+                <div class="stat-label">Students w/ Payments</div>
             </div>
-            <i class="bi bi-person-check-fill card-icon"></i>
+            <div class="stat-number" style="color:#2E7D32">@Model.PaidStudents</div>
         </div>
     </div>
 
-    <div class="col">
-        <div class="stat-card">
-            <div>
-                <small>Total Transactions</small>
-                <h2>@Model.TotalTransactions</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card sc-txn">
+            <div class="stat-left">
+                <div class="stat-icon icon-yellow"><i class="bi bi-arrow-left-right"></i></div>
+                <div class="stat-label">Total Transactions</div>
             </div>
-            <i class="bi bi-arrow-left-right card-icon"></i>
+            <div class="stat-number" style="color:#D97706">@Model.TotalTransactions</div>
         </div>
     </div>
 
-    <div class="col">
-        <div class="stat-card">
-            <div>
-                <small>Revenue Today</small>
-                <h2>₱@Model.RevenueToday.ToString("N2")</h2>
+    <div class="col-6 col-md-3">
+        <div class="stat-card sc-today">
+            <div class="stat-left">
+                <div class="stat-icon icon-blue"><i class="bi bi-graph-up-arrow"></i></div>
+                <div class="stat-label">Revenue Today</div>
             </div>
-            <i class="bi bi-graph-up-arrow card-icon"></i>
+            <div class="stat-number" style="color:#1565C0">₱@Model.RevenueToday.ToString("N2")</div>
         </div>
     </div>
 

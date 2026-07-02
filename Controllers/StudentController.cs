@@ -18,6 +18,7 @@ namespace MalikongkongNHS.Controllers
         private string Who  => HttpContext.Session.GetString("Username") ?? "Unknown";
         private string Role => HttpContext.Session.GetString("Role")     ?? "Unknown";
         private string IP   => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+        private int    UId  => HttpContext.Session.GetInt32("UserId") ?? 0;
 
         // =========================
         // LIST
@@ -51,7 +52,7 @@ namespace MalikongkongNHS.Controllers
             }
             _studentService.Add(student);
             _audit.Log(Who, Role, "Create", "Student",
-                $"Added student: {student.FirstName} {student.LastName} (LRN: {student.LRN})", IP);
+                $"Added student: {student.FirstName} {student.LastName} (LRN: {student.LRN})", IP, UId);
             TempData["Success"] = "Student added successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -80,7 +81,7 @@ namespace MalikongkongNHS.Controllers
             }
             _studentService.Update(student);
             _audit.Log(Who, Role, "Update", "Student",
-                $"Updated student: {student.FirstName} {student.LastName} (ID: {student.StudentId})", IP);
+                $"Updated student: {student.FirstName} {student.LastName} (ID: {student.StudentId})", IP, UId);
             TempData["Success"] = "Student updated successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -96,7 +97,7 @@ namespace MalikongkongNHS.Controllers
             var student = _studentService.GetById(id);
             _studentService.Delete(id);
             _audit.Log(Who, Role, "Delete", "Student",
-                $"Deleted student ID: {id}" + (student != null ? $" ({student.FirstName} {student.LastName})" : ""), IP);
+                $"Deleted student ID: {id}" + (student != null ? $" ({student.FirstName} {student.LastName})" : ""), IP, UId);
             TempData["Success"] = "Student deleted successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -112,7 +113,7 @@ namespace MalikongkongNHS.Controllers
             var student = _studentService.GetById(id);
             _studentService.ToggleStatus(id);
             _audit.Log(Who, Role, "Update", "Student",
-                $"Toggled status for student ID: {id}" + (student != null ? $" ({student.FirstName} {student.LastName})" : ""), IP);
+                $"Toggled status for student ID: {id}" + (student != null ? $" ({student.FirstName} {student.LastName})" : ""), IP, UId);
             TempData["Success"] = "Student status updated successfully!";
             return RedirectToAction(nameof(Index));
         }
@@ -156,7 +157,7 @@ namespace MalikongkongNHS.Controllers
 
             _studentService.Update(student);
             _audit.Log(Who, Role, "Update", "Student",
-                $"Student ID {StudentId} updated their profile.", IP);
+                $"Student ID {StudentId} updated their profile.", IP, UId);
 
             TempData["Success"] = "Profile updated successfully!";
             return RedirectToAction(nameof(Profile));
@@ -188,7 +189,7 @@ namespace MalikongkongNHS.Controllers
             student.Password = NewPassword;
             _studentService.Update(student);
             _audit.Log(Who, Role, "Update", "Student",
-                $"Student ID {StudentId} changed their password.", IP);
+                $"Student ID {StudentId} changed their password.", IP, UId);
 
             TempData["Success"] = "Password updated successfully!";
             return RedirectToAction(nameof(Profile));

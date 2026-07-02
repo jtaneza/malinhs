@@ -13,7 +13,13 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null
+        )
+    ));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
@@ -55,7 +61,7 @@ using (var scope = app.Services.CreateScope())
 
         if (app.Environment.IsDevelopment())
         {
-            var oldMigrations = new[]
+            var knownMigrations = new[]
             {
                 "20260617085138_InitialCreate",
                 "20260617095013_AddSubjectsAndAccountFields",
@@ -66,11 +72,12 @@ using (var scope = app.Services.CreateScope())
                 "20260624152651_AddSectionSubjects",
                 "20260625105955_AddCredentialsToTeacher",
                 "20260626042537_AddTimeAndRoomToSectionSubject",
-                "20260628095813_CreatePaymentsTable"
+                "20260628095813_CreatePaymentsTable",
+                "20260629053845_AddNotifications",
+                "20260629000000_AddAuditLog",
+                "20260701110352_AddAuditLogsProper",
             };
 
-            // Ensure __EFMigrationsHistory exists first
-            // (no interpolation here — safe to keep as ExecuteSqlRaw)
 #pragma warning disable EF1002
             db.Database.ExecuteSqlRaw(@"
                 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES
@@ -80,18 +87,44 @@ using (var scope = app.Services.CreateScope())
                     [ProductVersion] nvarchar(32)  NOT NULL,
                     CONSTRAINT [PK___EFMigrationsHistory] PRIMARY KEY ([MigrationId])
                 );");
-#pragma warning restore EF1002
 
-            // Use ExecuteSql with FormattableString to avoid SQL injection warning
-            foreach (var mig in oldMigrations)
+            db.Database.ExecuteSqlRaw(@"
+                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'AuditLogs')
+                CREATE TABLE [AuditLogs] (
+                    [Id]          INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+                    [UserId]      INT           NOT NULL DEFAULT 0,
+                    [PerformedBy] NVARCHAR(MAX) NOT NULL DEFAULT '',
+                    [Role]        NVARCHAR(MAX) NOT NULL DEFAULT '',
+                    [Action]      NVARCHAR(MAX) NOT NULL DEFAULT '',
+                    [Module]      NVARCHAR(MAX) NOT NULL DEFAULT '',
+                    [Description] NVARCHAR(MAX) NOT NULL DEFAULT '',
+                    [IpAddress]   NVARCHAR(MAX) NOT NULL DEFAULT '',
+                    [Timestamp]   DATETIME2     NOT NULL DEFAULT GETDATE()
+                );");
+
+            db.Database.ExecuteSqlRaw(@"
+                IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                               WHERE TABLE_NAME = 'AuditLogs' AND COLUMN_NAME = 'UserId')
+                    ALTER TABLE [AuditLogs] ADD [UserId] INT NOT NULL DEFAULT 0;");
+
+            db.Database.ExecuteSqlRaw(@"
+                IF EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                           WHERE TABLE_NAME = 'AuditLogs' AND COLUMN_NAME = 'IpAddress'
+                           AND IS_NULLABLE = 'YES')
+                BEGIN
+                    UPDATE [AuditLogs] SET [IpAddress] = '' WHERE [IpAddress] IS NULL;
+                    ALTER TABLE [AuditLogs] ALTER COLUMN [IpAddress] NVARCHAR(MAX) NOT NULL;
+                END");
+
+            foreach (var mig in knownMigrations)
             {
                 db.Database.ExecuteSql($@"
                     IF NOT EXISTS (SELECT 1 FROM [__EFMigrationsHistory] WHERE [MigrationId] = {mig})
                     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
                     VALUES ({mig}, '8.0.11');");
             }
+#pragma warning restore EF1002
 
-            // Now run Migrate() — only truly new migrations will apply
             db.Database.Migrate();
             DbSeeder.Seed(db);
         }
@@ -99,6 +132,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         logger.LogWarning("DB startup skipped due to error: {Message}", ex.Message);
+        logger.LogWarning("DB startup FULL exception: {Exception}", ex.ToString());
     }
 }
 // ───────────────────────────────────────────────────────────────────

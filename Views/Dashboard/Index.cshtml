@@ -160,38 +160,93 @@
 <!-- CHART + RECENT ACTIVITIES -->
 <div class="row mt-4">
 
+    <!-- ── ENROLLMENT TREND CHART ──────────────────────── -->
     <div class="col-lg-8 mb-4">
         <div class="section-card h-100">
-            <div class="card-header-custom">
-                <i class="bi bi-bar-chart-line-fill me-2 text-danger"></i>Student Enrollment Trend
+            <div class="card-header-custom d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-bar-chart-line-fill me-2 text-danger"></i>Student Enrollment Trend</span>
+                <small class="text-muted" style="font-size:.72rem;font-weight:600;">Total enrolled students per month (last 8 months)</small>
             </div>
-            <canvas id="enrollmentChart" height="110"></canvas>
+
+            <div style="position:relative; height:220px;">
+                <canvas id="enrollmentChart"></canvas>
+            </div>
+
+            @{
+                var firstMonth = Model.MonthlyEnrollment.FirstOrDefault();
+                var lastMonth  = Model.MonthlyEnrollment.LastOrDefault();
+                var growth     = lastMonth - firstMonth;
+            }
+            <div class="row g-2 mt-3">
+                <div class="col-4 text-center" style="border-right:1px solid #f1f3f5;">
+                    <div style="font-size:1.5rem;font-weight:900;color:#C8102E;">@lastMonth</div>
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;">Current Total</div>
+                </div>
+                <div class="col-4 text-center" style="border-right:1px solid #f1f3f5;">
+                    <div style="font-size:1.5rem;font-weight:900;color:#2E7D32;">@firstMonth</div>
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;">8 Months Ago</div>
+                </div>
+                <div class="col-4 text-center">
+                    <div style="font-size:1.5rem;font-weight:900;color:@(growth >= 0 ? "#1565C0" : "#C8102E");">@(growth >= 0 ? "+" : "")@growth</div>
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;color:#9CA3AF;">Growth</div>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- ── RECENT ACTIVITIES ───────────────────────────── -->
     <div class="col-lg-4 mb-4">
-        <div class="section-card h-100">
-            <div class="card-header-custom">
-                <i class="bi bi-clock-history me-2 text-danger"></i>Recent Activities
+        <div class="section-card h-100 d-flex flex-column">
+            <div class="card-header-custom d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-clock-history me-2 text-danger"></i>Recent Activities</span>
+                <a href="/AuditLog/Index" style="font-size:.72rem;color:#C8102E;font-weight:700;text-decoration:none;">
+                    View All <i class="bi bi-arrow-right"></i>
+                </a>
             </div>
 
-            @if (!Model.RecentActivities.Any())
-            {
-                <p class="no-activity">No recent activities recorded yet.</p>
-            }
-            else
-            {
-                foreach (var act in Model.RecentActivities)
+            <div style="flex:1; overflow-y:auto; max-height:340px;">
+                @if (!Model.RecentActivities.Any())
                 {
-                    <div class="activity-item">
-                        <div class="activity-dot"></div>
-                        <div>
-                            <div class="activity-msg">@act.Message</div>
-                            <div class="activity-time">@act.CreatedAt.ToString("MMM dd, yyyy h:mm tt")</div>
-                        </div>
+                    <div style="text-align:center;padding:2.5rem 1rem;">
+                        <i class="bi bi-inbox" style="font-size:2.5rem;color:#dee2e6;"></i>
+                        <p class="no-activity mt-2">No recent activities recorded yet.</p>
                     </div>
                 }
-            }
+                else
+                {
+                    foreach (var act in Model.RecentActivities)
+                    {
+                        var roleStr = act.Message.Contains('[') && act.Message.Contains(']')
+                                      ? act.Message.Substring(act.Message.IndexOf('[')+1, act.Message.IndexOf(']')-act.Message.IndexOf('[')-1)
+                                      : "System";
+
+                        var dotColor = roleStr == "Admin" ? "#C8102E" :
+                                       roleStr == "Cashier" ? "#1565C0" :
+                                       roleStr == "Teacher" ? "#2E7D32" :
+                                       roleStr == "Student" ? "#D97706" : "#9CA3AF";
+
+                        var diff = DateTime.Now - act.CreatedAt;
+                        var timeAgo = diff.TotalMinutes < 1 ? "just now"
+                                    : diff.TotalHours < 1 ? $"{(int)diff.TotalMinutes}m ago"
+                                    : diff.TotalDays < 1 ? $"{(int)diff.TotalHours}h ago"
+                                    : diff.TotalDays < 7 ? $"{(int)diff.TotalDays}d ago"
+                                    : act.CreatedAt.ToString("MMM dd");
+
+                        var shortMsg = act.Message.Length > 72 ? act.Message[..72] + "…" : act.Message;
+
+                        <div class="activity-item" style="padding:.65rem 0;border-bottom:1px solid #f1f3f5;gap:.6rem;">
+                            <div style="width:8px;height:8px;border-radius:50%;background:@dotColor;margin-top:6px;flex-shrink:0;"></div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:.80rem;line-height:1.4;color:#374151;" title="@act.Message">@shortMsg</div>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span style="font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(200,16,46,.08);color:@dotColor;">@roleStr</span>
+                                    <span style="font-size:.68rem;color:#9CA3AF;">@timeAgo</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
         </div>
     </div>
 
@@ -201,37 +256,65 @@
 <script>
     const ctx = document.getElementById("enrollmentChart");
 
-    const labels = @Html.Raw(
-        System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels)
-    );
-    const data   = @Html.Raw(
-        System.Text.Json.JsonSerializer.Serialize(Model.MonthlyEnrollment)
-    );
+    const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels));
+    const data   = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyEnrollment));
 
     new Chart(ctx, {
         type: "line",
         data: {
             labels: labels,
             datasets: [{
-                label: "Students",
+                label: "Students Enrolled",
                 data: data,
                 borderColor: "#C8102E",
-                backgroundColor: "rgba(200,16,46,0.08)",
+                backgroundColor: function(ctx) {
+                    const chart = ctx.chart;
+                    const { ctx: c, chartArea } = chart;
+                    if (!chartArea) return "rgba(200,16,46,0.08)";
+                    const grad = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    grad.addColorStop(0, "rgba(200,16,46,0.18)");
+                    grad.addColorStop(1, "rgba(200,16,46,0.01)");
+                    return grad;
+                },
                 fill: true,
-                tension: .4,
-                pointBackgroundColor: "#C8102E",
-                pointRadius: 5
+                tension: 0.4,
+                borderWidth: 2.5,
+                pointBackgroundColor: "#fff",
+                pointBorderColor: "#C8102E",
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "index", intersect: false },
             plugins: {
-                legend: { position: "top" }
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: "#1e1e2e",
+                    titleFont: { size: 12, weight: "700" },
+                    bodyFont: { size: 12 },
+                    padding: 10,
+                    callbacks: {
+                        label: function(ctx) {
+                            return "  " + ctx.parsed.y + " students enrolled";
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
                     beginAtZero: false,
-                    ticks: { stepSize: 1 }
+                    ticks: { stepSize: 1, font: { size: 11 }, color: "#9CA3AF" },
+                    grid: { color: "rgba(0,0,0,.04)" },
+                    border: { display: false }
+                },
+                x: {
+                    ticks: { font: { size: 11 }, color: "#9CA3AF" },
+                    grid: { display: false },
+                    border: { display: false }
                 }
             }
         }

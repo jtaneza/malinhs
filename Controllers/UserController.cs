@@ -18,6 +18,7 @@ namespace MalikongkongNHS.Controllers
         private string Who  => HttpContext.Session.GetString("Username") ?? "Unknown";
         private string Role => HttpContext.Session.GetString("Role")     ?? "Unknown";
         private string IP   => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+        private int    UId  => HttpContext.Session.GetInt32("UserId") ?? 0;
 
         // ======================
         // USER LIST
@@ -38,7 +39,7 @@ namespace MalikongkongNHS.Controllers
             {
                 _service.CreateUser(model);
                 _audit.Log(Who, Role, "Create", "User",
-                    $"Created user account: {model.FullName} (Role: {model.Role})", IP);
+                    $"Created user account: {model.FullName} (Role: {model.Role})", IP, UId);
             }
             return RedirectToAction("Index");
         }
@@ -73,7 +74,7 @@ namespace MalikongkongNHS.Controllers
             {
                 _service.UpdateUser(model);
                 _audit.Log(Who, Role, "Update", "User",
-                    $"Updated user account: {model.FullName} (Role: {model.Role})", IP);
+                    $"Updated user account: {model.FullName} (Role: {model.Role})", IP, UId);
             }
             return RedirectToAction("Index");
         }
@@ -86,7 +87,7 @@ namespace MalikongkongNHS.Controllers
             var user = _service.GetUserById(id);
             _service.DeleteUser(id);
             _audit.Log(Who, Role, "Delete", "User",
-                $"Deleted user ID: {id}" + (user != null ? $" ({user.FullName})" : ""), IP);
+                $"Deleted user ID: {id}" + (user != null ? $" ({user.FullName})" : ""), IP, UId);
             return RedirectToAction("Index");
         }
     }

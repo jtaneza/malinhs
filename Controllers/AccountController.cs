@@ -16,7 +16,8 @@ namespace MalikongkongNHS.Controllers
             _audit       = audit;
         }
 
-        private string IP => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+        private string IP  => HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+        private int    UId => HttpContext.Session.GetInt32("UserId") ?? 0;
 
         // =========================
         // LOGIN PAGE
@@ -62,7 +63,7 @@ namespace MalikongkongNHS.Controllers
                 HttpContext.Session.SetInt32 ("UserId",   user.UserId);
 
                 _audit.Log(user.Username, user.Role, "Login", "Account",
-                    $"{user.FullName} logged in ({user.Role})", IP);
+                    $"{user.FullName} logged in ({user.Role})", IP, user.UserId);
 
                 return user.Role switch
                 {
@@ -98,7 +99,7 @@ public IActionResult ChangePassword(int UserId, string UserRole, string CurrentP
         if (teacher.Password != CurrentPassword) { TempData["HeaderPassError"] = "Current password is incorrect."; return Redirect(Request.Headers["Referer"].ToString()); }
         teacher.Password = NewPassword;
         teacherService!.Update(teacher);
-        _audit.Log(teacher.Email ?? teacher.FullName, UserRole, "Update", "Account", $"Teacher ID {UserId} changed password.", IP);
+        _audit.Log(teacher.Email ?? teacher.FullName, UserRole, "Update", "Account", $"Teacher ID {UserId} changed password.", IP, UserId);
     }
     else // Admin or Cashier — stored in Users table
     {
@@ -108,7 +109,7 @@ public IActionResult ChangePassword(int UserId, string UserRole, string CurrentP
         if (user.Password != CurrentPassword) { TempData["HeaderPassError"] = "Current password is incorrect."; return Redirect(Request.Headers["Referer"].ToString()); }
         user.Password = NewPassword;
         userService!.UpdateUser(user);
-        _audit.Log(user.Username, UserRole, "Update", "Account", $"User ID {UserId} changed password.", IP);
+        _audit.Log(user.Username, UserRole, "Update", "Account", $"User ID {UserId} changed password.", IP, UserId);
     }
 
     TempData["HeaderPassSuccess"] = "Password updated successfully!";
@@ -128,7 +129,7 @@ public IActionResult ChangePassword(int UserId, string UserRole, string CurrentP
             var role     = HttpContext.Session.GetString("Role")     ?? "Unknown";
 
             _audit.Log(username, role, "Logout", "Account",
-                $"{username} logged out", IP);
+                $"{username} logged out", IP, UId);
 
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Account");

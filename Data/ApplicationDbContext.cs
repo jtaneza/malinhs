@@ -22,6 +22,7 @@ namespace MalikongkongNHS.Data
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        
 
         // DASHBOARD MODULES
         public DbSet<ClassEntity> Classes { get; set; }

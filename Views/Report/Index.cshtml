@@ -20,16 +20,46 @@
     .page-title    { color:#1a1a2e; font-size:2.2rem; font-weight:800; letter-spacing:-.5px; margin:0; }
     .page-subtitle { color:#9CA3AF; font-size:.88rem; margin-top:4px; }
 
-    /* Section picker */
-    .section-picker { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
-    .sec-btn {
-        padding:6px 16px; border-radius:20px; border:1.5px solid #E5E7EB;
-        background:#fff; font-size:.8rem; font-weight:600; color:#6B7280;
-        cursor:pointer; text-decoration:none; transition:all .15s;
-        display:inline-flex; align-items:center; gap:5px;
+    /* Section dropdown */
+    .section-dropdown { position:relative; display:inline-block; margin-bottom:1rem; }
+    .section-dropdown-btn {
+        padding:8px 18px; border-radius:12px; border:1.5px solid #E5E7EB;
+        background:#fff; font-size:.85rem; font-weight:700; color:#1a1a2e;
+        cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+        box-shadow:0 2px 12px rgba(0,0,0,.06); transition:border-color .15s;
+        min-width:220px; justify-content:space-between;
     }
-    .sec-btn:hover  { border-color:#C8102E; color:#C8102E; }
-    .sec-btn.active { background:#C8102E; border-color:#C8102E; color:#fff; }
+    .section-dropdown-btn:hover { border-color:#C8102E; }
+    .section-dropdown-btn .sdb-left { display:flex; align-items:center; gap:8px; }
+    .section-dropdown-btn .sdb-grade { color:#9CA3AF; font-weight:500; font-size:.78rem; }
+    .section-dropdown-btn i.bi-chevron-down { color:#9CA3AF; font-size:.75rem; transition:transform .15s; }
+    .section-dropdown.open .section-dropdown-btn i.bi-chevron-down { transform:rotate(180deg); }
+    .section-dropdown.open .section-dropdown-btn { border-color:#C8102E; }
+
+    .section-dropdown-menu {
+        position:absolute; top:calc(100% + 6px); left:0; z-index:20;
+        background:#fff; border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,.14);
+        border:1px solid #F0F0F0; min-width:260px; max-height:320px; overflow-y:auto;
+        padding:.4rem; display:none;
+    }
+    .section-dropdown.open .section-dropdown-menu { display:block; }
+    .section-dropdown-item {
+        display:flex; align-items:center; justify-content:space-between; gap:8px;
+        padding:8px 12px; border-radius:8px; font-size:.85rem; font-weight:600;
+        color:#374151; text-decoration:none; cursor:pointer; transition:background .12s;
+    }
+    .section-dropdown-item:hover { background:#FFF5F7; color:#C8102E; }
+    .section-dropdown-item.active { background:#C8102E; color:#fff; }
+    .section-dropdown-item.active .sdi-grade { color:rgba(255,255,255,.75); }
+    .section-dropdown-item .sdi-grade { color:#9CA3AF; font-size:.75rem; font-weight:500; }
+    .section-dropdown-search {
+        width:100%; border:1.5px solid #E5E7EB; border-radius:8px; padding:6px 10px;
+        font-size:.8rem; margin-bottom:.4rem; outline:none;
+    }
+    .section-dropdown-search:focus { border-color:#C8102E; }
+    .section-dropdown-empty {
+        padding:10px 12px; font-size:.8rem; color:#B0B7C3; text-align:center;
+    }
 
     /* Date range bar */
     .date-bar {
@@ -174,6 +204,26 @@
     .empty-state i { font-size:2.5rem; display:block; margin-bottom:.75rem; }
     .empty-state p { font-size:.9rem; margin:0; }
 
+    /* Pagination */
+    .table-pagination {
+        display:flex; align-items:center; justify-content:space-between;
+        padding:.9rem 1.3rem; border-top:1.5px solid #F3F4F6; flex-wrap:wrap; gap:.6rem;
+    }
+    .tp-info { font-size:.78rem; color:#9CA3AF; font-weight:500; }
+    .tp-info b { color:#374151; font-weight:700; }
+    .tp-controls { display:flex; align-items:center; gap:.3rem; }
+    .tp-btn {
+        min-width:30px; height:30px; padding:0 8px; border-radius:8px;
+        border:1.5px solid #E5E7EB; background:#fff; color:#6B7280;
+        font-size:.78rem; font-weight:700; cursor:pointer;
+        display:inline-flex; align-items:center; justify-content:center;
+        transition:all .15s;
+    }
+    .tp-btn:hover:not(:disabled) { border-color:#C8102E; color:#C8102E; }
+    .tp-btn.active { background:#C8102E; border-color:#C8102E; color:#fff; }
+    .tp-btn:disabled { opacity:.4; cursor:not-allowed; }
+    .tp-ellipsis { color:#B0B7C3; font-size:.78rem; padding:0 2px; }
+
     @@media print {
         .no-print { display:none !important; }
         .report-card { box-shadow:none; border:1px solid #ddd; }
@@ -204,21 +254,40 @@
     }
     else
     {
-        <!-- SECTION PICKER -->
-        <div class="section-picker no-print">
-            @foreach (var sec in Model.Sections)
-            {
-                var isSel = Model.SelectedSection?.SectionId == sec.SectionId;
-                <a href="/Report/Index?sectionId=@sec.SectionId&tab=@activeTab&dateFrom=@dfrom&dateTo=@dto"
-                   class="sec-btn @(isSel ? "active" : "")">
-                    <i class="bi bi-people-fill"></i>
-                    @sec.SectionName
-                    @if (!string.IsNullOrEmpty(sec.GradeLevel))
+        <!-- SECTION DROPDOWN -->
+        <div class="section-dropdown no-print" id="sectionDropdown">
+            <button type="button" class="section-dropdown-btn" id="sectionDropdownBtn">
+                <span class="sdb-left">
+                    <i class="bi bi-people-fill text-danger"></i>
+                    @(Model.SelectedSection?.SectionName ?? "Select section")
+                    @if (!string.IsNullOrEmpty(Model.SelectedSection?.GradeLevel))
                     {
-                        <span style="opacity:.7;font-size:.70rem;">(@sec.GradeLevel)</span>
+                        <span class="sdb-grade">(@Model.SelectedSection.GradeLevel)</span>
                     }
-                </a>
-            }
+                </span>
+                <i class="bi bi-chevron-down"></i>
+            </button>
+
+            <div class="section-dropdown-menu" id="sectionDropdownMenu">
+                @if (Model.Sections.Count() > 6)
+                {
+                    <input type="text" class="section-dropdown-search" id="sectionSearch" placeholder="Search section..." />
+                }
+                @foreach (var sec in Model.Sections)
+                {
+                    var isSel = Model.SelectedSection?.SectionId == sec.SectionId;
+                    <a href="/Report/Index?sectionId=@sec.SectionId&tab=@activeTab&dateFrom=@dfrom&dateTo=@dto"
+                       class="section-dropdown-item @(isSel ? "active" : "")"
+                       data-name="@sec.SectionName.ToLower()">
+                        <span>@sec.SectionName</span>
+                        @if (!string.IsNullOrEmpty(sec.GradeLevel))
+                        {
+                            <span class="sdi-grade">@sec.GradeLevel</span>
+                        }
+                    </a>
+                }
+                <div class="section-dropdown-empty" id="sectionNoMatch" style="display:none;">No sections match.</div>
+            </div>
         </div>
 
         <!-- DATE RANGE BAR -->
@@ -356,7 +425,7 @@
                 else
                 {
                     <div class="table-responsive">
-                        <table class="rep-table">
+                        <table class="rep-table" id="attendanceTable">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -390,6 +459,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="table-pagination" id="attendancePagination"></div>
                 }
             </div>
         }
@@ -424,7 +494,7 @@
                 else
                 {
                     <div class="table-responsive">
-                        <table class="rep-table">
+                        <table class="rep-table" id="gradesTable">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -478,6 +548,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="table-pagination" id="gradesPagination"></div>
                 }
             </div>
         }
@@ -522,4 +593,132 @@ form.addEventListener('submit', function (e) {
         e.preventDefault();
     }
 });
+
+// Section dropdown toggle
+const secDropdown = document.getElementById('sectionDropdown');
+const secBtn       = document.getElementById('sectionDropdownBtn');
+const secSearch    = document.getElementById('sectionSearch');
+const secNoMatch   = document.getElementById('sectionNoMatch');
+
+if (secDropdown && secBtn) {
+    secBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        secDropdown.classList.toggle('open');
+        if (secDropdown.classList.contains('open') && secSearch) {
+            secSearch.value = '';
+            secSearch.focus();
+            document.querySelectorAll('.section-dropdown-item').forEach(i => i.style.display = 'flex');
+            if (secNoMatch) secNoMatch.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!secDropdown.contains(e.target)) {
+            secDropdown.classList.remove('open');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') secDropdown.classList.remove('open');
+    });
+
+    if (secSearch) {
+        secSearch.addEventListener('input', function () {
+            const q = this.value.toLowerCase();
+            let visibleCount = 0;
+            document.querySelectorAll('.section-dropdown-item').forEach(item => {
+                const match = item.dataset.name.includes(q);
+                item.style.display = match ? 'flex' : 'none';
+                if (match) visibleCount++;
+            });
+            if (secNoMatch) secNoMatch.style.display = visibleCount === 0 ? 'block' : 'none';
+        });
+        secSearch.addEventListener('click', e => e.stopPropagation());
+    }
+}
+
+// Generic client-side table pagination
+function initTablePagination(tableId, paginationId, pageSize) {
+    const table = document.getElementById(tableId);
+    const pager = document.getElementById(paginationId);
+    if (!table || !pager) return;
+
+    const tbody = table.querySelector('tbody');
+    const rows  = Array.from(tbody.querySelectorAll('tr'));
+    const total = rows.length;
+    const pageCount = Math.max(1, Math.ceil(total / pageSize));
+    let currentPage = 1;
+
+    if (total === 0) {
+        pager.style.display = 'none';
+        return;
+    }
+
+    function renderRows() {
+        const start = (currentPage - 1) * pageSize;
+        const end   = start + pageSize;
+        rows.forEach((row, i) => {
+            row.style.display = (i >= start && i < end) ? '' : 'none';
+        });
+    }
+
+    function pageNumbers() {
+        const nums = [];
+        const win = 1;
+        for (let p = 1; p <= pageCount; p++) {
+            if (p === 1 || p === pageCount || (p >= currentPage - win && p <= currentPage + win)) {
+                nums.push(p);
+            } else if (nums[nums.length - 1] !== '...') {
+                nums.push('...');
+            }
+        }
+        return nums;
+    }
+
+    function renderControls() {
+        const start = (currentPage - 1) * pageSize + 1;
+        const end   = Math.min(currentPage * pageSize, total);
+
+        let html = `<div class="tp-info">Showing <b>${start}-${end}</b> of <b>${total}</b></div>`;
+        html += `<div class="tp-controls">`;
+        html += `<button type="button" class="tp-btn" data-action="prev" ${currentPage === 1 ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-left"></i>
+                  </button>`;
+
+        pageNumbers().forEach(p => {
+            if (p === '...') {
+                html += `<span class="tp-ellipsis">…</span>`;
+            } else {
+                html += `<button type="button" class="tp-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+            }
+        });
+
+        html += `<button type="button" class="tp-btn" data-action="next" ${currentPage === pageCount ? 'disabled' : ''}>
+                    <i class="bi bi-chevron-right"></i>
+                  </button>`;
+        html += `</div>`;
+
+        pager.innerHTML = html;
+
+        pager.querySelectorAll('[data-page]').forEach(btn => {
+            btn.addEventListener('click', function () {
+                currentPage = parseInt(this.dataset.page);
+                renderRows();
+                renderControls();
+            });
+        });
+        pager.querySelector('[data-action="prev"]').addEventListener('click', function () {
+            if (currentPage > 1) { currentPage--; renderRows(); renderControls(); }
+        });
+        pager.querySelector('[data-action="next"]').addEventListener('click', function () {
+            if (currentPage < pageCount) { currentPage++; renderRows(); renderControls(); }
+        });
+    }
+
+    renderRows();
+    renderControls();
+}
+
+initTablePagination('attendanceTable', 'attendancePagination', 5);
+initTablePagination('gradesTable', 'gradesPagination', 5);
 </script>

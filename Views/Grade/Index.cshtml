@@ -89,6 +89,25 @@
 
 .empty-state { text-align:center; padding:3.5rem; color:#9CA3AF; }
 .empty-state i { font-size:3.5rem; opacity:.25; }
+
+/* ── PAGINATION ── */
+.table-toolbar { display:flex; justify-content:flex-end; align-items:center; margin-bottom:.75rem; gap:8px; }
+.pg-size-select {
+    border:1.5px solid #dee2e6; border-radius:8px; font-size:.78rem;
+    font-weight:600; padding:4px 8px; cursor:pointer; background:#fff;
+}
+.pg-size-select:focus { outline:none; border-color:#C8102E; }
+.pg-footer { display:flex; justify-content:space-between; align-items:center; margin-top:.9rem; flex-wrap:wrap; gap:8px; }
+.pg-info { font-size:.78rem; color:#9CA3AF; }
+.pg-buttons { display:flex; gap:4px; }
+.pg-btn {
+    min-width:30px; height:30px; padding:0 8px; border-radius:8px;
+    border:1.5px solid #dee2e6; background:#fff; color:#374151;
+    font-size:.78rem; font-weight:600; cursor:pointer; transition:.2s;
+}
+.pg-btn:hover:not(:disabled) { border-color:#C8102E; color:#C8102E; }
+.pg-btn.active { background:#C8102E; color:#fff; border-color:#C8102E; }
+.pg-btn:disabled { opacity:.4; cursor:not-allowed; }
 </style>
 
 <!-- HEADER -->
@@ -206,43 +225,59 @@ else
             }
             else
             {
-                <div class="table-responsive">
-                    <table class="table grade-table mb-0">
-                        <thead>
-                            <tr>
-                                <th style="width:14%">LRN</th>
-                                <th style="width:32%">Full Name</th>
-                                <th style="width:14%" class="text-center">1st Term</th>
-                                <th style="width:14%" class="text-center">2nd Term</th>
-                                <th style="width:14%" class="text-center">3rd Term</th>
-                                <th style="width:12%" class="text-center">Avg</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var st in subj.Students)
-                            {
+                <div class="grade-table-wrapper" data-page-size="5">
+                    <div class="table-toolbar">
+                        <span class="ctrl-label mb-0">Show</span>
+                        <select class="pg-size-select">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="9999">All</option>
+                        </select>
+                        <span class="ctrl-label mb-0">entries</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table grade-table mb-0">
+                            <thead>
                                 <tr>
-                                    <td class="fw-semibold">@st.LRN</td>
-                                    <td>@st.FullName</td>
-                                    <td class="text-center">@ScoreBadge(st.Q1)</td>
-                                    <td class="text-center">@ScoreBadge(st.Q2)</td>
-                                    <td class="text-center">@ScoreBadge(st.Q3)</td>
-                                    <td class="text-center">
-                                        @if (st.Average.HasValue)
-                                        {
-                                            <span class="score-badge @(st.Average >= 75 ? "score-pass" : "score-fail")">
-                                                @st.Average.Value.ToString("0.00")
-                                            </span>
-                                        }
-                                        else
-                                        {
-                                            <span class="score-badge score-none">—</span>
-                                        }
-                                    </td>
+                                    <th style="width:14%">LRN</th>
+                                    <th style="width:32%">Full Name</th>
+                                    <th style="width:14%" class="text-center">1st Term</th>
+                                    <th style="width:14%" class="text-center">2nd Term</th>
+                                    <th style="width:14%" class="text-center">3rd Term</th>
+                                    <th style="width:12%" class="text-center">Avg</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var st in subj.Students)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@st.LRN</td>
+                                        <td>@st.FullName</td>
+                                        <td class="text-center">@ScoreBadge(st.Q1)</td>
+                                        <td class="text-center">@ScoreBadge(st.Q2)</td>
+                                        <td class="text-center">@ScoreBadge(st.Q3)</td>
+                                        <td class="text-center">
+                                            @if (st.Average.HasValue)
+                                            {
+                                                <span class="score-badge @(st.Average >= 75 ? "score-pass" : "score-fail")">
+                                                    @st.Average.Value.ToString("0.00")
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="score-badge score-none">—</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pg-footer">
+                        <span class="pg-info"></span>
+                        <div class="pg-buttons"></div>
+                    </div>
                 </div>
             }
         </div>
@@ -262,5 +297,75 @@ else
 <script>
     function switchSection(sectionId) {
         window.location.href = '/Grade/Index?sectionId=' + sectionId + '&quarter=@Model.Quarter';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.grade-table-wrapper').forEach(initGradeTablePagination);
+    });
+
+    function initGradeTablePagination(wrapper) {
+        var table = wrapper.querySelector('table');
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr'));
+        var sizeSelect = wrapper.querySelector('.pg-size-select');
+        var pageSize = parseInt((sizeSelect && sizeSelect.value) || wrapper.dataset.pageSize, 10) || 5;
+        var currentPage = 1;
+
+        function render() {
+            var totalRows = rows.length;
+            var totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            rows.forEach(function (row, i) {
+                var page = Math.floor(i / pageSize) + 1;
+                row.style.display = (page === currentPage) ? '' : 'none';
+            });
+
+            var start = totalRows === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+            var end = Math.min(currentPage * pageSize, totalRows);
+            var infoEl = wrapper.querySelector('.pg-info');
+            if (infoEl) infoEl.textContent = 'Showing ' + start + '-' + end + ' of ' + totalRows + ' students';
+
+            var pgButtons = wrapper.querySelector('.pg-buttons');
+            if (!pgButtons) return;
+            pgButtons.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            var prevBtn = document.createElement('button');
+            prevBtn.type = 'button';
+            prevBtn.className = 'pg-btn';
+            prevBtn.innerHTML = '<i class="bi bi-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener('click', function () { currentPage--; render(); });
+            pgButtons.appendChild(prevBtn);
+
+            for (var p = 1; p <= totalPages; p++) {
+                (function (p) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = p;
+                    btn.className = 'pg-btn' + (p === currentPage ? ' active' : '');
+                    btn.addEventListener('click', function () { currentPage = p; render(); });
+                    pgButtons.appendChild(btn);
+                })(p);
+            }
+
+            var nextBtn = document.createElement('button');
+            nextBtn.type = 'button';
+            nextBtn.className = 'pg-btn';
+            nextBtn.innerHTML = '<i class="bi bi-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener('click', function () { currentPage++; render(); });
+            pgButtons.appendChild(nextBtn);
+        }
+
+        if (sizeSelect) {
+            sizeSelect.addEventListener('change', function () {
+                pageSize = parseInt(this.value, 10) || rows.length || 5;
+                currentPage = 1;
+                render();
+            });
+        }
+
+        render();
     }
 </script>
